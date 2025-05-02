@@ -16,8 +16,7 @@ public class LobbyUIManager : MonoBehaviour
     private void OnStartClicked()
     {
         Debug.Log("게임 시작 버튼 클릭됨");
-        // TODO: 맵 씬으로 전환
-        // SceneManager.LoadScene("Map");
+        SceneLoader.LoadScene(SceneLoader.Names.Map);
     }
 
     private void OnSettingsClicked()
