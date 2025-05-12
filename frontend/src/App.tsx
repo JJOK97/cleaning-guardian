@@ -1,38 +1,19 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import SplashScreen from './pages/main/SplashScreen';
-import MainMapScreen from './pages/main/MainMapScreen';
-import StageSelectScreen from './pages/main/StageSelectScreen';
-import InGameScreen from './pages/game/InGameScreen';
-import ResultScreen from './pages/game/ResultScreen';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { theme } from './styles/theme/theme';
+import { GlobalStyle } from './styles/theme/GlobalStyle';
+import AppRoutes from './routes';
 
-function App() {
+const App: React.FC = () => {
     return (
-        <Router>
-            <Routes>
-                <Route
-                    path='/'
-                    element={<SplashScreen />}
-                />
-                <Route
-                    path='/main'
-                    element={<MainMapScreen />}
-                />
-                <Route
-                    path='/stage'
-                    element={<StageSelectScreen />}
-                />
-                <Route
-                    path='/game'
-                    element={<InGameScreen />}
-                />
-                <Route
-                    path='/result'
-                    element={<ResultScreen />}
-                />
-            </Routes>
-        </Router>
+        <ThemeProvider theme={theme}>
+            <GlobalStyle />
+            <Router>
+                <AppRoutes />
+            </Router>
+        </ThemeProvider>
     );
-}
+};
 
 export default App;
