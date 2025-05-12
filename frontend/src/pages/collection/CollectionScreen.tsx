@@ -1,119 +1,118 @@
 import React from 'react';
+import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import Button from '@/components/common/Button';
 
-interface TrashItem {
-    id: string;
-    name: string;
-    description: string;
-    image: string;
-    category: string;
-    discovered: boolean;
-}
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem;
+`;
 
-const trashItems: TrashItem[] = [
-    {
-        id: 'plastic-bottle',
-        name: '플라스틱 병',
-        description: '해양 생물에게 치명적인 위험을 주는 플라스틱 병입니다.',
-        image: '🥤',
-        category: '플라스틱',
-        discovered: true,
-    },
-    {
-        id: 'plastic-bag',
-        name: '비닐봉지',
-        description: '분해되는데 수백 년이 걸리는 비닐봉지입니다.',
-        image: '🛍️',
-        category: '플라스틱',
-        discovered: true,
-    },
-    {
-        id: 'straw',
-        name: '플라스틱 빨대',
-        description: '작은 크기지만 환경에 큰 영향을 미치는 플라스틱 빨대입니다.',
-        image: '🥤',
-        category: '플라스틱',
-        discovered: false,
-    },
-];
+const Title = styled.h1`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 2rem;
+    text-align: center;
+`;
+
+const CollectionGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+`;
+
+const CollectionCard = styled.div`
+    background-color: ${({ theme }) => theme.colors.background.card};
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
+`;
+
+const ItemImage = styled.div`
+    width: 100px;
+    height: 100px;
+    background-color: ${({ theme }) => theme.colors.background.light};
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+`;
+
+const ItemName = styled.h3`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 1.2rem;
+    text-align: center;
+`;
+
+const ItemDescription = styled.p`
+    color: ${({ theme }) => theme.colors.text.secondary};
+    font-size: 0.9rem;
+    text-align: center;
+`;
+
+const ButtonGroup = styled.div`
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+`;
 
 const CollectionScreen: React.FC = () => {
-    const categories = Array.from(new Set(trashItems.map((item) => item.category)));
+    const navigate = useNavigate();
+
+    const collections = [
+        {
+            id: 1,
+            name: '플라스틱',
+            description: '일회용 플라스틱 제품들',
+            icon: '🥤',
+        },
+        {
+            id: 2,
+            name: '유리',
+            description: '깨진 유리 조각들',
+            icon: '🍶',
+        },
+        {
+            id: 3,
+            name: '금속',
+            description: '녹슨 금속 조각들',
+            icon: '🔧',
+        },
+    ];
 
     return (
-        <div
-            style={{
-                padding: '1rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-            }}
-        >
-            <h1
-                style={{
-                    color: '#fff',
-                    textAlign: 'center',
-                    marginBottom: '1rem',
-                }}
-            >
-                쓰레기 도감
-            </h1>
-
-            {categories.map((category) => (
-                <div key={category}>
-                    <h2
-                        style={{
-                            color: '#fff',
-                            marginBottom: '1rem',
-                            padding: '0.5rem',
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                        }}
-                    >
-                        {category}
-                    </h2>
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                            gap: '1rem',
-                        }}
-                    >
-                        {trashItems
-                            .filter((item) => item.category === category)
-                            .map((item) => (
-                                <div
-                                    key={item.id}
-                                    style={{
-                                        background: item.discovered ? 'rgba(76, 175, 80, 0.2)' : 'rgba(0, 0, 0, 0.3)',
-                                        border: `1px solid ${
-                                            item.discovered ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 255, 255, 0.1)'
-                                        }`,
-                                        borderRadius: '12px',
-                                        padding: '1rem',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                    }}
-                                >
-                                    <span style={{ fontSize: '3rem' }}>{item.image}</span>
-                                    <h3 style={{ color: '#fff', margin: 0 }}>{item.name}</h3>
-                                    <p
-                                        style={{
-                                            color: item.discovered
-                                                ? 'rgba(255, 255, 255, 0.8)'
-                                                : 'rgba(255, 255, 255, 0.4)',
-                                            textAlign: 'center',
-                                            margin: 0,
-                                        }}
-                                    >
-                                        {item.discovered ? item.description : '??? 발견되지 않음'}
-                                    </p>
-                                </div>
-                            ))}
-                    </div>
-                </div>
-            ))}
-        </div>
+        <Container>
+            <Title>컬렉션</Title>
+            <CollectionGrid>
+                {collections.map((item) => (
+                    <CollectionCard key={item.id}>
+                        <ItemImage>{item.icon}</ItemImage>
+                        <ItemName>{item.name}</ItemName>
+                        <ItemDescription>{item.description}</ItemDescription>
+                    </CollectionCard>
+                ))}
+            </CollectionGrid>
+            <ButtonGroup>
+                <Button
+                    $variant='secondary'
+                    onClick={() => navigate('/main')}
+                >
+                    메인으로
+                </Button>
+            </ButtonGroup>
+        </Container>
     );
 };
 

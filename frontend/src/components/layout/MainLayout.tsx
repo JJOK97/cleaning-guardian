@@ -1,31 +1,32 @@
 import React from 'react';
+import styled from 'styled-components';
 import { Outlet } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+
+const Container = styled.div`
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: ${({ theme }) => theme.colors.background.main};
+`;
+
+const Main = styled.main`
+    flex: 1;
+    padding: 1rem;
+    padding-bottom: 5rem;
+    overflow-y: auto;
+`;
 
 const MainLayout: React.FC = () => {
     return (
-        <div
-            style={{
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            }}
-        >
+        <Container>
             <Header />
-            <main
-                style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: '1rem',
-                    paddingBottom: '80px', // Footer 높이만큼 여백 추가
-                }}
-            >
+            <Main>
                 <Outlet />
-            </main>
+            </Main>
             <Footer />
-        </div>
+        </Container>
     );
 };
 

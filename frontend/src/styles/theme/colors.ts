@@ -41,4 +41,24 @@ export const colors = {
         medium: '0 4px 8px rgba(0,0,0,0.3)',
         large: '0 8px 16px rgba(0,0,0,0.4)',
     },
+    error: {
+        main: '#f44336',
+        light: '#ef5350',
+        dark: '#d32f2f',
+    },
+    success: {
+        main: '#4CAF50',
+        light: '#81C784',
+        dark: '#388E3C',
+    },
+    warning: {
+        main: '#FFC107',
+        light: '#FFD54F',
+        dark: '#FFA000',
+    },
+    info: {
+        main: '#2196F3',
+        light: '#64B5F6',
+        dark: '#1976D2',
+    },
 } as const;

@@ -1,125 +1,109 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Button from '@/components/common/Button';
+import { GameResult } from '@/types/game';
 
-interface ResultScreenProps {
-    score?: number;
-    stars?: number;
-    isSuccess?: boolean;
-}
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    gap: 2rem;
+`;
 
-const ResultScreen: React.FC<ResultScreenProps> = ({ score = 0, stars = 0, isSuccess = true }) => {
+const ResultCard = styled.div`
+    background-color: ${({ theme }) => theme.colors.background.card};
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+`;
+
+const Title = styled.h1`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+`;
+
+const Score = styled.div`
+    font-size: 3rem;
+    font-weight: bold;
+    color: ${({ theme }) => theme.colors.primary.main};
+    margin: 1rem 0;
+`;
+
+const Stats = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+`;
+
+const StatItem = styled.div`
+    display: flex;
+    justify-content: space-between;
+    color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const ButtonGroup = styled.div`
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+`;
+
+const ResultScreen: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const result = location.state as GameResult;
+
+    const handleRetry = () => {
+        navigate(`/game/${result.stageId}`);
+    };
+
+    const handleMainMenu = () => {
+        navigate('/main');
+    };
 
     return (
-        <div
-            style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '2rem',
-                boxSizing: 'border-box',
-            }}
-        >
-            <div
-                style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    borderRadius: '20px',
-                    padding: '2rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '1.5rem',
-                    maxWidth: '500px',
-                    width: '100%',
-                }}
-            >
-                <h1
-                    style={{
-                        color: '#fff',
-                        fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-                        margin: 0,
-                    }}
-                >
-                    {isSuccess ? '스테이지 클리어!' : '게임 오버'}
-                </h1>
-
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                    }}
-                >
-                    {[1, 2, 3].map((star) => (
-                        <span
-                            key={star}
-                            style={{
-                                fontSize: '2rem',
-                                color: star <= stars ? '#FFD700' : 'rgba(255, 255, 255, 0.2)',
-                            }}
-                        >
-                            ⭐
-                        </span>
-                    ))}
-                </div>
-
-                <div
-                    style={{
-                        color: '#fff',
-                        fontSize: 'clamp(1.2rem, 2vw, 1.8rem)',
-                    }}
-                >
-                    최종 점수: {score}
-                </div>
-
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        width: '100%',
-                    }}
-                >
-                    <button
-                        onClick={() => navigate('/main')}
-                        style={{
-                            flex: 1,
-                            padding: '1rem',
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            borderRadius: '10px',
-                            color: '#fff',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                        }}
-                        onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)')}
-                        onMouseOut={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)')}
+        <Container>
+            <ResultCard>
+                <Title>게임 결과</Title>
+                <Score>{result.score}점</Score>
+                <Stats>
+                    <StatItem>
+                        <span>스테이지</span>
+                        <span>{result.stageId}</span>
+                    </StatItem>
+                    <StatItem>
+                        <span>소요 시간</span>
+                        <span>{result.timeSpent}초</span>
+                    </StatItem>
+                    <StatItem>
+                        <span>제거한 오염물질</span>
+                        <span>{result.pollutantsRemoved}개</span>
+                    </StatItem>
+                </Stats>
+                <ButtonGroup>
+                    <Button
+                        $variant='primary'
+                        onClick={handleRetry}
                     >
-                        메인으로
-                    </button>
-                    <button
-                        onClick={() => navigate(-1)}
-                        style={{
-                            flex: 1,
-                            padding: '1rem',
-                            background: '#4CAF50',
-                            border: 'none',
-                            borderRadius: '10px',
-                            color: '#fff',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                        }}
-                        onMouseOver={(e) => (e.currentTarget.style.background = '#45a049')}
-                        onMouseOut={(e) => (e.currentTarget.style.background = '#4CAF50')}
+                        다시 도전
+                    </Button>
+                    <Button
+                        $variant='secondary'
+                        onClick={handleMainMenu}
                     >
-                        다시하기
-                    </button>
-                </div>
-            </div>
-        </div>
+                        메인 메뉴
+                    </Button>
+                </ButtonGroup>
+            </ResultCard>
+        </Container>
     );
 };
 

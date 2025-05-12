@@ -1,22 +1,77 @@
 import React, { useState, useEffect, useRef } from 'react';
+import styled from 'styled-components';
 import { Stage, Layer } from 'react-konva';
-import { useLocation, useNavigate } from 'react-router-dom';
-import SliceTrail from '../../components/game/SliceTrail';
-import Pollutant from '../../components/game/Pollutant';
-import { PollutantData, GameResult } from '../../types/game';
-import { colors } from '../../styles/colors';
-import GameBackground from '../../components/game/GameBackground';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import SliceTrail from '@/components/game/SliceTrail';
+import Pollutant from '@/components/game/Pollutant';
+import { PollutantData, GameResult } from '@/types/game';
+import GameBackground from '@/components/game/GameBackground';
+import GamePreparationModal from '@/components/game/GamePreparationModal';
+import Button from '@/components/common/Button';
+import LoadingScreen from '@/components/common/LoadingScreen';
+import TransitionWrapper from '@/components/common/TransitionWrapper';
+
+const Container = styled.div`
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+`;
+
+const GameUI = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+`;
+
+const Score = styled.div`
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+`;
+
+const Timer = styled.div`
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+`;
+
+const Lives = styled.div`
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    color: ${({ theme }) => theme.colors.error.main};
+    font-size: 1.5rem;
+`;
 
 const InGameScreen: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const stageId = (location.state as { stageId: number })?.stageId || 1;
-
+    const { stageId } = useParams<{ stageId: string }>();
     const [score, setScore] = useState(0);
     const [pollutants, setPollutants] = useState<PollutantData[]>([]);
     const [slicePoints, setSlicePoints] = useState<number[]>([]);
     const [isSlicing, setIsSlicing] = useState(false);
     const [startTime] = useState(Date.now());
+    const [showPreparation, setShowPreparation] = useState(true);
+    const [time, setTime] = useState(60);
+    const [lives, setLives] = useState(3);
+    const [isLoading, setIsLoading] = useState(true);
 
     const stageRef = useRef<any>(null);
     const [stageSize, setStageSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -39,8 +94,9 @@ const InGameScreen: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const pollutantCount = stageId * 5 + 5;
-        const safeMargin = 100; // 화면 가장자리에서의 안전 거리
+        if (!stageId) return;
+        const pollutantCount = parseInt(stageId) * 5 + 5;
+        const safeMargin = 100;
         const maxX = stageSize.width - safeMargin;
         const maxY = stageSize.height - safeMargin;
         const minX = safeMargin;
@@ -50,7 +106,7 @@ const InGameScreen: React.FC = () => {
             id: i,
             x: Math.random() * (maxX - minX) + minX,
             y: Math.random() * (maxY - minY) + minY,
-            radius: Math.random() * 20 + 20, // 20~40px 사이의 크기
+            radius: Math.random() * 20 + 20,
             color: `hsl(${Math.random() * 360}, 70%, 50%)`,
             isRemoved: false,
         }));
@@ -59,11 +115,11 @@ const InGameScreen: React.FC = () => {
 
     useEffect(() => {
         const allRemoved = pollutants.length > 0 && pollutants.every((p) => p.isRemoved);
-        if (allRemoved) {
+        if (allRemoved && stageId) {
             const timeSpent = Math.floor((Date.now() - startTime) / 1000);
             const result: GameResult = {
                 score,
-                stageId,
+                stageId: parseInt(stageId),
                 timeSpent,
                 pollutantsRemoved: pollutants.length,
             };
@@ -72,6 +128,31 @@ const InGameScreen: React.FC = () => {
             }, 1000);
         }
     }, [pollutants, score, navigate, stageId, startTime]);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            if (!showPreparation) {
+                setTime((prev) => {
+                    if (prev <= 0) {
+                        clearInterval(timer);
+                        navigate('/result', { state: { score } });
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [showPreparation, score, navigate]);
+
+    useEffect(() => {
+        const loadingTimer = setTimeout(() => {
+            setIsLoading(false);
+        }, 2000);
+
+        return () => clearTimeout(loadingTimer);
+    }, []);
 
     const handleMouseDown = (e: any) => {
         e.evt.preventDefault();
@@ -129,36 +210,42 @@ const InGameScreen: React.FC = () => {
         setSlicePoints([]);
     };
 
+    const handleGameStart = () => {
+        setShowPreparation(false);
+    };
+
+    const handleGameOver = () => {
+        navigate('/result', { state: { score } });
+    };
+
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
+
     return (
-        <div
-            style={{
-                width: '100%',
-                height: '100%',
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                backgroundColor: colors.background.light,
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-            }}
-        >
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 'clamp(0.5rem, 2vw, 1rem)',
-                    left: 'clamp(0.5rem, 2vw, 1rem)',
-                    zIndex: 1,
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    padding: 'clamp(0.3rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 1rem)',
-                    borderRadius: '4px',
-                    fontSize: 'clamp(1rem, 2vw, 1.2rem)',
-                    color: '#fff',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                }}
-            >
-                점수: {score}
-            </div>
+        <Container>
+            <GameBackground />
+            <GameUI>
+                <Score>점수: {score}</Score>
+                <Timer>시간: {time}</Timer>
+                <Lives>
+                    {Array.from({ length: lives }).map((_, index) => (
+                        <span key={index}>❤️</span>
+                    ))}
+                </Lives>
+            </GameUI>
+            {showPreparation && (
+                <GamePreparationModal
+                    isOpen={showPreparation}
+                    onClose={() => setShowPreparation(false)}
+                    onStart={() => setShowPreparation(false)}
+                    stageInfo={{
+                        name: '스테이지 시작',
+                        description: '준비되셨나요?',
+                        difficulty: 'easy',
+                    }}
+                />
+            )}
             <Stage
                 ref={stageRef}
                 width={stageSize.width}
@@ -175,7 +262,6 @@ const InGameScreen: React.FC = () => {
                     touchAction: 'none',
                 }}
             >
-                <GameBackground />
                 <Layer>
                     {pollutants.map((pollutant) => (
                         <Pollutant
@@ -192,13 +278,16 @@ const InGameScreen: React.FC = () => {
                     {slicePoints.length > 0 && (
                         <SliceTrail
                             points={slicePoints}
-                            color={colors.primary.main}
+                            color='#4CAF50'
                             width={5}
                         />
                     )}
                 </Layer>
             </Stage>
-        </div>
+            <TransitionWrapper $isVisible={true}>
+                <div />
+            </TransitionWrapper>
+        </Container>
     );
 };
 

@@ -1,124 +1,111 @@
 import React from 'react';
+import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import Button from '@/components/common/Button';
 
-interface InventoryItem {
-    id: string;
-    name: string;
-    description: string;
-    image: string;
-    quantity: number;
-    type: 'consumable' | 'passive';
-}
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem;
+`;
 
-const inventoryItems: InventoryItem[] = [
-    {
-        id: 'double-score',
-        name: '점수 2배',
-        description: '획득하는 점수가 2배가 됩니다',
-        image: '⭐',
-        quantity: 3,
-        type: 'consumable',
-    },
-    {
-        id: 'slow-time',
-        name: '시간 감속',
-        description: '게임 시간이 1.5배 느려집니다',
-        image: '⏰',
-        quantity: 2,
-        type: 'consumable',
-    },
-    {
-        id: 'extra-life',
-        name: '추가 생명',
-        description: '생명이 1개 추가됩니다',
-        image: '❤️',
-        quantity: 1,
-        type: 'consumable',
-    },
-];
+const Title = styled.h1`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 2rem;
+    text-align: center;
+`;
+
+const InventoryGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+`;
+
+const ItemCard = styled.div`
+    background-color: ${({ theme }) => theme.colors.background.card};
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+`;
+
+const ItemIcon = styled.div`
+    font-size: 2rem;
+`;
+
+const ItemName = styled.h3`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 1rem;
+    text-align: center;
+`;
+
+const ItemCount = styled.div`
+    color: ${({ theme }) => theme.colors.text.secondary};
+    font-size: 0.9rem;
+`;
+
+const ButtonGroup = styled.div`
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+`;
 
 const InventoryScreen: React.FC = () => {
-    const types = Array.from(new Set(inventoryItems.map((item) => item.type)));
+    const navigate = useNavigate();
+
+    const inventory = [
+        {
+            id: 1,
+            name: '플라스틱 병',
+            icon: '🥤',
+            count: 5,
+        },
+        {
+            id: 2,
+            name: '비닐봉지',
+            icon: '🛍️',
+            count: 3,
+        },
+        {
+            id: 3,
+            name: '플라스틱 빨대',
+            icon: '🥤',
+            count: 10,
+        },
+    ];
 
     return (
-        <div
-            style={{
-                padding: '1rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-            }}
-        >
-            <h1
-                style={{
-                    color: '#fff',
-                    textAlign: 'center',
-                    marginBottom: '1rem',
-                }}
-            >
-                인벤토리
-            </h1>
-
-            {types.map((type) => (
-                <div key={type}>
-                    <h2
-                        style={{
-                            color: '#fff',
-                            marginBottom: '1rem',
-                            padding: '0.5rem',
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                        }}
-                    >
-                        {type === 'consumable' ? '소모품' : '패시브 아이템'}
-                    </h2>
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                            gap: '1rem',
-                        }}
-                    >
-                        {inventoryItems
-                            .filter((item) => item.type === type)
-                            .map((item) => (
-                                <div
-                                    key={item.id}
-                                    style={{
-                                        background: 'rgba(0, 0, 0, 0.3)',
-                                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                                        borderRadius: '12px',
-                                        padding: '1rem',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                    }}
-                                >
-                                    <span style={{ fontSize: '3rem' }}>{item.image}</span>
-                                    <h3 style={{ color: '#fff', margin: 0 }}>{item.name}</h3>
-                                    <p
-                                        style={{
-                                            color: 'rgba(255, 255, 255, 0.8)',
-                                            textAlign: 'center',
-                                            margin: 0,
-                                        }}
-                                    >
-                                        {item.description}
-                                    </p>
-                                    <div
-                                        style={{
-                                            color: '#fff',
-                                            fontSize: '0.9rem',
-                                            marginTop: '0.5rem',
-                                        }}
-                                    >
-                                        보유 수량: {item.quantity}
-                                    </div>
-                                </div>
-                            ))}
-                    </div>
-                </div>
-            ))}
-        </div>
+        <Container>
+            <Title>인벤토리</Title>
+            <InventoryGrid>
+                {inventory.map((item) => (
+                    <ItemCard key={item.id}>
+                        <ItemIcon>{item.icon}</ItemIcon>
+                        <ItemName>{item.name}</ItemName>
+                        <ItemCount>보유: {item.count}개</ItemCount>
+                    </ItemCard>
+                ))}
+            </InventoryGrid>
+            <ButtonGroup>
+                <Button
+                    $variant='secondary'
+                    onClick={() => navigate('/shop')}
+                >
+                    상점으로
+                </Button>
+            </ButtonGroup>
+        </Container>
     );
 };
 

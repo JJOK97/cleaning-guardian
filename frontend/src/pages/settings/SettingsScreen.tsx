@@ -1,148 +1,159 @@
 import React, { useState } from 'react';
-import { soundManager } from '../../utils/sound';
-import { vibrationManager } from '../../utils/vibration';
+import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import Button from '@/components/common/Button';
+
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    min-height: 100vh;
+`;
+
+const SettingsCard = styled.div`
+    background-color: ${({ theme }) => theme.colors.background.card};
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+`;
+
+const Title = styled.h1`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+`;
+
+const SettingItem = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
+
+    &:last-child {
+        border-bottom: none;
+    }
+`;
+
+const SettingLabel = styled.span`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 1.1rem;
+`;
+
+const ButtonGroup = styled.div`
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: center;
+`;
 
 const SettingsScreen: React.FC = () => {
-    const [isMuted, setIsMuted] = useState(false);
-    const [volume, setVolume] = useState(0.5);
-    const [isVibrationEnabled, setIsVibrationEnabled] = useState(true);
+    const navigate = useNavigate();
+    const [settings, setSettings] = useState({
+        sound: true,
+        vibration: true,
+        darkMode: false,
+        difficulty: 'normal',
+    });
 
-    const handleMuteToggle = () => {
-        const newMuted = soundManager.toggleMute();
-        setIsMuted(newMuted);
-        vibrationManager.click();
+    const handleToggle = (setting: keyof typeof settings) => {
+        setSettings((prev) => ({
+            ...prev,
+            [setting]: !prev[setting],
+        }));
     };
 
-    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newVolume = parseFloat(e.target.value);
-        setVolume(newVolume);
-        soundManager.setVolume(newVolume);
-        vibrationManager.click();
+    const handleDifficultyChange = (difficulty: string) => {
+        setSettings((prev) => ({
+            ...prev,
+            difficulty,
+        }));
     };
 
-    const handleVibrationToggle = () => {
-        setIsVibrationEnabled(!isVibrationEnabled);
-        vibrationManager.click();
+    const handleSave = () => {
+        // TODO: 설정 저장 로직 구현
+        navigate('/main');
+    };
+
+    const handleReset = () => {
+        setSettings({
+            sound: true,
+            vibration: true,
+            darkMode: false,
+            difficulty: 'normal',
+        });
     };
 
     return (
-        <div
-            style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '2rem',
-                boxSizing: 'border-box',
-            }}
-        >
-            <div
-                style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    borderRadius: '20px',
-                    padding: '2rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '2rem',
-                    maxWidth: '500px',
-                    width: '100%',
-                }}
-            >
-                <h1
-                    style={{
-                        color: '#fff',
-                        fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-                        margin: 0,
-                        textAlign: 'center',
-                    }}
-                >
-                    설정
-                </h1>
+        <Container>
+            <SettingsCard>
+                <Title>설정</Title>
 
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1.5rem',
-                    }}
-                >
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                        }}
+                <SettingItem>
+                    <SettingLabel>사운드</SettingLabel>
+                    <Button
+                        $variant={settings.sound ? 'primary' : 'secondary'}
+                        onClick={() => handleToggle('sound')}
                     >
-                        <span style={{ color: '#fff', fontSize: '1.1rem' }}>소리</span>
-                        <button
-                            onClick={handleMuteToggle}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                background: isMuted ? '#f44336' : '#4CAF50',
-                                border: 'none',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                            }}
-                        >
-                            {isMuted ? '🔇' : '🔊'}
-                        </button>
-                    </div>
+                        {settings.sound ? '켜짐' : '꺼짐'}
+                    </Button>
+                </SettingItem>
 
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.5rem',
-                        }}
+                <SettingItem>
+                    <SettingLabel>진동</SettingLabel>
+                    <Button
+                        $variant={settings.vibration ? 'primary' : 'secondary'}
+                        onClick={() => handleToggle('vibration')}
                     >
-                        <span style={{ color: '#fff', fontSize: '1.1rem' }}>볼륨</span>
-                        <input
-                            type='range'
-                            min='0'
-                            max='1'
-                            step='0.1'
-                            value={volume}
-                            onChange={handleVolumeChange}
-                            style={{
-                                width: '100%',
-                                height: '4px',
-                                background: '#4CAF50',
-                                borderRadius: '2px',
-                                outline: 'none',
-                                WebkitAppearance: 'none',
-                            }}
-                        />
-                    </div>
+                        {settings.vibration ? '켜짐' : '꺼짐'}
+                    </Button>
+                </SettingItem>
 
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                        }}
+                <SettingItem>
+                    <SettingLabel>다크 모드</SettingLabel>
+                    <Button
+                        $variant={settings.darkMode ? 'primary' : 'secondary'}
+                        onClick={() => handleToggle('darkMode')}
                     >
-                        <span style={{ color: '#fff', fontSize: '1.1rem' }}>진동</span>
-                        <button
-                            onClick={handleVibrationToggle}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                background: isVibrationEnabled ? '#4CAF50' : '#f44336',
-                                border: 'none',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                            }}
-                        >
-                            {isVibrationEnabled ? '📳' : '📴'}
-                        </button>
+                        {settings.darkMode ? '켜짐' : '꺼짐'}
+                    </Button>
+                </SettingItem>
+
+                <SettingItem>
+                    <SettingLabel>난이도</SettingLabel>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {['easy', 'normal', 'hard'].map((difficulty) => (
+                            <Button
+                                key={difficulty}
+                                $variant={settings.difficulty === difficulty ? 'primary' : 'secondary'}
+                                onClick={() => handleDifficultyChange(difficulty)}
+                            >
+                                {difficulty === 'easy' ? '쉬움' : difficulty === 'normal' ? '보통' : '어려움'}
+                            </Button>
+                        ))}
                     </div>
-                </div>
-            </div>
-        </div>
+                </SettingItem>
+
+                <ButtonGroup>
+                    <Button
+                        $variant='primary'
+                        onClick={handleSave}
+                    >
+                        저장
+                    </Button>
+                    <Button
+                        $variant='secondary'
+                        onClick={handleReset}
+                    >
+                        초기화
+                    </Button>
+                </ButtonGroup>
+            </SettingsCard>
+        </Container>
     );
 };
 

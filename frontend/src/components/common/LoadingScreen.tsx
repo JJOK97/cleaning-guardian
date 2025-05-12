@@ -1,55 +1,60 @@
 import React from 'react';
+import styled, { keyframes } from 'styled-components';
+
+const fadeIn = keyframes`
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+`;
+
+const spin = keyframes`
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+`;
+
+const Container = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: ${({ theme }) => theme.colors.background.main};
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    animation: ${fadeIn} 0.3s ease-out;
+`;
+
+const Spinner = styled.div`
+    width: 50px;
+    height: 50px;
+    border: 4px solid ${({ theme }) => theme.colors.background.light};
+    border-top: 4px solid ${({ theme }) => theme.colors.primary.main};
+    border-radius: 50%;
+    animation: ${spin} 1s linear infinite;
+`;
+
+const Text = styled.div`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 1.2rem;
+    text-align: center;
+`;
 
 const LoadingScreen: React.FC = () => {
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                background: 'rgba(0, 0, 0, 0.8)',
-                zIndex: 1000,
-                animation: 'fadeIn 0.3s ease-in-out',
-            }}
-        >
-            <div
-                style={{
-                    width: '50px',
-                    height: '50px',
-                    border: '3px solid #f3f3f3',
-                    borderTop: '3px solid #4CAF50',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                }}
-            />
-            <p
-                style={{
-                    color: '#fff',
-                    marginTop: '1rem',
-                    fontSize: '1rem',
-                }}
-            >
-                로딩중...
-            </p>
-            <style>
-                {`
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                    @keyframes fadeIn {
-                        from { opacity: 0; }
-                        to { opacity: 1; }
-                    }
-                `}
-            </style>
-        </div>
+        <Container>
+            <Spinner />
+            <Text>로딩 중...</Text>
+        </Container>
     );
 };
 

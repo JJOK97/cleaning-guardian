@@ -1,112 +1,118 @@
 import React from 'react';
+import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
-interface Map {
-    id: string;
-    name: string;
-    description: string;
-    image: string;
-    unlocked: boolean;
-}
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    gap: 2rem;
+`;
 
-const maps: Map[] = [
-    {
-        id: 'ocean',
-        name: '바다',
-        description: '플라스틱으로 오염된 바다를 정화하세요',
-        image: '🌊',
-        unlocked: true,
-    },
-    {
-        id: 'forest',
-        name: '숲',
-        description: '쓰레기로 오염된 숲을 정화하세요',
-        image: '🌲',
-        unlocked: false,
-    },
-    {
-        id: 'city',
-        name: '도시',
-        description: '미세먼지로 오염된 도시를 정화하세요',
-        image: '🏙️',
-        unlocked: false,
-    },
-];
+const Title = styled.h1`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 3rem;
+    text-align: center;
+    margin: 0;
+`;
+
+const Subtitle = styled.p`
+    color: ${({ theme }) => theme.colors.text.secondary};
+    font-size: 1.2rem;
+    text-align: center;
+    margin: 0;
+`;
+
+const MapGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+    padding: 1rem;
+`;
+
+const MapCard = styled.div`
+    background-color: ${({ theme }) => theme.colors.background.card};
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
+`;
+
+const MapIcon = styled.div`
+    font-size: 3rem;
+`;
+
+const MapName = styled.h3`
+    color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 1.2rem;
+    text-align: center;
+    margin: 0;
+`;
+
+const MapDescription = styled.p`
+    color: ${({ theme }) => theme.colors.text.secondary};
+    font-size: 0.9rem;
+    text-align: center;
+    margin: 0;
+`;
 
 const MainScreen: React.FC = () => {
     const navigate = useNavigate();
 
-    return (
-        <div
-            style={{
-                padding: '1rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-            }}
-        >
-            <h1
-                style={{
-                    color: '#fff',
-                    textAlign: 'center',
-                    marginBottom: '1rem',
-                }}
-            >
-                청소의 신
-            </h1>
+    const maps = [
+        {
+            id: 'ocean',
+            name: '바다',
+            description: '플라스틱으로 오염된 바다를 정화하세요',
+            icon: '🌊',
+            unlocked: true,
+        },
+        {
+            id: 'forest',
+            name: '숲',
+            description: '쓰레기로 오염된 숲을 정화하세요',
+            icon: '🌲',
+            unlocked: false,
+        },
+        {
+            id: 'city',
+            name: '도시',
+            description: '미세먼지로 오염된 도시를 정화하세요',
+            icon: '🏙️',
+            unlocked: false,
+        },
+    ];
 
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '1rem',
-                }}
-            >
+    return (
+        <Container>
+            <Title>맵 선택</Title>
+            <MapGrid>
                 {maps.map((map) => (
-                    <button
+                    <MapCard
                         key={map.id}
-                        onClick={() => map.unlocked && navigate(`/stage/${map.id}`)}
-                        style={{
-                            background: map.unlocked ? 'rgba(76, 175, 80, 0.2)' : 'rgba(0, 0, 0, 0.3)',
-                            border: `1px solid ${map.unlocked ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                            borderRadius: '12px',
-                            padding: '1rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            cursor: map.unlocked ? 'pointer' : 'not-allowed',
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseOver={(e) => map.unlocked && (e.currentTarget.style.transform = 'scale(1.02)')}
-                        onMouseOut={(e) => map.unlocked && (e.currentTarget.style.transform = 'scale(1)')}
+                        onClick={() => map.unlocked && navigate(`/stage-select/${map.id}`)}
                     >
-                        <span style={{ fontSize: '3rem' }}>{map.image}</span>
-                        <h2 style={{ color: '#fff', margin: 0 }}>{map.name}</h2>
-                        <p
-                            style={{
-                                color: map.unlocked ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.4)',
-                                textAlign: 'center',
-                                margin: 0,
-                            }}
-                        >
-                            {map.description}
-                        </p>
-                        {!map.unlocked && (
-                            <div
-                                style={{
-                                    color: 'rgba(255, 255, 255, 0.6)',
-                                    fontSize: '0.9rem',
-                                    marginTop: '0.5rem',
-                                }}
-                            >
-                                🔒 잠겨있음
-                            </div>
-                        )}
-                    </button>
+                        <MapIcon>{map.icon}</MapIcon>
+                        <MapName>{map.name}</MapName>
+                        <MapDescription>{map.description}</MapDescription>
+                        {!map.unlocked && <span>🔒 잠겨있음</span>}
+                    </MapCard>
                 ))}
-            </div>
-        </div>
+            </MapGrid>
+        </Container>
     );
 };
 
