@@ -5,6 +5,7 @@ import SliceTrail from '../../components/game/SliceTrail';
 import Pollutant from '../../components/game/Pollutant';
 import { PollutantData, GameResult } from '../../types/game';
 import { colors } from '../../styles/colors';
+import GameBackground from '../../components/game/GameBackground';
 
 const InGameScreen: React.FC = () => {
     const navigate = useNavigate();
@@ -148,10 +149,12 @@ const InGameScreen: React.FC = () => {
                     top: 'clamp(0.5rem, 2vw, 1rem)',
                     left: 'clamp(0.5rem, 2vw, 1rem)',
                     zIndex: 1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
                     padding: 'clamp(0.3rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 1rem)',
                     borderRadius: '4px',
                     fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+                    color: '#fff',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
                 }}
             >
                 점수: {score}
@@ -169,20 +172,15 @@ const InGameScreen: React.FC = () => {
                 style={{
                     width: '100%',
                     height: '100%',
-                    backgroundColor: colors.background.main,
-                    border: `2px solid ${colors.primary.main}`,
                     touchAction: 'none',
                 }}
             >
+                <GameBackground />
                 <Layer>
                     {pollutants.map((pollutant) => (
                         <Pollutant
                             key={pollutant.id}
-                            x={pollutant.x}
-                            y={pollutant.y}
-                            radius={pollutant.radius}
-                            color={pollutant.color}
-                            isRemoved={pollutant.isRemoved}
+                            {...pollutant}
                             onRemove={() => {
                                 setPollutants((prev) =>
                                     prev.map((p) => (p.id === pollutant.id ? { ...p, isRemoved: true } : p)),
