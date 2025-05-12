@@ -1,52 +1,51 @@
-import React, { useEffect, useRef } from 'react';
-import styled from 'styled-components';
+import React, { useMemo } from 'react';
 import { Line } from 'react-konva';
-
-const StyledLine = styled(Line)`
-    linecap: 'round';
-    linejoin: 'round';
-    shadowcolor: ${({ theme }) => theme.colors.primary.main};
-    shadowblur: 10;
-    shadowopacity: 0.5;
-`;
 
 interface SliceTrailProps {
     points: number[];
-    color: string;
-    width: number;
 }
 
-const SliceTrail: React.FC<SliceTrailProps> = ({ points, color, width }) => {
-    const lineRef = useRef<any>(null);
-
-    useEffect(() => {
-        if (!lineRef.current) return;
-
-        const animate = () => {
-            if (!lineRef.current) return;
-            lineRef.current.opacity(lineRef.current.opacity() - 0.02);
-            if (lineRef.current.opacity() > 0) {
-                requestAnimationFrame(animate);
-            }
-        };
-
-        lineRef.current.opacity(1);
-        animate();
-    }, [points]);
+const SliceTrail: React.FC<SliceTrailProps> = ({ points }) => {
+    // 트레일 대시 패턴 (실선과 빈 공간 교차)
+    const dashPattern = useMemo(() => [10, 5], []);
 
     return (
-        <Line
-            ref={lineRef}
-            points={points}
-            stroke={color}
-            strokeWidth={width}
-            lineCap='round'
-            lineJoin='round'
-            shadowColor={color}
-            shadowBlur={10}
-            shadowOpacity={0.5}
-            globalCompositeOperation='lighter'
-        />
+        <>
+            {/* 메인 슬라이스 트레일 */}
+            <Line
+                points={points}
+                stroke='#FFFFFF'
+                strokeWidth={8}
+                lineCap='round'
+                lineJoin='round'
+                opacity={0.5}
+                shadowColor='#4CAF50'
+                shadowBlur={15}
+                shadowOpacity={0.8}
+                shadowOffset={{ x: 0, y: 0 }}
+            />
+
+            {/* 트레일 효과 - 대시 라인 */}
+            <Line
+                points={points}
+                stroke='#4CAF50'
+                strokeWidth={4}
+                lineCap='round'
+                lineJoin='round'
+                opacity={0.7}
+                dash={dashPattern}
+            />
+
+            {/* 트레일 효과 - 가운데 라인 */}
+            <Line
+                points={points}
+                stroke='#FFFFFF'
+                strokeWidth={2}
+                lineCap='round'
+                lineJoin='round'
+                opacity={0.9}
+            />
+        </>
     );
 };
 

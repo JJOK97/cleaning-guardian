@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-import { Stage, Layer } from 'react-konva';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Stage, Layer, Circle } from 'react-konva';
+import { useNavigate, useParams } from 'react-router-dom';
 import SliceTrail from '@/components/game/SliceTrail';
 import Pollutant from '@/components/game/Pollutant';
-import { PollutantData, GameResult } from '@/types/game';
 import GameBackground from '@/components/game/GameBackground';
 import GamePreparationModal from '@/components/game/GamePreparationModal';
-import Button from '@/components/common/Button';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import TransitionWrapper from '@/components/common/TransitionWrapper';
+import Matter from 'matter-js';
 
 const Container = styled.div`
     position: relative;
@@ -68,26 +67,53 @@ const Lives = styled.div`
     border-radius: 20px;
 `;
 
+// 오염물질 정보 타입 (필요한 정보만)
+interface PollutantBody {
+    id: number;
+    x: number;
+    y: number;
+    angle: number;
+    radius: number;
+    color: string;
+    opacity: number;
+}
+
+// 게임 결과 타입 정의
+interface GameResult {
+    score: number;
+    stageId: number;
+    timeSpent: number;
+    pollutantsRemoved: number;
+    maxCombo: number;
+}
+
 const InGameScreen: React.FC = () => {
     const navigate = useNavigate();
     const { stageId } = useParams<{ stageId: string }>();
     const [score, setScore] = useState(0);
-    const [pollutants, setPollutants] = useState<PollutantData[]>([]);
     const [slicePoints, setSlicePoints] = useState<number[]>([]);
     const [isSlicing, setIsSlicing] = useState(false);
-    const [startTime] = useState(Date.now());
     const [showPreparation, setShowPreparation] = useState(true);
     const [time, setTime] = useState(60);
     const [lives, setLives] = useState(3);
     const [isLoading, setIsLoading] = useState(true);
     const [combo, setCombo] = useState(0);
     const [maxCombo, setMaxCombo] = useState(0);
-    const [pollutantCount, setPollutantCount] = useState(0);
-    const [maxPollutants, setMaxPollutants] = useState(0);
+    const [currentIndex, setCurrentIndex] = useState(0); // 현재 오염물질 인덱스
+    const [pollutant, setPollutant] = useState<PollutantBody | null>(null); // 현재 오염물질
+    const [pollutantQueue, setPollutantQueue] = useState<PollutantBody[]>([]); // 오염물질 큐
+    const [gameEnded, setGameEnded] = useState(false); // 게임 종료 상태 추가
+    const startTime = useRef(Date.now());
 
     const stageRef = useRef<any>(null);
     const [stageSize, setStageSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
+    // Matter.js 관련
+    const engineRef = useRef<Matter.Engine | null>(null);
+    const bodyRef = useRef<Matter.Body | null>(null);
+    const animationRef = useRef<number | null>(null);
+
+    // 화면 크기 업데이트
     const updateStageSize = useCallback(() => {
         if (stageRef.current) {
             const container = stageRef.current.container();
@@ -105,77 +131,171 @@ const InGameScreen: React.FC = () => {
         return () => window.removeEventListener('resize', updateStageSize);
     }, [updateStageSize]);
 
-    const generatePollutant = useCallback(() => {
+    // 오염물질 큐 미리 생성
+    useEffect(() => {
+        if (showPreparation) return;
         const { width, height } = stageSize;
-        const minX = 50;
-        const maxX = width - 50;
-        const minY = 50;
-        const maxY = height - 50;
+        // 더 적은 수의 오염물질을 생성하여 디버깅하기 쉽게 함
+        const totalPollutants = Math.floor((width * height) / 50000); // 더 적은 수의 오염물질
+        const queue: PollutantBody[] = [];
+        for (let i = 0; i < totalPollutants; i++) {
+            const radius = Math.random() * 20 + 30; // 더 큰 반지름으로 변경
+            const color = Math.random() > 0.5 ? '#4CAF50' : '#2196F3';
+            // 오염물질이 화면 안쪽에 생성되도록 수정
+            const startX = width * 0.2 + Math.random() * (width * 0.6);
+            const startY = 100; // 화면 상단에서 시작하도록 변경
+            queue.push({
+                id: i,
+                x: startX,
+                y: startY,
+                angle: 0,
+                radius,
+                color,
+                opacity: 1,
+            });
+        }
+        setPollutantQueue(queue);
+        setCurrentIndex(0);
+    }, [stageSize, showPreparation]);
 
-        const newPollutant: PollutantData = {
-            id: pollutantCount,
-            x: Math.random() * (maxX - minX) + minX,
-            y: Math.random() * (maxY - minY) + minY,
-            radius: Math.random() * 20 + 20,
-            color: Math.random() > 0.5 ? '#4CAF50' : '#2196F3',
-            isRemoved: false,
+    // Matter.js 엔진/월드/바디 관리 및 오염물질 하나씩만 추가
+    useEffect(() => {
+        if (showPreparation || gameEnded) return;
+        if (!pollutantQueue.length) return;
+
+        // 게임 종료 확인
+        if (currentIndex >= pollutantQueue.length) {
+            endGame();
+            return;
+        }
+
+        // 엔진 생성
+        const engine = Matter.Engine.create({ gravity: { x: 0, y: 0.3 } }); // 중력 약하게 조정
+        engineRef.current = engine;
+        const world = engine.world;
+
+        // 현재 오염물질 바디 생성
+        const p = pollutantQueue[currentIndex];
+        if (!p) return;
+
+        const body = Matter.Bodies.circle(p.x, p.y, p.radius, {
+            restitution: 0.6,
+            friction: 0.1,
+            density: 0.001,
+            velocity: {
+                x: Math.random() * 4 - 2, // 좌우 속도 감소
+                y: 1 + Math.random() * 2, // 아래로 떨어지는 속도 조정
+            },
+        });
+        bodyRef.current = body;
+        Matter.World.add(world, body);
+        setPollutant({ ...p });
+
+        // 애니메이션 루프
+        const animate = () => {
+            if (!bodyRef.current) return;
+            Matter.Engine.update(engine, 1000 / 60);
+            setPollutant((prev) =>
+                prev && bodyRef.current
+                    ? {
+                          ...prev,
+                          x: bodyRef.current.position.x,
+                          y: bodyRef.current.position.y,
+                          angle: bodyRef.current.angle,
+                      }
+                    : prev,
+            );
+            // 화면 아래로 벗어나면
+            if (bodyRef.current.position.y - p.radius > stageSize.height) {
+                console.log('Pollutant fell off screen:', bodyRef.current.position.y);
+                setLives((prev) => {
+                    const newLives = Math.max(prev - 1, 0);
+                    if (newLives === 0) {
+                        endGame();
+                    }
+                    return newLives;
+                });
+                setPollutant(null);
+                Matter.World.remove(world, bodyRef.current);
+                bodyRef.current = null;
+                setTimeout(() => {
+                    if (!gameEnded) {
+                        setCurrentIndex((idx) => idx + 1);
+                    }
+                }, 800); // 다음 오염물질 등장 시간 증가
+                return;
+            }
+
+            // 화면 밖으로 너무 멀리 나가는 경우 방지
+            if (
+                bodyRef.current.position.x < -p.radius * 2 ||
+                bodyRef.current.position.x > stageSize.width + p.radius * 2
+            ) {
+                // 화면 안으로 다시 들어오도록 힘을 가함
+                Matter.Body.applyForce(bodyRef.current, bodyRef.current.position, {
+                    x: bodyRef.current.position.x < 0 ? 0.005 : -0.005,
+                    y: 0,
+                });
+            }
+
+            animationRef.current = requestAnimationFrame(animate);
         };
+        animationRef.current = requestAnimationFrame(animate);
 
-        setPollutants((prev) => [...prev, newPollutant]);
-        setPollutantCount((prev) => prev + 1);
-    }, [stageSize, pollutantCount]);
+        return () => {
+            if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            if (engineRef.current) Matter.Engine.clear(engineRef.current);
+        };
+    }, [pollutantQueue, currentIndex, stageSize.height, showPreparation, gameEnded]);
 
-    useEffect(() => {
-        if (!showPreparation) {
-            const { width, height } = stageSize;
-            const totalPollutants = Math.floor((width * height) / 10000);
-            setMaxPollutants(totalPollutants);
+    // 게임 종료 함수
+    const endGame = useCallback(() => {
+        setGameEnded(true);
+        const result: GameResult = {
+            score,
+            stageId: parseInt(stageId || '0'),
+            timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
+            pollutantsRemoved: currentIndex,
+            maxCombo,
+        };
+        setTimeout(() => {
+            navigate('/result', { state: result });
+        }, 1000);
+    }, [score, stageId, currentIndex, maxCombo, navigate]);
 
-            // 1초마다 새로운 오염물질 생성
-            const interval = setInterval(() => {
-                if (pollutantCount < totalPollutants) {
-                    generatePollutant();
-                } else {
-                    clearInterval(interval);
-                }
-            }, 1000);
+    // 오염물질 자르기(슬라이스) 처리 - 직접 클릭/탭 했을 때의 로직
+    const handlePollutantSlice = useCallback(() => {
+        if (!pollutant || gameEnded) return;
 
-            return () => clearInterval(interval);
+        setScore((prev) => prev + 100);
+        setCombo((prev) => {
+            const newCombo = prev + 1;
+            setMaxCombo((prevMax) => Math.max(prevMax, newCombo));
+            return newCombo;
+        });
+
+        setPollutant(null);
+        if (bodyRef.current && engineRef.current) {
+            Matter.World.remove(engineRef.current.world, bodyRef.current);
+            bodyRef.current = null;
         }
-    }, [showPreparation, stageSize, pollutantCount, generatePollutant]);
 
-    useEffect(() => {
-        const allRemoved = pollutants.length > 0 && pollutants.every((p) => p.isRemoved);
-        if (allRemoved && stageId) {
-            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-            const result: GameResult = {
-                score,
-                stageId: parseInt(stageId),
-                timeSpent,
-                pollutantsRemoved: pollutants.length,
-                maxCombo,
-            };
-            setTimeout(() => {
-                navigate('/result', { state: result });
-            }, 1000);
-        }
-    }, [pollutants, score, navigate, stageId, startTime, maxCombo]);
+        setTimeout(() => {
+            if (!gameEnded) {
+                setCurrentIndex((idx) => idx + 1);
+            }
+        }, 100);
+    }, [pollutant, gameEnded]);
 
+    // 시간 로직
     useEffect(() => {
         let timer: NodeJS.Timeout;
-        if (!showPreparation) {
+        if (!showPreparation && !gameEnded) {
             timer = setInterval(() => {
                 setTime((prev) => {
-                    if (prev <= 0) {
+                    if (prev <= 1) {
                         clearInterval(timer);
-                        const result: GameResult = {
-                            score,
-                            stageId: parseInt(stageId || '0'),
-                            timeSpent: 60,
-                            pollutantsRemoved: pollutants.filter((p) => p.isRemoved).length,
-                            maxCombo,
-                        };
-                        navigate('/result', { state: result });
+                        endGame();
                         return 0;
                     }
                     return prev - 1;
@@ -183,8 +303,9 @@ const InGameScreen: React.FC = () => {
             }, 1000);
         }
         return () => clearInterval(timer);
-    }, [showPreparation, score, navigate, stageId, pollutants, maxCombo]);
+    }, [showPreparation, gameEnded, endGame]);
 
+    // 로딩 화면 처리
     useEffect(() => {
         const loadingTimer = setTimeout(() => {
             setIsLoading(false);
@@ -193,7 +314,9 @@ const InGameScreen: React.FC = () => {
         return () => clearTimeout(loadingTimer);
     }, []);
 
+    // 마우스/터치 이벤트 핸들러
     const handleMouseDown = (e: any) => {
+        if (gameEnded || showPreparation) return;
         e.evt.preventDefault();
         const stage = e.target.getStage();
         const point = stage.getPointerPosition();
@@ -202,19 +325,45 @@ const InGameScreen: React.FC = () => {
     };
 
     const handleMouseMove = (e: any) => {
+        if (gameEnded || showPreparation || !isSlicing) return;
         e.evt.preventDefault();
-        if (!isSlicing) return;
         const stage = e.target.getStage();
         const point = stage.getPointerPosition();
         setSlicePoints((prev) => [...prev, point.x, point.y]);
+
+        // 슬라이스가 현재 오염물질과 충돌하는지 확인
+        if (pollutant) {
+            const { x, y, radius } = pollutant;
+            const lastIdx = slicePoints.length;
+            if (lastIdx >= 4) {
+                const x1 = slicePoints[lastIdx - 4];
+                const y1 = slicePoints[lastIdx - 3];
+                const x2 = slicePoints[lastIdx - 2];
+                const y2 = slicePoints[lastIdx - 1];
+
+                // 선분과 원의 충돌 검사
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const lineLength = Math.sqrt(dx * dx + dy * dy);
+
+                if (lineLength > 0) {
+                    const distance = Math.abs((dy * x - dx * y + x2 * y1 - x1 * y2) / lineLength);
+
+                    if (distance < radius) {
+                        handlePollutantSlice();
+                    }
+                }
+            }
+        }
     };
 
     const handleMouseUp = (e: any) => {
+        if (gameEnded || showPreparation) return;
         e.evt.preventDefault();
         if (!isSlicing) return;
         setIsSlicing(false);
 
-        // Calculate slice length
+        // 슬라이스 길이 계산
         let length = 0;
         for (let i = 0; i < slicePoints.length - 2; i += 2) {
             const dx = slicePoints[i + 2] - slicePoints[i];
@@ -222,48 +371,23 @@ const InGameScreen: React.FC = () => {
             length += Math.sqrt(dx * dx + dy * dy);
         }
 
-        // Check for pollutants in slice path
-        const removedPollutants = pollutants.filter((pollutant) => {
-            if (pollutant.isRemoved) return false;
-            for (let i = 0; i < slicePoints.length - 2; i += 2) {
-                const dx = slicePoints[i + 2] - slicePoints[i];
-                const dy = slicePoints[i + 3] - slicePoints[i + 1];
-                const distance = Math.abs(
-                    (dy * pollutant.x -
-                        dx * pollutant.y +
-                        slicePoints[i + 1] * slicePoints[i + 2] -
-                        slicePoints[i] * slicePoints[i + 3]) /
-                        Math.sqrt(dx * dx + dy * dy),
-                );
-                if (distance < pollutant.radius) return true;
-            }
-            return false;
-        });
-
-        // Update score and remove pollutants
-        const removedCount = removedPollutants.length;
-        if (removedCount > 0) {
-            setCombo((prev) => {
-                const newCombo = prev + removedCount;
-                setMaxCombo((prevMax) => Math.max(prevMax, newCombo));
-                return newCombo;
-            });
-            setScore((prev) => prev + Math.floor(length) + removedCount * 100 * (combo + 1));
-        } else {
-            setCombo(0);
+        // 점수 추가 (슬라이스 길이에 비례)
+        if (length > 50) {
+            setScore((prev) => prev + Math.floor(length / 10));
         }
 
-        setPollutants((prev) =>
-            prev.map((p) => (removedPollutants.some((rp) => rp.id === p.id) ? { ...p, isRemoved: true } : p)),
-        );
-
-        setSlicePoints([]);
+        // 조금 시간이 지난 후 슬라이스 트레일 초기화
+        setTimeout(() => {
+            setSlicePoints([]);
+        }, 200);
     };
 
     const handleGameStart = () => {
+        startTime.current = Date.now();
         setShowPreparation(false);
     };
 
+    // 로딩 화면 표시
     if (isLoading) {
         return <LoadingScreen />;
     }
@@ -298,6 +422,23 @@ const InGameScreen: React.FC = () => {
                         {combo}콤보!
                     </div>
                 )}
+
+                {/* 디버그 정보 표시 */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        bottom: '1rem',
+                        left: '1rem',
+                        color: 'white',
+                        fontSize: '0.8rem',
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        padding: '0.5rem',
+                        borderRadius: '5px',
+                    }}
+                >
+                    오염물질: {currentIndex + 1}/{pollutantQueue.length || 0}
+                    {pollutant && ` (x: ${Math.round(pollutant.x)}, y: ${Math.round(pollutant.y)})`}
+                </div>
             </GameUI>
             {showPreparation && (
                 <GamePreparationModal
@@ -315,43 +456,41 @@ const InGameScreen: React.FC = () => {
                 ref={stageRef}
                 width={stageSize.width}
                 height={stageSize.height}
+                style={{ width: '100%', height: '100%', touchAction: 'none' }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onTouchStart={handleMouseDown}
                 onTouchMove={handleMouseMove}
                 onTouchEnd={handleMouseUp}
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    touchAction: 'none',
-                }}
             >
                 <Layer>
-                    {pollutants.map((pollutant) => (
+                    {/* 슬라이스 트레일 */}
+                    {isSlicing && slicePoints.length >= 4 && <SliceTrail points={slicePoints} />}
+
+                    {/* 오염물질 */}
+                    {pollutant && (
                         <Pollutant
                             key={pollutant.id}
-                            {...pollutant}
-                            onRemove={() => {
-                                setPollutants((prev) =>
-                                    prev.map((p) => (p.id === pollutant.id ? { ...p, isRemoved: true } : p)),
-                                );
-                                setScore((prev) => prev + 100 * (combo + 1));
-                                setCombo((prev) => {
-                                    const newCombo = prev + 1;
-                                    setMaxCombo((prevMax) => Math.max(prevMax, newCombo));
-                                    return newCombo;
-                                });
-                            }}
-                        />
-                    ))}
-                    {slicePoints.length > 0 && (
-                        <SliceTrail
-                            points={slicePoints}
-                            color='#4CAF50'
-                            width={5}
+                            id={pollutant.id}
+                            x={pollutant.x}
+                            y={pollutant.y}
+                            angle={pollutant.angle}
+                            radius={pollutant.radius}
+                            color={pollutant.color}
+                            opacity={pollutant.opacity}
+                            onRemove={handlePollutantSlice}
                         />
                     )}
+
+                    {/* 스테이지 경계선 표시 (디버깅용) */}
+                    {/* 디버그 표시 - 항상 보이도록 수정 */}
+                    <Circle
+                        x={stageSize.width / 2}
+                        y={stageSize.height / 2}
+                        radius={5}
+                        fill='red'
+                    />
                 </Layer>
             </Stage>
             <TransitionWrapper $isVisible={true}>
