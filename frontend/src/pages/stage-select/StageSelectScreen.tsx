@@ -12,145 +12,71 @@ interface Stage {
     stars: number;
 }
 
-const stages: Record<string, Stage[]> = {
-    ocean: [
-        {
-            id: 'ocean-1',
-            name: '해변가',
-            description: '플라스틱 병과 비닐봉지를 제거하세요',
-            difficulty: 'easy',
-            unlocked: true,
-            stars: 0,
-        },
-        {
-            id: 'ocean-2',
-            name: '얕은 바다',
-            description: '플라스틱 빨대와 일회용 컵을 제거하세요',
-            difficulty: 'normal',
-            unlocked: false,
-            stars: 0,
-        },
-        {
-            id: 'ocean-3',
-            name: '깊은 바다',
-            description: '어망과 플라스틱 조각을 제거하세요',
-            difficulty: 'hard',
-            unlocked: false,
-            stars: 0,
-        },
-    ],
-    forest: [
-        {
-            id: 'forest-1',
-            name: '숲 입구',
-            description: '일회용 쓰레기를 제거하세요',
-            difficulty: 'easy',
-            unlocked: false,
-            stars: 0,
-        },
-    ],
-    city: [
-        {
-            id: 'city-1',
-            name: '도시 공원',
-            description: '미세먼지를 제거하세요',
-            difficulty: 'easy',
-            unlocked: false,
-            stars: 0,
-        },
-    ],
-};
-
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    align-items: center;
     padding: 2rem;
+    gap: 2rem;
 `;
 
 const Title = styled.h1`
     color: ${({ theme }) => theme.colors.text.primary};
     font-size: 2rem;
-    text-align: center;
+    margin-bottom: 1rem;
 `;
 
 const StageGrid = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
-    padding: 1rem;
+    width: 100%;
+    max-width: 1200px;
 `;
 
 const StageCard = styled.div<{ $unlocked: boolean }>`
-    background-color: ${({ theme, $unlocked }) =>
-        $unlocked ? theme.colors.background.card : theme.colors.background.dark};
-    border-radius: 12px;
+    position: relative;
+    background-color: ${({ theme }) => theme.colors.background.card};
+    border-radius: 16px;
     padding: 1.5rem;
     cursor: ${({ $unlocked }) => ($unlocked ? 'pointer' : 'not-allowed')};
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    transition: transform 0.2s ease;
 
     &:hover {
-        transform: ${({ $unlocked }) => ($unlocked ? 'translateY(-4px)' : 'none')};
-        box-shadow: ${({ $unlocked }) => ($unlocked ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none')};
+        transform: ${({ $unlocked }) => ($unlocked ? 'translateY(-5px)' : 'none')};
     }
 `;
 
-const StageIcon = styled.div`
-    font-size: 3rem;
-`;
-
-const StageName = styled.h3`
+const StageName = styled.h2`
     color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 1.2rem;
-    text-align: center;
-    margin: 0;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
 `;
 
 const StageDescription = styled.p`
     color: ${({ theme }) => theme.colors.text.secondary};
-    font-size: 0.9rem;
-    text-align: center;
-    margin: 0;
+    font-size: 1rem;
+    margin-bottom: 1rem;
 `;
 
 const DifficultyBadge = styled.div<{ $difficulty: string }>`
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+    display: inline-block;
     padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    background-color: ${({ theme, $difficulty }) => {
+    border-radius: 20px;
+    font-size: 0.9rem;
+    background-color: ${({ $difficulty, theme }) => {
         switch ($difficulty) {
             case 'easy':
-                return theme.colors.primary.light;
+                return theme.colors.primary.main;
             case 'normal':
                 return theme.colors.secondary.main;
             case 'hard':
                 return theme.colors.error.main;
             default:
-                return theme.colors.primary.light;
+                return theme.colors.background.light;
         }
     }};
     color: white;
-`;
-
-const LockedLabel = styled.div`
-    color: ${({ theme }) => theme.colors.text.disabled};
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-`;
-
-const ButtonGroup = styled.div`
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 2rem;
 `;
 
 const LockedOverlay = styled.div`
@@ -176,12 +102,94 @@ const Stars = styled.div`
     gap: 0.25rem;
 `;
 
+const stages: Record<string, Stage[]> = {
+    ocean: [
+        {
+            id: '1',
+            name: '해변의 쓰레기',
+            description: '해변에 쌓인 플라스틱 쓰레기를 정화하세요',
+            difficulty: 'easy',
+            unlocked: true,
+            stars: 0,
+        },
+        {
+            id: '2',
+            name: '깊은 바다',
+            description: '깊은 바다 속의 오염물질을 제거하세요',
+            difficulty: 'normal',
+            unlocked: true,
+            stars: 0,
+        },
+        {
+            id: '3',
+            name: '해저 유적',
+            description: '고대 유적지의 오염물질을 정화하세요',
+            difficulty: 'hard',
+            unlocked: false,
+            stars: 0,
+        },
+    ],
+    forest: [
+        {
+            id: '4',
+            name: '숲속 오솔길',
+            description: '숲속 오솔길의 쓰레기를 정화하세요',
+            difficulty: 'easy',
+            unlocked: false,
+            stars: 0,
+        },
+        {
+            id: '5',
+            name: '깊은 숲',
+            description: '깊은 숲 속의 오염물질을 제거하세요',
+            difficulty: 'normal',
+            unlocked: false,
+            stars: 0,
+        },
+        {
+            id: '6',
+            name: '고대 나무',
+            description: '고대 나무 주변의 오염물질을 정화하세요',
+            difficulty: 'hard',
+            unlocked: false,
+            stars: 0,
+        },
+    ],
+    city: [
+        {
+            id: '7',
+            name: '도시 공원',
+            description: '도시 공원의 쓰레기를 정화하세요',
+            difficulty: 'easy',
+            unlocked: false,
+            stars: 0,
+        },
+        {
+            id: '8',
+            name: '고층 빌딩',
+            description: '고층 빌딩 주변의 오염물질을 제거하세요',
+            difficulty: 'normal',
+            unlocked: false,
+            stars: 0,
+        },
+        {
+            id: '9',
+            name: '지하철',
+            description: '지하철의 오염물질을 정화하세요',
+            difficulty: 'hard',
+            unlocked: false,
+            stars: 0,
+        },
+    ],
+};
+
 const StageSelectScreen: React.FC = () => {
     const navigate = useNavigate();
     const { mapId } = useParams<{ mapId: string }>();
     const mapStages = stages[mapId || ''] || [];
 
     const handleStageSelect = (stageId: string) => {
+        console.log('Selected stage:', stageId);
         navigate(`/game/${stageId}`);
     };
 
@@ -206,31 +214,20 @@ const StageSelectScreen: React.FC = () => {
                         $unlocked={stage.unlocked}
                         onClick={() => stage.unlocked && handleStageSelect(stage.id)}
                     >
-                        <StageIcon>🎯</StageIcon>
                         <StageName>{stage.name}</StageName>
                         <StageDescription>{stage.description}</StageDescription>
                         <DifficultyBadge $difficulty={stage.difficulty}>
                             {getDifficultyText(stage.difficulty)}
                         </DifficultyBadge>
                         {!stage.unlocked && <LockedOverlay>🔒</LockedOverlay>}
-                        {stage.stars > 0 && (
-                            <Stars>
-                                {Array.from({ length: stage.stars }).map((_, i) => (
-                                    <span key={i}>⭐</span>
-                                ))}
-                            </Stars>
-                        )}
+                        <Stars>
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <span key={i}>{i < stage.stars ? '⭐' : '☆'}</span>
+                            ))}
+                        </Stars>
                     </StageCard>
                 ))}
             </StageGrid>
-            <ButtonGroup>
-                <Button
-                    $variant='secondary'
-                    onClick={() => navigate('/main')}
-                >
-                    맵 선택으로
-                </Button>
-            </ButtonGroup>
         </Container>
     );
 };

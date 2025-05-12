@@ -20,4 +20,11 @@ export interface GameResult {
     stageId: number;
     timeSpent: number;
     pollutantsRemoved: number;
+    maxCombo: number;
+}
+
+export interface StageInfo {
+    name: string;
+    description: string;
+    difficulty: 'easy' | 'medium' | 'hard';
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Line } from 'react-konva';
 
@@ -17,17 +17,35 @@ interface SliceTrailProps {
 }
 
 const SliceTrail: React.FC<SliceTrailProps> = ({ points, color, width }) => {
+    const lineRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (!lineRef.current) return;
+
+        const animate = () => {
+            if (!lineRef.current) return;
+            lineRef.current.opacity(lineRef.current.opacity() - 0.02);
+            if (lineRef.current.opacity() > 0) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        lineRef.current.opacity(1);
+        animate();
+    }, [points]);
+
     return (
-        <StyledLine
+        <Line
+            ref={lineRef}
             points={points}
             stroke={color}
             strokeWidth={width}
-            tension={0.5}
             lineCap='round'
             lineJoin='round'
             shadowColor={color}
             shadowBlur={10}
             shadowOpacity={0.5}
+            globalCompositeOperation='lighter'
         />
     );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { Stage, Layer } from 'react-konva';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -36,6 +36,9 @@ const Score = styled.div`
     font-size: 1.5rem;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
 `;
 
 const Timer = styled.div`
@@ -46,6 +49,9 @@ const Timer = styled.div`
     font-size: 1.5rem;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
 `;
 
 const Lives = styled.div`
@@ -57,11 +63,13 @@ const Lives = styled.div`
     gap: 0.5rem;
     color: ${({ theme }) => theme.colors.error.main};
     font-size: 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
 `;
 
 const InGameScreen: React.FC = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const { stageId } = useParams<{ stageId: string }>();
     const [score, setScore] = useState(0);
     const [pollutants, setPollutants] = useState<PollutantData[]>([]);
@@ -72,46 +80,69 @@ const InGameScreen: React.FC = () => {
     const [time, setTime] = useState(60);
     const [lives, setLives] = useState(3);
     const [isLoading, setIsLoading] = useState(true);
+    const [combo, setCombo] = useState(0);
+    const [maxCombo, setMaxCombo] = useState(0);
+    const [pollutantCount, setPollutantCount] = useState(0);
+    const [maxPollutants, setMaxPollutants] = useState(0);
 
     const stageRef = useRef<any>(null);
     const [stageSize, setStageSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
-    useEffect(() => {
-        const updateStageSize = () => {
-            if (stageRef.current) {
-                const container = stageRef.current.container();
-                const newSize = {
-                    width: container.offsetWidth || window.innerWidth,
-                    height: container.offsetHeight || window.innerHeight,
-                };
-                setStageSize(newSize);
-            }
-        };
-
-        updateStageSize();
-        window.addEventListener('resize', updateStageSize);
-        return () => window.removeEventListener('resize', updateStageSize);
+    const updateStageSize = useCallback(() => {
+        if (stageRef.current) {
+            const container = stageRef.current.container();
+            const newSize = {
+                width: container.offsetWidth || window.innerWidth,
+                height: container.offsetHeight || window.innerHeight,
+            };
+            setStageSize(newSize);
+        }
     }, []);
 
     useEffect(() => {
-        if (!stageId) return;
-        const pollutantCount = parseInt(stageId) * 5 + 5;
-        const safeMargin = 100;
-        const maxX = stageSize.width - safeMargin;
-        const maxY = stageSize.height - safeMargin;
-        const minX = safeMargin;
-        const minY = safeMargin;
+        updateStageSize();
+        window.addEventListener('resize', updateStageSize);
+        return () => window.removeEventListener('resize', updateStageSize);
+    }, [updateStageSize]);
 
-        const newPollutants: PollutantData[] = Array.from({ length: pollutantCount }, (_, i) => ({
-            id: i,
+    const generatePollutant = useCallback(() => {
+        const { width, height } = stageSize;
+        const minX = 50;
+        const maxX = width - 50;
+        const minY = 50;
+        const maxY = height - 50;
+
+        const newPollutant: PollutantData = {
+            id: pollutantCount,
             x: Math.random() * (maxX - minX) + minX,
             y: Math.random() * (maxY - minY) + minY,
             radius: Math.random() * 20 + 20,
-            color: `hsl(${Math.random() * 360}, 70%, 50%)`,
+            color: Math.random() > 0.5 ? '#4CAF50' : '#2196F3',
             isRemoved: false,
-        }));
-        setPollutants(newPollutants);
-    }, [stageSize, stageId]);
+        };
+
+        setPollutants((prev) => [...prev, newPollutant]);
+        setPollutantCount((prev) => prev + 1);
+    }, [stageSize, pollutantCount]);
+
+    useEffect(() => {
+        if (!showPreparation) {
+            const { width, height } = stageSize;
+            const totalPollutants = Math.floor((width * height) / 10000);
+            setMaxPollutants(totalPollutants);
+
+            // 1초마다 새로운 오염물질 생성
+            const interval = setInterval(() => {
+                if (pollutantCount < totalPollutants) {
+                    generatePollutant();
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [showPreparation, stageSize, pollutantCount, generatePollutant]);
 
     useEffect(() => {
         const allRemoved = pollutants.length > 0 && pollutants.every((p) => p.isRemoved);
@@ -122,29 +153,37 @@ const InGameScreen: React.FC = () => {
                 stageId: parseInt(stageId),
                 timeSpent,
                 pollutantsRemoved: pollutants.length,
+                maxCombo,
             };
             setTimeout(() => {
                 navigate('/result', { state: result });
             }, 1000);
         }
-    }, [pollutants, score, navigate, stageId, startTime]);
+    }, [pollutants, score, navigate, stageId, startTime, maxCombo]);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            if (!showPreparation) {
+        let timer: NodeJS.Timeout;
+        if (!showPreparation) {
+            timer = setInterval(() => {
                 setTime((prev) => {
                     if (prev <= 0) {
                         clearInterval(timer);
-                        navigate('/result', { state: { score } });
+                        const result: GameResult = {
+                            score,
+                            stageId: parseInt(stageId || '0'),
+                            timeSpent: 60,
+                            pollutantsRemoved: pollutants.filter((p) => p.isRemoved).length,
+                            maxCombo,
+                        };
+                        navigate('/result', { state: result });
                         return 0;
                     }
                     return prev - 1;
                 });
-            }
-        }, 1000);
-
+            }, 1000);
+        }
         return () => clearInterval(timer);
-    }, [showPreparation, score, navigate]);
+    }, [showPreparation, score, navigate, stageId, pollutants, maxCombo]);
 
     useEffect(() => {
         const loadingTimer = setTimeout(() => {
@@ -202,7 +241,18 @@ const InGameScreen: React.FC = () => {
         });
 
         // Update score and remove pollutants
-        setScore((prev) => prev + Math.floor(length) + removedPollutants.length * 100);
+        const removedCount = removedPollutants.length;
+        if (removedCount > 0) {
+            setCombo((prev) => {
+                const newCombo = prev + removedCount;
+                setMaxCombo((prevMax) => Math.max(prevMax, newCombo));
+                return newCombo;
+            });
+            setScore((prev) => prev + Math.floor(length) + removedCount * 100 * (combo + 1));
+        } else {
+            setCombo(0);
+        }
+
         setPollutants((prev) =>
             prev.map((p) => (removedPollutants.some((rp) => rp.id === p.id) ? { ...p, isRemoved: true } : p)),
         );
@@ -212,10 +262,6 @@ const InGameScreen: React.FC = () => {
 
     const handleGameStart = () => {
         setShowPreparation(false);
-    };
-
-    const handleGameOver = () => {
-        navigate('/result', { state: { score } });
     };
 
     if (isLoading) {
@@ -233,12 +279,31 @@ const InGameScreen: React.FC = () => {
                         <span key={index}>❤️</span>
                     ))}
                 </Lives>
+                {combo > 1 && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: '4rem',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            color: '#4CAF50',
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold',
+                            textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                            background: 'rgba(0, 0, 0, 0.3)',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '20px',
+                        }}
+                    >
+                        {combo}콤보!
+                    </div>
+                )}
             </GameUI>
             {showPreparation && (
                 <GamePreparationModal
                     isOpen={showPreparation}
                     onClose={() => setShowPreparation(false)}
-                    onStart={() => setShowPreparation(false)}
+                    onStart={handleGameStart}
                     stageInfo={{
                         name: '스테이지 시작',
                         description: '준비되셨나요?',
@@ -271,7 +336,12 @@ const InGameScreen: React.FC = () => {
                                 setPollutants((prev) =>
                                     prev.map((p) => (p.id === pollutant.id ? { ...p, isRemoved: true } : p)),
                                 );
-                                setScore((prev) => prev + 100);
+                                setScore((prev) => prev + 100 * (combo + 1));
+                                setCombo((prev) => {
+                                    const newCombo = prev + 1;
+                                    setMaxCombo((prevMax) => Math.max(prevMax, newCombo));
+                                    return newCombo;
+                                });
                             }}
                         />
                     ))}
