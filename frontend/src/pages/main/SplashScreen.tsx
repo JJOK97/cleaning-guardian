@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../../components/common/Layout';
 import { colors } from '../../styles/colors';
 
 const SplashScreen: React.FC = () => {
@@ -15,17 +14,35 @@ const SplashScreen: React.FC = () => {
     }, [navigate]);
 
     return (
-        <Layout style={{ backgroundColor: colors.primary.main }}>
+        <div
+            style={{
+                width: '100vw',
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: colors.background.main,
+            }}
+        >
             <div
                 style={{
-                    color: colors.text.white,
+                    color: colors.text.primary,
                     fontSize: '2rem',
                     fontWeight: 'bold',
                 }}
             >
-                청소의 신
+                클리닝 가디언
             </div>
-        </Layout>
+            <div
+                style={{
+                    color: colors.text.secondary,
+                    marginTop: '1rem',
+                }}
+            >
+                지구를 지켜라!
+            </div>
+        </div>
     );
 };
 

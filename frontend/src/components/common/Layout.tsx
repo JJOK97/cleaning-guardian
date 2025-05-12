@@ -1,5 +1,5 @@
 import React from 'react';
-import { commonStyles } from '../../styles/common';
+import { layoutStyles } from '../../styles/components/layout/layout';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -10,7 +10,7 @@ const Layout: React.FC<LayoutProps> = ({ children, style }) => {
     return (
         <div
             style={{
-                ...commonStyles.fullScreen,
+                ...layoutStyles.mainLayout.container,
                 ...style,
             }}
         >

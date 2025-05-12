@@ -1,16 +1,19 @@
 import React from 'react';
-import { commonStyles } from '../../styles/common';
+import { buttonStyles } from '../../styles/components/button';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'icon';
+    size?: 'small' | 'medium' | 'large';
     children: React.ReactNode;
 }
 
-const Button: React.FC<ButtonProps> = ({ variant = 'primary', children, style, ...props }) => {
+const Button: React.FC<ButtonProps> = ({ variant = 'primary', size = 'medium', children, style, ...props }) => {
     return (
         <button
             style={{
-                ...commonStyles.button[variant],
+                ...buttonStyles.base,
+                ...buttonStyles.variants[variant],
+                ...buttonStyles.sizes[size],
                 ...style,
             }}
             {...props}
