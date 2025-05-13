@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CleaningGuardianApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CleaningGuardianApplication.class, args);
 		System.out.println("hello");
 	}
 
