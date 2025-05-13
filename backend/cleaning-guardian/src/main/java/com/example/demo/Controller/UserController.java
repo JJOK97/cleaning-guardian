@@ -21,7 +21,11 @@ public class UserController {
 	
 	@Autowired
 	UserService userservice;
-	
+
+    @GetMapping("/")
+    public String main() {
+        return "Cleaning Guardian API!";
+    }
 
 	// 회원가입
 	@PostMapping("/register")
