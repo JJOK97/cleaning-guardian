@@ -1,4 +1,4 @@
-package DTO;
+package com.example.demo.DTO;
 
 import lombok.*;
 
@@ -11,6 +11,7 @@ public class UserDTO {
     private String userLoginId;     // 자동 생성 로그인 아이디
     // private String password;   이건 보류. 자동 로그인.
     private String nickname;        // 사용자 입력값 받을 닉네임.
+    
 	public String getUserLoginId() {
 		return userLoginId;
 	}
