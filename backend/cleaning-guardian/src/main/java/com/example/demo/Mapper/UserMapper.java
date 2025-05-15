@@ -11,6 +11,5 @@
 //
 //	public void register(UserDTO user);
 //	public List<String> UserLogin();
-//	public List<String> UniqueGuestId();
 //
 //}

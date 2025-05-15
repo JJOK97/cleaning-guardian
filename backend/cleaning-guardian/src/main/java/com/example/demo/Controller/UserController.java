@@ -28,7 +28,11 @@ public class UserController {
     }
 
 	// 회원가입
+    // register 명령을 받았을 때 실행하라 > post 보내라
 	@PostMapping("/register")
+	// 객체 만들기 string 값이 들어가는 register 메소드선언. 매개변수는 user
+	// @RequestBody == 사용자가 준 JSON 타입의 데이터를 JAVA에서 이해할 수 있게 만들어 준다.
+	// 그 데이터를 UserDTO 형식의 user로 받아오게 한다.
 	public ResponseEntity<String> register(@RequestBody UserDTO user) {
 		boolean result = userservice.register(user);
 		if (result == true) {

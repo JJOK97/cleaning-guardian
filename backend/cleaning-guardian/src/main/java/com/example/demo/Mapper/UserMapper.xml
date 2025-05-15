@@ -3,15 +3,15 @@
 <mapper namespace="com.example.demo.Mapper.UserMapper">
 
 <insert id="register" parameterType="com.example.demo.DTO.UserDTO">
-INSERT INTO users (userLoginId) VALUES (#{userLoginId})
+INSERT INTO users (email) VALUES (#{email})
 </insert>
 
 <select id="UserLogin" resultType="java.lang.String">
-SELECT userLoginId FROM users
+SELECT email FROM users
 </select>
 
 <select id="UniqueGuestId" resultType="java.lang.String"> 
-SELECT userLoginId FROM users
+SELECT email FROM users
 </select>
 
 </mapper>
