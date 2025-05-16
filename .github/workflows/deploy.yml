@@ -1,55 +1,75 @@
-name: Deploy Spring Backend to AWS EC2
+name: Deploy Full Stack App to AWS EC2
 on:
   push:
-    branches: 
-      - main
-      - backend
+    branches: [ main ]
     paths:
       - 'backend/**'
+      - 'frontend/**'
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      DB_URL: ${{ secrets.DB_URL }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'corretto'
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
-      
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DB_URL,DB_USERNAME,DB_PASSWORD
-          script: |
-            cd /home/ec2-user/app/backend/cleaning-guardian
-            git pull
-            
-            # 환경변수를 시스템에 반영
-            export DB_URL="$DB_URL"
-            export DB_USERNAME="$DB_USERNAME"
-            export DB_PASSWORD="$DB_PASSWORD"
-            
-            # Maven 빌드 시 DB 정보를 함께 전달
-            ./mvnw clean package -DskipTests \
-              -Dspring.datasource.url="$DB_URL" \
-              -Dspring.datasource.username="$DB_USERNAME" \
-              -Dspring.datasource.password="$DB_PASSWORD"
-            
-            sudo systemctl restart spring-app
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'corretto'
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+    
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /home/ec2-user/app
+          git pull
+          
+          # 백엔드 빌드 및 배포
+          cd backend/cleaning-guardian
+          # application.properties 설정
+          cat > src/main/resources/application.properties << EOL
+          spring.application.name=cleaning-guardian
+          spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+          server.port=8088
+          server.address=0.0.0.0
+          spring.messages.encoding=UTF-8
+          spring.datasource.url=${DB_URL}
+          spring.datasource.username=${DB_USERNAME}
+          spring.datasource.password=${DB_PASSWORD}
+          spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+          mybatis.mapper-locations=classpath*:com/example/demo/Mapper/*.xml
+          mybatis.type-aliases-package=com.example.demo.DTO
+          EOL
+          
+          ./mvnw clean package -DskipTests
+          sudo systemctl restart spring-app
+          
+          # 프론트엔드 빌드 및 배포 (React)
+          cd ../../frontend
+          npm install
+          npm run build
+          
+          # 빌드된 React 앱을 Nginx 디렉토리로 복사
+          sudo cp -r build/* /usr/share/nginx/html/
+          sudo systemctl restart nginx
+      env:
+        DB_URL: ${{ secrets.DB_URL }}
+        DB_USERNAME: ${{ secrets.DB_USERNAME }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
