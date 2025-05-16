@@ -10,6 +10,8 @@ public interface UserTokenMapper {
     
     UserTokenVO findByDeviceIdAndToken(@Param("deviceId") String deviceId, @Param("accessToken") String accessToken);
     
+    UserTokenVO findByToken(String accessToken);
+    
     int insertToken(UserTokenVO token);
     
     int invalidateTokens(@Param("email") String email, @Param("deviceId") String deviceId);
