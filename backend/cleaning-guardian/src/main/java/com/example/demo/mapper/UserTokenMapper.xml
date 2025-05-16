@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserTokenMapper">
+    
+    <select id="findByDeviceIdAndToken" resultType="com.example.demo.vo.UserTokenVO">
+        SELECT
+            token_idx AS tokenIdx,
+            email,
+            device_id AS deviceId,
+            access_token AS accessToken,
+            created_at AS createdAt,
+            expired_at AS expiredAt,
+            is_valid AS isValid
+        FROM
+            user_tokens
+        WHERE
+            device_id = #{deviceId}
+            AND access_token = #{accessToken}
+    </select>
+    
+    <select id="findByToken" resultType="com.example.demo.vo.UserTokenVO">
+	    SELECT
+	        token_idx AS tokenIdx,
+	        email,
+	        device_id AS deviceId,
+	        access_token AS accessToken,
+	        created_at AS createdAt,
+	        expired_at AS expiredAt,
+	        is_valid AS isValid
+	    FROM
+	        user_tokens
+	    WHERE
+	        access_token = #{accessToken}
+	        AND is_valid = 'Y'
+	        AND expired_at > SYSDATE
+	</select>
+    
+    <insert id="insertToken" parameterType="com.example.demo.vo.UserTokenVO">
+        INSERT INTO user_tokens (
+            email,
+            device_id,
+            access_token,
+            created_at,
+            expired_at,
+            is_valid
+        ) VALUES (
+            #{email},
+            #{deviceId},
+            #{accessToken},
+            #{createdAt},
+            #{expiredAt},
+            #{isValid}
+        )
+    </insert>
+    
+    <update id="invalidateTokens">
+        UPDATE user_tokens
+        SET
+            is_valid = 'N'
+        WHERE
+            email = #{email}
+            AND device_id = #{deviceId}
+    </update>
+    
+</mapper>

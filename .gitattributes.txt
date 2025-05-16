@@ -1,0 +1,6 @@
+* text=auto
+*.java text eol=lf encoding=utf-8
+*.xml text eol=lf encoding=utf-8
+*.properties text eol=lf encoding=utf-8
+*.yml text eol=lf encoding=utf-8
+*.md text eol=lf encoding=utf-8
