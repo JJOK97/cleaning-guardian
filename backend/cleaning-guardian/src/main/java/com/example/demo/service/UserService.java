@@ -1,11 +1,11 @@
-package com.example.demo.Service;
+package com.example.demo.service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.DTO.UserDTO;
+import com.example.demo.dto.UserDTO;
 
 
 @Service
@@ -40,10 +40,4 @@ public class UserService {
 		}
 	}
 	
-	// 유저 아이디 가져오기. > login과 무엇이 다를까?
-	
-//	public boolean check_id(String userLoginId){
-//		
-//	}
-//	
 }

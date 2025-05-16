@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.Mapper.GameMapper">
+
+<select id="getAllmaps" >
+SELECT * FROM maps
+</select>
+
+<select id="getMaps" resultType="com.example.demo.dto.MapsDTO">
+        SELECT DISTINCT *
+        FROM maps
+        WHERE map_idx NOT IN (
+            SELECT map_idx
+            FROM stages
+            INNER JOIN game_clear ON stages.stage_idx = game_clear.stage_idx
+            WHERE game_clear.email = #{email}
+        )
+    </select>
+    
+    <select id="getAllstages" resultType="com.example.demo.dto.StagesDTO">
+    SELECT * from stages
+    </select>
+    
+    <select id="getStages" resultType="com.example.demo.dto.StagesDTO">
+    SELECT DISTINCT *
+    FROM stages
+    where stages_idx NOT IN (
+		SELECT stages_idx
+		FROM game_clear
+		WHERE email = #{email}
+	)
+    </select>
+    
+    <select id="getCampaign" resultType="com.example.demo.dto.CampaignDTO">
+    select distinct *
+    from campaigns
+    where campaign_idx not in (
+		select campaigns_idx
+		from maps
+		where maps_idx = #{map_idx}
+	)
+    </select>
+
+	<select id="getCampaign" resultType="com.example.demo.dto.CampaignDTO">
+	select *
+	from campaigns
+	where map_idx = #{map_idx} and campaign_idx = #{campaign_idx}
+	</select>
+
+</mapper>
