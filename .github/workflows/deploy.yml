@@ -53,11 +53,17 @@ jobs:
           # 저장소 클론 또는 풀
           if [ -d ".git" ]; then
             echo "Git repository exists, pulling latest changes"
+            git reset --hard
             git pull
           else
             echo "Cloning repository"
             git clone https://github.com/JJOK97/cleaning-guardian.git .
           fi
+          
+          # 중요: 환경 변수를 쉘 변수로 설정
+          export DB_URL_VALUE="${DB_URL}"
+          export DB_USERNAME_VALUE="${DB_USERNAME}"
+          export DB_PASSWORD_VALUE="${DB_PASSWORD}"
           
           # 백엔드 빌드 및 배포
           if [ -d "backend/cleaning-guardian" ]; then
@@ -71,20 +77,26 @@ jobs:
             mkdir -p src/main/resources
             
             # application.properties 설정
-            echo "Creating application.properties"
+            echo "Creating application.properties with secrets"
             cat > src/main/resources/application.properties << EOL
 spring.application.name=cleaning-guardian
-spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+# spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 server.port=8088
 server.address=0.0.0.0
 spring.messages.encoding=UTF-8
-spring.datasource.url=${DB_URL}
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
+# DB 설정 - GitHub Actions Secrets 사용
+spring.datasource.url=${DB_URL_VALUE}
+spring.datasource.username=${DB_USERNAME_VALUE}
+spring.datasource.password=${DB_PASSWORD_VALUE}
 spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
-mybatis.mapper-locations=classpath*:com/example/demo/Mapper/*.xml
+# MyBatis 매퍼 XML 위치 지정
+mybatis.mapper-locations=classpath*:com/example/demo/mapper/*.xml
 mybatis.type-aliases-package=com.example.demo.DTO
 EOL
+            
+            # application.properties 내용 확인 (비밀번호는 가리기)
+            echo "Verifying application.properties (sensitive info redacted):"
+            cat src/main/resources/application.properties | sed "s/${DB_PASSWORD_VALUE}/********/g"
             
             # Maven 빌드
             echo "Building backend with Maven"
