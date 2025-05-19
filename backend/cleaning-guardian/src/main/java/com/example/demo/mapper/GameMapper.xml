@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.GameMapper">
+
+<!-- 모든 maps 불러오기, clear한 맵 제외 -->
+<select id="getAllmaps" resultType="com.example.demo.vo.MapsVO">
+  SELECT DISTINCT "maps".*
+  FROM "maps"
+  JOIN "stages" ON "maps"."map_idx" = "stages"."map_idx"
+  LEFT JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx" AND "game_clear"."email" = #{email}
+  WHERE ("game_clear"."success_yn" IS NULL OR "game_clear"."success_yn" = 'N')
+</select>
+<!-- 맵 상세 조회 > 선택한 맵 만 조회-->
+<select id="getMap" resultType="com.example.demo.vo.MapsVO">
+        SELECT *
+		  FROM "maps"
+		  WHERE "map_idx" = #{map_idx}
+    </select>
+<!-- 모든 stages 불러오기, clear한 stages 제외 -->
+    <select id="getAllstages" resultType="com.example.demo.vo.StagesVO">
+   SELECT DISTINCT "stages".*
+  FROM "stages"
+  LEFT JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx" AND "game_clear"."email" = #{email}
+  WHERE "stages"."map_idx" = #{map_idx}
+    AND ("game_clear"."success_yn" IS NULL OR "game_clear"."success_yn" = 'N')
+    </select>
+    
+<!-- 스테이지 상세 조회 > 선택한 스테이지 만 조회-->
+    <select id="getStage" resultType="com.example.demo.vo.StagesVO">
+    SELECT *
+  FROM "stages"
+  WHERE "stage_idx" = #{stage_idx}
+    </select>
+<!-- 스테이지 전체 조회 -->
+    <select id="getAllcampaigns" resultType="com.example.demo.vo.CampaignsVO">
+    select distinct *
+    from "campaigns"
+    where "campaign_idx" not in (
+		select "campaign_idx"
+		from "maps"
+		where "map_idx" = #{map_idx}
+	)
+    </select>
+<!-- 스테이지 선택 조회 -->
+	<select id="getCampaign" resultType="com.example.demo.vo.CampaignsVO">
+	select *
+	from "campaigns"
+	where "map_idx" = #{map_idx} and "campaign_idx" = #{campaign_idx}
+	</select>
+
+</mapper>
