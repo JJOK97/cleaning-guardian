@@ -77,17 +77,17 @@ jobs:
               mkdir -p src/main/resources
               echo "Writing application.properties"
               cat << EOL > src/main/resources/application.properties
-spring.application.name=cleaning-guardian
-server.port=8088
-server.address=0.0.0.0
-spring.messages.encoding=UTF-8
-spring.datasource.url=$DB_URL_VALUE
-spring.datasource.username=$DB_USERNAME_VALUE
-spring.datasource.password=$DB_PASSWORD_VALUE
-spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
-mybatis.mapper-locations=classpath*:com/example/demo/mapper/*.xml
-mybatis.type-aliases-package=com.example.demo.DTO
-EOL
+            spring.application.name=cleaning-guardian
+            server.port=8088
+            server.address=0.0.0.0
+            spring.messages.encoding=UTF-8
+            spring.datasource.url=$DB_URL_VALUE
+            spring.datasource.username=$DB_USERNAME_VALUE
+            spring.datasource.password=$DB_PASSWORD_VALUE
+            spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+            mybatis.mapper-locations=classpath*:com/example/demo/mapper/*.xml
+            mybatis.type-aliases-package=com.example.demo.DTO
+            EOL
 
               echo "Verifying (password masked):"
               sed "s/$DB_PASSWORD_VALUE/********/" src/main/resources/application.properties
