@@ -40,13 +40,6 @@ Thumbs.db
 *.log
 *.env
 .env.*
-- application-local.yml
-- application-dev.yml
-- application-*.properties
-+ application-local.yml
-+ application-dev.yml
-+ application-*.properties
-+ application.properties
 
 # Gradle 관련
 .gradle/
@@ -57,9 +50,7 @@ build/
 *.log
 *.env
 .env.*
-application-local.yml
-application-dev.yml
-application-*.properties
+
 
 #############################
 # OS 별 임시파일
