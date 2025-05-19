@@ -1,14 +1,3 @@
-#############################
-# Unity 관련
-#############################
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-[Mm]emoryCaptures/
-sysinfo.txt
-
 # Visual Studio / Rider 자동 생성 파일
 *.csproj
 *.unityproj
@@ -47,6 +36,17 @@ Thumbs.db
 .project
 .settings/
 .factorypath
+
+*.log
+*.env
+.env.*
+- application-local.yml
+- application-dev.yml
+- application-*.properties
++ application-local.yml
++ application-dev.yml
++ application-*.properties
++ application.properties
 
 # Gradle 관련
 .gradle/
