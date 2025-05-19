@@ -39,7 +39,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: DB_URL,DB_USERNAME,DB_PASSWORD
           script: |
-            # 디버깅 정보
             echo "Starting deployment process..."
             echo "Current directory: $(pwd)"
 
@@ -48,7 +47,6 @@ jobs:
               echo "Creating app directory"
               mkdir -p /home/ec2-user/app
             fi
-
             cd /home/ec2-user/app
 
             # 저장소 클론 또는 풀
@@ -61,7 +59,7 @@ jobs:
               git clone https://github.com/JJOK97/cleaning-guardian.git .
             fi
 
-            # 중요: 환경 변수를 쉘 변수로 설정
+            # 환경 변수 설정
             export DB_URL_VALUE="${DB_URL}"
             export DB_USERNAME_VALUE="${DB_USERNAME}"
             export DB_PASSWORD_VALUE="${DB_PASSWORD}"
@@ -69,17 +67,12 @@ jobs:
             # 백엔드 빌드 및 배포
             if [ -d "backend/cleaning-guardian" ]; then
               cd backend/cleaning-guardian
-
-              # 디렉토리 구조 확인
               echo "Backend directory structure:"
               ls -la
 
-              # application.properties 디렉토리 확인
               mkdir -p src/main/resources
-
-              # application.properties 설정
               echo "Creating application.properties with secrets"
-              cat > src/main/resources/application.properties << EOL
+              cat > src/main/resources/application.properties << 'EOL'
 spring.application.name=cleaning-guardian
 # spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 server.port=8088
@@ -95,16 +88,13 @@ mybatis.mapper-locations=classpath*:com/example/demo/mapper/*.xml
 mybatis.type-aliases-package=com.example.demo.DTO
 EOL
 
-              # application.properties 내용 확인 (비밀번호는 가리기)
               echo "Verifying application.properties (sensitive info redacted):"
-              cat src/main/resources/application.properties | sed "s/${DB_PASSWORD_VALUE}/********/g"
+              sed "s/${DB_PASSWORD_VALUE}/********/g" src/main/resources/application.properties
 
-              # Maven 빌드
               echo "Building backend with Maven"
               chmod +x ./mvnw
               ./mvnw clean package -DskipTests
 
-              # 서비스 재시작
               if systemctl list-unit-files | grep -q spring-app; then
                 echo "Restarting spring-app service"
                 sudo systemctl restart spring-app
@@ -120,7 +110,6 @@ EOL
             # 프론트엔드 빌드 및 배포
             if [ -d "frontend" ]; then
               cd frontend
-
               echo "Frontend directory structure:"
               ls -la
 
@@ -130,7 +119,6 @@ EOL
               echo "Building React app"
               npm run build
 
-              # Nginx 설치 확인
               if ! command -v nginx &> /dev/null; then
                 echo "Installing Nginx"
                 sudo dnf install nginx -y
@@ -138,10 +126,11 @@ EOL
                 sudo systemctl start nginx
               fi
 
-              # 빌드된 React 앱을 Nginx 디렉토리로 복사
               echo "Copying build files to Nginx html directory"
               sudo cp -r build/* /usr/share/nginx/html/
               sudo systemctl restart nginx
+
+              cd ..
             else
               echo "Frontend directory not found"
             fi
