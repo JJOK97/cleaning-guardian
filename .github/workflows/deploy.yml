@@ -1,142 +1,133 @@
 name: Deploy Full Stack App to AWS EC2
 
 on:
-    push:
-        branches: [main]
-    workflow_dispatch:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            - name: Set up JDK
-              uses: actions/setup-java@v3
-              with:
-                  java-version: '17'
-                  distribution: 'corretto'
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
 
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: '18'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-            - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@v1
-              with:
-                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                  aws-region: ap-northeast-2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
 
-            - name: Deploy to EC2
-              uses: appleboy/ssh-action@master
-              with:
-                  host: ${{ secrets.EC2_HOST }}
-                  username: ec2-user
-                  key: ${{ secrets.EC2_SSH_KEY }}
-                  envs: DB_URL,DB_USERNAME,DB_PASSWORD
-                  script: |
-                      echo "Starting deployment process..."
-                      echo "Current directory: $(pwd)"
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD
+          script: |
+            echo "Starting deployment process..."
+            echo "Current directory: $(pwd)"
 
-                      # 앱 디렉토리 확인 및 생성
-                      if [ ! -d "/home/ec2-user/app" ]; then
-                        echo "Creating app directory"
-                        mkdir -p /home/ec2-user/app
-                      fi
-                      cd /home/ec2-user/app
+            # Ensure app directory exists
+            if [ ! -d "/home/ec2-user/app" ]; then
+              echo "Creating app directory"
+              mkdir -p /home/ec2-user/app
+            fi
+            cd /home/ec2-user/app
 
-                      # 저장소 클론 또는 풀
-                      if [ -d ".git" ]; then
-                        echo "Git repository exists, pulling latest changes"
-                        git reset --hard
-                        git pull origin main
-                      else
-                        echo "Cloning repository"
-                        git clone git@github.com:JJOK97/cleaning-guardian.git .
-                      fi
+            # Clone or pull repository via SSH
+            if [ -d ".git" ]; then
+              echo "Repository found, pulling latest changes"
+              git reset --hard
+              git pull origin main
+            else
+              echo "Cloning repository via SSH"
+              git clone git@github.com:JJOK97/cleaning-guardian.git .
+            fi
 
-                      # 환경 변수 설정
-                      export DB_URL_VALUE="${DB_URL}"
-                      export DB_USERNAME_VALUE="${DB_USERNAME}"
-                      export DB_PASSWORD_VALUE="${DB_PASSWORD}"
+            # Export DB env vars for property file
+            export DB_URL_VALUE="$DB_URL"
+            export DB_USERNAME_VALUE="$DB_USERNAME"
+            export DB_PASSWORD_VALUE="$DB_PASSWORD"
 
-                      # 백엔드 빌드 및 배포
-                      if [ -d "backend/cleaning-guardian" ]; then
-                        cd backend/cleaning-guardian
-                        echo "Backend directory structure:"
-                        ls -la
+            # Build & deploy backend
+            if [ -d "backend/cleaning-guardian" ]; then
+              cd backend/cleaning-guardian
+              echo "Backend directory contents:"
+              ls -la
 
-                        mkdir -p src/main/resources
-                        echo "Creating application.properties with secrets"
-                        cat > src/main/resources/application.properties << EOL
-                        spring.application.name=cleaning-guardian
-                        # spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-                        server.port=8088
-                        server.address=0.0.0.0
-                        spring.messages.encoding=UTF-8
-                        # DB 설정 - GitHub Actions Secrets 사용
-                        spring.datasource.url=${DB_URL_VALUE}
-                        spring.datasource.username=${DB_USERNAME_VALUE}
-                        spring.datasource.password=${DB_PASSWORD_VALUE}
-                        spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
-                        # MyBatis 매퍼 XML 위치 지정
-                        mybatis.mapper-locations=classpath*:com/example/demo/mapper/*.xml
-                        mybatis.type-aliases-package=com.example.demo.DTO
-                        EOL
+              mkdir -p src/main/resources
+              echo "Writing application.properties"
+              cat << EOL > src/main/resources/application.properties
+spring.application.name=cleaning-guardian
+server.port=8088
+server.address=0.0.0.0
+spring.messages.encoding=UTF-8
+spring.datasource.url=$DB_URL_VALUE
+spring.datasource.username=$DB_USERNAME_VALUE
+spring.datasource.password=$DB_PASSWORD_VALUE
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+mybatis.mapper-locations=classpath*:com/example/demo/mapper/*.xml
+mybatis.type-aliases-package=com.example.demo.DTO
+EOL
 
-                        echo "Verifying application.properties (sensitive info redacted):"
-                        sed "s/${DB_PASSWORD_VALUE}/********/g" src/main/resources/application.properties
+              echo "Verifying (password masked):"
+              sed "s/$DB_PASSWORD_VALUE/********/" src/main/resources/application.properties
 
-                        echo "Building backend with Maven"
-                        chmod +x ./mvnw
-                        ./mvnw clean package -DskipTests
+              echo "Building with Maven"
+              chmod +x mvnw
+              ./mvnw clean package -DskipTests
 
-                        if systemctl list-unit-files | grep -q spring-app; then
-                          echo "Restarting spring-app service"
-                          sudo systemctl restart spring-app
-                        else
-                          echo "Warning: spring-app service not found"
-                        fi
+              if systemctl list-unit-files | grep -q spring-app; then
+                echo "Restarting spring-app service"
+                sudo systemctl restart spring-app
+              else
+                echo "No systemd service found; launching jar directly"
+                nohup java -jar target/cleaning-guardian-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+              fi
 
-                        cd ../..
-                      else
-                        echo "Backend directory not found"
-                      fi
+              cd ../..
+            fi
 
-                      # 프론트엔드 빌드 및 배포
-                      if [ -d "frontend" ]; then
-                        cd frontend
-                        echo "Frontend directory structure:"
-                        ls -la
+            # Build & deploy frontend
+            if [ -d "frontend" ]; then
+              cd frontend
+              echo "Installing npm dependencies"
+              npm ci
 
-                        echo "Installing npm dependencies"
-                        npm install
+              echo "Building frontend"
+              npm run build
 
-                        echo "Building React app"
-                        npm run build
+              if ! command -v nginx >/dev/null; then
+                echo "Installing Nginx"
+                sudo dnf install -y nginx
+                sudo systemctl enable nginx
+                sudo systemctl start nginx
+              fi
 
-                        if ! command -v nginx &> /dev/null; then
-                          echo "Installing Nginx"
-                          sudo dnf install nginx -y
-                          sudo systemctl enable nginx
-                          sudo systemctl start nginx
-                        fi
+              echo "Deploying to Nginx html"
+              sudo cp -r build/* /usr/share/nginx/html/
+              sudo systemctl reload nginx
 
-                        echo "Copying build files to Nginx html directory"
-                        sudo cp -r build/* /usr/share/nginx/html/
-                        sudo systemctl restart nginx
+              cd ..
+            fi
 
-                        cd ..
-                      else
-                        echo "Frontend directory not found"
-                      fi
-
-                      echo "Deployment process completed"
-              env:
-                  DB_URL: ${{ secrets.DB_URL }}
-                  DB_USERNAME: ${{ secrets.DB_USERNAME }}
-                  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+            echo "Deployment completed."
