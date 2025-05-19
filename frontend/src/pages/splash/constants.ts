@@ -1,0 +1,97 @@
+export const fixedStars = [
+    { id: 1, size: 3, top: 15, left: 10, delay: 0.5 },
+    { id: 2, size: 2, top: 25, left: 20, delay: 1.2 },
+    { id: 3, size: 4, top: 10, left: 30, delay: 0.8 },
+    { id: 4, size: 3, top: 30, left: 40, delay: 1.5 },
+    { id: 5, size: 5, top: 8, left: 50, delay: 0.3 },
+    { id: 6, size: 2, top: 20, left: 60, delay: 1.7 },
+    { id: 7, size: 3, top: 12, left: 70, delay: 0.9 },
+    { id: 8, size: 4, top: 28, left: 80, delay: 1.4 },
+    { id: 9, size: 2, top: 18, left: 90, delay: 0.6 },
+    { id: 10, size: 3, top: 5, left: 95, delay: 1.1 },
+    { id: 11, size: 2, top: 40, left: 15, delay: 0.4 },
+    { id: 12, size: 4, top: 45, left: 25, delay: 1.3 },
+    { id: 13, size: 3, top: 35, left: 35, delay: 0.7 },
+    { id: 14, size: 5, top: 50, left: 45, delay: 1.6 },
+    { id: 15, size: 2, top: 42, left: 55, delay: 0.2 },
+    { id: 16, size: 3, top: 55, left: 65, delay: 1.8 },
+    { id: 17, size: 4, top: 48, left: 75, delay: 0.5 },
+    { id: 18, size: 2, top: 60, left: 85, delay: 1.0 },
+    { id: 19, size: 3, top: 52, left: 95, delay: 1.9 },
+    { id: 20, size: 3, top: 65, left: 5, delay: 0.5 },
+    { id: 21, size: 2, top: 70, left: 15, delay: 1.2 },
+    { id: 22, size: 4, top: 68, left: 25, delay: 0.8 },
+    { id: 23, size: 3, top: 75, left: 35, delay: 1.5 },
+    { id: 24, size: 5, top: 72, left: 45, delay: 0.3 },
+    { id: 25, size: 2, top: 80, left: 55, delay: 1.7 },
+    { id: 26, size: 3, top: 78, left: 65, delay: 0.9 },
+    { id: 27, size: 4, top: 85, left: 75, delay: 1.4 },
+    { id: 28, size: 2, top: 82, left: 85, delay: 0.6 },
+    { id: 29, size: 3, top: 90, left: 95, delay: 1.1 },
+    { id: 30, size: 2, top: 95, left: 5, delay: 0.4 },
+    // Larger bright stars
+    { id: 31, size: 6, top: 22, left: 33, delay: 0.2 },
+    { id: 32, size: 6, top: 58, left: 12, delay: 1.0 },
+    { id: 33, size: 5, top: 37, left: 88, delay: 0.7 },
+    { id: 34, size: 6, top: 73, left: 92, delay: 1.3 },
+    { id: 35, size: 5, top: 88, left: 46, delay: 0.5 },
+];
+
+export const spaceParticles = [
+    { id: 1, size: 3, top: 25, left: 15, delay: 0.2, duration: 8 },
+    { id: 2, size: 4, top: 40, left: 30, delay: 1.0, duration: 12 },
+    { id: 3, size: 2, top: 60, left: 45, delay: 0.5, duration: 10 },
+    { id: 4, size: 5, top: 30, left: 60, delay: 1.5, duration: 9 },
+    { id: 5, size: 3, top: 70, left: 75, delay: 0.8, duration: 11 },
+    { id: 6, size: 4, top: 45, left: 90, delay: 1.2, duration: 13 },
+    { id: 7, size: 2, top: 20, left: 85, delay: 0.3, duration: 7 },
+    { id: 8, size: 5, top: 85, left: 25, delay: 1.8, duration: 14 },
+    { id: 9, size: 3, top: 55, left: 10, delay: 0.7, duration: 9 },
+    { id: 10, size: 4, top: 75, left: 50, delay: 1.4, duration: 10 },
+    { id: 11, size: 2, top: 15, left: 70, delay: 0.6, duration: 8 },
+    { id: 12, size: 5, top: 65, left: 35, delay: 1.1, duration: 12 },
+    { id: 13, size: 3, top: 35, left: 80, delay: 0.9, duration: 11 },
+    { id: 14, size: 4, top: 50, left: 20, delay: 1.7, duration: 13 },
+    { id: 15, size: 2, top: 80, left: 65, delay: 0.4, duration: 9 },
+];
+
+export const planets = [
+    {
+        id: 1,
+        size: 80,
+        top: 15,
+        left: 80,
+        color: 'linear-gradient(45deg, #3f87a6, #ebf8e1)',
+        duration: 120,
+        zIndex: 4,
+    },
+    {
+        id: 2,
+        size: 50,
+        top: 75,
+        left: 20,
+        color: 'linear-gradient(45deg, #d53369, #daae51)',
+        duration: 180,
+        zIndex: 3,
+    },
+    {
+        id: 3,
+        size: 30,
+        top: 30,
+        left: 10,
+        color: 'linear-gradient(45deg, #8360c3, #2ebf91)',
+        duration: 90,
+        zIndex: 5,
+    },
+];
+
+export const planetRings = [
+    { id: 1, size: 80, top: 20, left: 80, color: 'rgba(255, 255, 255, 0.3)', rotation: 30 },
+    { id: 2, size: 50, top: 78, left: 20, color: 'rgba(255, 215, 0, 0.3)', rotation: 45 },
+];
+
+export const cleaningIcons = [
+    { id: 1, emoji: '🧹', size: 30, top: 20, left: 25, rotation: -15 },
+    { id: 2, emoji: '🧽', size: 25, top: 70, left: 80, rotation: 15 },
+    { id: 3, emoji: '🧼', size: 20, top: 40, left: 75, rotation: -10 },
+];
