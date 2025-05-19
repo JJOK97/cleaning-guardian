@@ -13,10 +13,10 @@ import lombok.Setter;
 public class MapsVO {
 	
 	// 맵 식별자 
-    private Double map_idx;
+    private long map_idx;
 
     // 게임 식별자 
-    private Double game_idx;
+    private long game_idx;
 
     // 맵 이름 
     private String map_title;

@@ -14,13 +14,13 @@ import lombok.Setter;
 public class UserSkinVO {
 
 	// 사용자 스킨 식별자
-	private Double uskin_idx;
+	private long uskin_idx;
 
 	// 사용자 이메일
 	private String email;
 
 	// 스킨 식별자
-	private Double skin_idx;
+	private long skin_idx;
 
 	// 스킨 획득 구분
 	private String get_type;

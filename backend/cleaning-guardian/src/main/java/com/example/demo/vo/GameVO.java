@@ -14,7 +14,7 @@ import lombok.Setter;
 public class GameVO {
 	
 	// 게임 식별자 
-    private Double game_idx;
+    private long game_idx;
 
     // 게임 명 
     private String game_name;

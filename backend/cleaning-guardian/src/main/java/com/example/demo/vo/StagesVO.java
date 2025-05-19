@@ -14,10 +14,10 @@ import lombok.Setter;
 public class StagesVO {
 
 	// 스테이지 식별자 
-    private Double stage_idx;
+    private long stage_idx;
 
     // 맵 식별자 
-    private Double map_idx;
+    private long map_idx;
 
     // 스테이지 이름 
     private String stage_name;
@@ -29,7 +29,7 @@ public class StagesVO {
     private String is_final_stage;
 
     // 스테이지 스텝 
-    private Integer stage_step;
+    private long stage_step;
 
     // 생성 일자 
     private Timestamp created_at;

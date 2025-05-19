@@ -3,22 +3,21 @@ package com.example.demo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+@Data
 @Builder
-@Getter
-@Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class GameDTO {
 
 	public boolean success;
 	public String message;
 	public String email;
-	public int map_idx;
-	public int stage_idx;
-	public int Campaign_idx;
+	public long game_idx;
+	public long map_idx;
+	public long stage_idx;
+	public long campaign_idx;
 
 }

@@ -13,10 +13,10 @@ import lombok.Setter;
 public class CampaignsVO {
 
 	 // 캠페인 식별자 
-    private Double campaign_idx;
+    private long campaign_idx;
 
     // 맵 식별자 
-    private Double map_idx;
+    private long map_idx;
 
     // 캠페인 제목 
     private String campaign_title;

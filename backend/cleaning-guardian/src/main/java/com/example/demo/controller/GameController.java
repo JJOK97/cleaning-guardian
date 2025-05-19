@@ -27,39 +27,39 @@ public class GameController {
 	
 	
 	@GetMapping("/maps")
-	public ResponseEntity<List<MapsVO>> maps(@RequestParam("email") String email) {
+	public ResponseEntity<GameDTO> maps(@RequestParam("email") String email) {
 		GameDTO game = gameservice.getAllmaps(email);
 		return new ResponseEntity<>(game, HttpStatus.OK);
 	}
 	
 	@GetMapping("/maps/{mapIdx}")
-	public ResponseEntity<List<MapsVO>> mapJoin(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
-		List<MapsVO> list = gameservice.getMap(email);
-		return new ResponseEntity<>(list, HttpStatus.OK);
+	public ResponseEntity<GameDTO> mapJoin(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
+		GameDTO game = gameservice.getMap(map_idx, email);
+		return new ResponseEntity<>(game, HttpStatus.OK);
 	}
 	
 	@GetMapping("/maps/{mapIdx}/stages")
-	public ResponseEntity<List<StagesVO>> stages(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
-		List<StagesVO> stages = gameservice.getAllstages(map_idx,email);
-		return new ResponseEntity<>(stages, HttpStatus.OK);
+	public ResponseEntity<GameDTO> stages(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
+		GameDTO game = gameservice.getAllstages(map_idx,email);
+		return new ResponseEntity<>(game, HttpStatus.OK);
 	}
 	
 	@GetMapping("/stages/{stageIdx}")
-	public ResponseEntity<List<StagesVO>> stageJoin(@PathVariable("stageIdx") int stage_idx,@RequestParam("email") String email) {
-		List<StagesVO> stages = gameservice.getStage(stage_idx,email);
-		return new ResponseEntity<>(stages, HttpStatus.OK);
+	public ResponseEntity<GameDTO> stageJoin(@PathVariable("stageIdx") int stage_idx,@RequestParam("email") String email) {
+		GameDTO game = gameservice.getStage(stage_idx,email);
+		return new ResponseEntity<>(game, HttpStatus.OK);
 	}
 	
 	@GetMapping("/maps/{mapIdx}/campaigns")
-	public ResponseEntity<List<CampaignsVO>> campaigns(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email)	 {
-		List<CampaignsVO> campaign = gameservice.getAllcampaigns(map_idx,email);
-		return new ResponseEntity<>(campaign, HttpStatus.OK);
+	public ResponseEntity<GameDTO> campaigns(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email)	 {
+		GameDTO game = gameservice.getAllcampaigns(map_idx,email);
+		return new ResponseEntity<>(game, HttpStatus.OK);
 	}
 	
 	@GetMapping("/maps/{mapIdx}/campaigns/{campaingIdx}")
-	public ResponseEntity<List<CampaignsVO>> campaignsJoin(@PathVariable("mapIdx") int map_idx, @PathVariable("campaingIdx") int campaign_idx,@RequestParam("email") String email) {
-		List<CampaignsVO> campaign = gameservice.campaignJoin(map_idx,campaign_idx,email);
-		return new ResponseEntity<>(campaign, HttpStatus.OK);
+	public ResponseEntity<GameDTO> campaignsJoin(@PathVariable("mapIdx") int map_idx, @PathVariable("campaingIdx") int campaign_idx,@RequestParam("email") String email) {
+		GameDTO game = gameservice.campaignJoin(map_idx,campaign_idx,email);
+		return new ResponseEntity<>(game,HttpStatus.OK);
 	}
 	
 	
