@@ -1,50 +1,60 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled, { keyframes } from 'styled-components';
+import { Container, TapToStart } from '@/styles/components/splash/containers';
+import { SpaceBackground } from '@/components/splash/SpaceBackground';
+import { LoadingBar } from '@/components/splash/LoadingBar';
+import { useSplashAnimation } from './hooks/useSplashAnimation';
+import { useBGM } from '@/hooks/useBGM';
+import { fixedStars, spaceParticles, planets, planetRings, cleaningIcons } from './constants';
+import background from '@/assets/sounds/background.wav';
 
-const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-`;
-
-const Container = styled.div`
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const Title = styled.div`
-    font-size: clamp(2rem, 5vw, 4rem);
-    margin-bottom: 1rem;
-    animation: ${fadeIn} 1s ease-in-out;
-`;
-
-const Subtitle = styled.div`
-    font-size: clamp(1rem, 2vw, 1.5rem);
-    opacity: 0.8;
-    animation: ${fadeIn} 1s ease-in-out 0.5s both;
-`;
+// Declare global type for the background music
+declare global {
+    interface Window {
+        globalBgm?: HTMLAudioElement;
+    }
+}
 
 const SplashScreen: React.FC = () => {
     const navigate = useNavigate();
+    const { progress, loadingComplete } = useSplashAnimation();
+    const { play, setAudio } = useBGM({ type: 'splash', volume: 0.3 });
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            navigate('/main');
-        }, 2000);
+    React.useEffect(() => {
+        // Create global reference for background music but don't autoplay
+        if (!window.globalBgm) {
+            window.globalBgm = new Audio(background);
+            window.globalBgm.volume = 0.3;
+            window.globalBgm.loop = true;
+        }
 
-        return () => clearTimeout(timer);
-    }, [navigate]);
+        setAudio(window.globalBgm);
+    }, [setAudio]);
+
+    const handleTapToStart = () => {
+        // Start playing music on user interaction
+        const audio = new Audio(background);
+        play(audio);
+
+        // Navigate to login page
+        navigate('/login');
+    };
 
     return (
         <Container>
-            <Title>청소의 신</Title>
-            <Subtitle>지구를 지켜라!</Subtitle>
+            <SpaceBackground
+                fixedStars={fixedStars}
+                spaceParticles={spaceParticles}
+                planets={planets}
+                planetRings={planetRings}
+                cleaningIcons={cleaningIcons}
+            />
+
+            {!loadingComplete ? (
+                <LoadingBar progress={progress} />
+            ) : (
+                <TapToStart onClick={handleTapToStart}>탭하여 게임 시작</TapToStart>
+            )}
         </Container>
     );
 };
