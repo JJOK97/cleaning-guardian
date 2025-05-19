@@ -53,10 +53,10 @@ jobs:
                       if [ -d ".git" ]; then
                         echo "Git repository exists, pulling latest changes"
                         git reset --hard
-                        git pull
+                        git pull origin main
                       else
                         echo "Cloning repository"
-                        git clone https://github.com/JJOK97/cleaning-guardian.git .
+                        git clone git@github.com:JJOK97/cleaning-guardian.git .
                       fi
 
                       # 환경 변수 설정
@@ -72,7 +72,7 @@ jobs:
 
                         mkdir -p src/main/resources
                         echo "Creating application.properties with secrets"
-                        cat > src/main/resources/application.properties << 'EOL'
+                        cat > src/main/resources/application.properties << EOL
                         spring.application.name=cleaning-guardian
                         # spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
                         server.port=8088
