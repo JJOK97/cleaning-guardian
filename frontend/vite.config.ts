@@ -15,4 +15,13 @@ export default defineConfig({
     build: {
         outDir: 'build',
     },
+
+    server: {
+        proxy: {
+            '/api': {
+                target: 'http://54.180.101.153:8088',
+                changeOrigin: true,
+            },
+        },
+    },
 });

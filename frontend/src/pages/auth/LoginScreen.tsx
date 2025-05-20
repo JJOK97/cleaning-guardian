@@ -28,11 +28,7 @@ const LoginScreen: React.FC = () => {
         setLoading(true);
         try {
             const deviceId = getDeviceId();
-            if (email.trim().toLowerCase() === 'admin' || email.trim().toLowerCase() === 'admin@admin.com') {
-                localStorage.setItem('accessToken', 'admin-token');
-                navigate('/main'); // TODO: 메인화면 경로로 수정
-                return;
-            }
+
             const res = await login({ email, password, deviceId });
             if (res.data.success) {
                 localStorage.setItem('accessToken', res.data.accessToken);
