@@ -1,6 +1,15 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
-export const Input = styled.input`
+const shake = keyframes`
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+`;
+
+export const Input = styled.input<{ $error?: boolean; $shake?: boolean }>`
     width: 260px;
     height: 40px;
     margin-bottom: 1rem;
@@ -9,10 +18,32 @@ export const Input = styled.input`
     padding: 0 1rem;
     font-size: 1rem;
     background: #e0e0e0;
+    color: #222;
+    transition: all 0.2s ease;
+    animation: ${({ $shake }) => ($shake ? shake : 'none')} 0.2s linear;
+    border: ${({ $error }) => ($error ? '2px solid #ff5252' : 'none')};
+
     &::placeholder {
-        color: #bdbdbd;
+        color: ${({ $error }) => ($error ? '#ff5252' : '#bdbdbd')};
         opacity: 1;
+        font-size: 0.9rem;
+        font-weight: 600;
     }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px ${({ $error }) => ($error ? '#ff5252' : '#19c37d')};
+    }
+`;
+
+export const ErrorInput = styled.div`
+    color: #ff5252;
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    width: 260px;
+    padding-left: 1rem;
 `;
 
 export const Button = styled.button`

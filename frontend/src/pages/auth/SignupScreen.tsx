@@ -23,6 +23,8 @@ const SignupScreen: React.FC = () => {
     const [password, setPassword] = useState('');
     const [nickname, setNickname] = useState('');
     const [loading, setLoading] = useState(false);
+    const [emailError, setEmailError] = useState(false);
+    const [shakeEmail, setShakeEmail] = useState(false);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,13 +35,29 @@ const SignupScreen: React.FC = () => {
             if (res.data.success) {
                 navigate('/auth/login');
             } else {
+                if (res.data.message?.includes('이미 등록된 이메일')) {
+                    setEmailError(true);
+                    setShakeEmail(true);
+                    setEmail('');
+                    setTimeout(() => setShakeEmail(false), 200);
+                }
                 console.log(res.data.message || '회원가입 실패');
             }
         } catch (err: any) {
+            if (err.response?.data?.message?.includes('이미 등록된 이메일')) {
+                setEmailError(true);
+                setShakeEmail(true);
+                setEmail('');
+                setTimeout(() => setShakeEmail(false), 200);
+            }
             console.log(err.response?.data?.message || '서버 오류');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEmailFocus = () => {
+        setEmailError(false);
     };
 
     return (
@@ -73,11 +91,14 @@ const SignupScreen: React.FC = () => {
                 >
                     <Input
                         type='email'
-                        placeholder='이메일'
+                        placeholder={emailError ? '이미 등록된 이메일입니다.' : '이메일'}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         autoComplete='off'
+                        $error={emailError}
+                        $shake={shakeEmail}
+                        onFocus={handleEmailFocus}
                     />
                     <Input
                         type='password'
