@@ -3,7 +3,7 @@ package com.example.demo.dto;
 
 import java.util.List;
 
-import com.example.demo.vo.MapsVO;
+import com.example.demo.vo.GameVO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,13 +17,9 @@ import lombok.NoArgsConstructor;
 public class GameDTO {
 	
 	
-	public List<MapsVO> maps;
+	public List<GameVO> maps;
 	public boolean success;
 	public String message;
 	public String email;
-	public long game_idx;
-	public long map_idx;
-	public long stage_idx;
-	public long campaign_idx;
 
 }

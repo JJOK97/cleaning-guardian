@@ -48,21 +48,20 @@ WHERE "stages"."map_idx" = #{map_idx}
   FROM "stages"
   WHERE "stage_idx" = #{stage_idx}
     </select>
-<!-- 스테이지 전체 조회 -->
-    <select id="getAllcampaigns" resultType="com.example.demo.vo.CampaignsVO">
-    select distinct *
-    from "campaigns"
-    where "campaign_idx" not in (
-		select "campaign_idx"
-		from "maps"
-		where "map_idx" = #{map_idx}
-	)
+<!-- 켐페인 전체 조회 -->
+    <select id="getAllCampaigns" parameterType="long" resultType="com.example.demo.vo.CampaignsVO">
+	SELECT "campaigns"."campaign_idx", "campaigns"."map_idx", "campaigns"."campaign_title",
+	 "campaigns"."campaign_desc", "campaigns"."campaign_url", "campaigns"."started_at", "campaigns"."closed_at", "campaigns"."created_at"
+	FROM "campaigns"
+	WHERE "campaigns"."map_idx" = #{map_idx}
     </select>
-<!-- 스테이지 선택 조회 -->
-	<select id="getCampaign" resultType="com.example.demo.vo.CampaignsVO">
-	select *
+<!-- 켐페인 선택 조회 -->
+	<select id="getCampaign" parameterType="map" resultType="com.example.demo.vo.CampaignsVO">
+	select "campaigns"."campaign_idx", "campaigns"."map_idx", "campaigns"."campaign_title",
+	 "campaigns"."campaign_desc", "campaigns"."campaign_url", "campaigns"."started_at", "campaigns"."closed_at", "campaigns"."created_at"
 	from "campaigns"
-	where "map_idx" = #{map_idx} and "campaign_idx" = #{campaign_idx}
+	JOIN "maps" ON "campaigns"."map_idx" = "maps"."map_idx"
+	where "campaigns"."map_idx" = #{map_idx} and "campaigns"."campaign_idx" = #{campaign_idx}
 	</select>
 
 </mapper>
