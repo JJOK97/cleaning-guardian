@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.StageDTO;
+import com.example.demo.dto.StageClearDTO;
 import com.example.demo.service.GamePlayServiceImpl;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,18 +29,21 @@ public class GameplayController {
 //	@PatchMapping
 //	public String patchSkin(@patch)
 //	
-//	// 스테이지 완료 처리 POST
-//	@PostMapping("/stages/{stageIdx}/complete")
-//	public String postMethodName(@RequestBody String entity) {
-//
-//		return entity;
-//	}
+	// 스테이지 완료 처리 POST
+	@PostMapping("/stages/{stageIdx}/complete")
+	public ResponseEntity<StageClearDTO> stageClear(@PathVariable("stageIdx") int stage_idx,
+													@RequestBody StageClearDTO clear) {
+		clear.setIsFinalStage(clear.getIsFinalStage().startsWith("Y") ? "Y" : "N");
+		clear.setStageIdx(stage_idx);
+		StageClearDTO stage = GamePlayService.stageClear(clear);
+		return new ResponseEntity<>(stage, HttpStatus.OK);
+	}
 
 	// 스테이지 상태 조회 GET
 	@GetMapping("/stages/{stageIdx}/status")
-	public ResponseEntity<StageDTO> stageJoin(@PathVariable("stageIdx") int stage_idx,
+	public ResponseEntity<StageDTO> getstageStatus(@PathVariable("stageIdx") int stage_idx,
 												@RequestParam("email") String email) {
-		StageDTO game = GamePlayService.getstageStatus(stage_idx, email);
+		StageDTO game = GamePlayService.getStageStatus(stage_idx, email);
 		return new ResponseEntity<>(game, HttpStatus.OK);
 	} 
 	
