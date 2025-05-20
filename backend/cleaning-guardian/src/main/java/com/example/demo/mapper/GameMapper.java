@@ -22,11 +22,14 @@ public interface GameMapper {
 
 	List<StagesVO> getAllStages(@Param("map_idx") long map_idx, @Param("email") String email);
 		
+	List<StagesVO> getClearedStages(@Param("map_idx") long map_idx, @Param("email") String email);
+	
 	StagesVO getStage (@Param("stage_idx") long stage_idx, @Param("email") String email);
 	
 	CampaignsVO getAllcampaigns(@Param("map_idx") long map_idx, @Param("email") String email);
 	
 	CampaignsVO getCampaign(@Param("map_idx") long map_idx, @Param("campaign_idx") long campaign_idx, @Param("email") String email);
+
 	
 	
 	

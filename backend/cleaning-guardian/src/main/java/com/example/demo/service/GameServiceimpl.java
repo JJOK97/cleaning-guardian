@@ -115,6 +115,29 @@ public class GameServiceimpl implements GameService {
 					.email(email)
 					.build();
 	}
+	
+	@Override
+	public StageDTO getClearedStages(long map_idx, String email) {
+		List<StagesVO> stagelist = gamemapper.getClearedStages(map_idx, email);
+
+		if (email == null) {
+			return StageDTO.builder()
+					.success(false)
+					.message("사용자를 찾을 수 없습니다.").build();
+		}
+		if (stagelist == null) {
+			return StageDTO.builder()
+					.success(false)
+					.message("스테이지를 찾을 수 없습니다.").build();
+		}
+
+		return 		StageDTO.builder()
+					.stagelist(stagelist)
+					.success(true)
+					.message("성공")
+					.email(email)
+					.build();
+	}
 
 	@Override
 	public GameDTO getStage(long stage_idx, String email) {
@@ -185,6 +208,7 @@ public class GameServiceimpl implements GameService {
 					.build();
 		
 	}
+
 
 
 }

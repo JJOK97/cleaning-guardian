@@ -18,9 +18,12 @@ public interface GameService {
 	
 	StageDTO getAllStages(long map_idx, String email);
 	
+	StageDTO getClearedStages(long map_idx, String email);
+	
 	GameDTO getStage(long stage_idx, String email);
 	
 	GameDTO getAllcampaigns(long map_idx, String email);
 	
 	GameDTO campaignJoin(long map_idx, long campaign_idx, String email);
+
 }

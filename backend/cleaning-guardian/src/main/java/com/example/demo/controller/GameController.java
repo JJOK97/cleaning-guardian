@@ -48,6 +48,13 @@ public class GameController {
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 	
+	@GetMapping("/maps/{mapIdx}/stages/clear")
+	public ResponseEntity<StageDTO> getClearedStages(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
+		StageDTO stage = gameservice.getClearedStages(map_idx,email);
+		return new ResponseEntity<>(stage, HttpStatus.OK);
+	}
+	
+	
 	@GetMapping("/stages/{stageIdx}")
 	public ResponseEntity<GameDTO> stageJoin(@PathVariable("stageIdx") int stage_idx,@RequestParam("email") String email) {
 		GameDTO game = gameservice.getStage(stage_idx,email);
