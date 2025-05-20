@@ -1,21 +1,25 @@
 package com.example.demo.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
+import com.example.demo.vo.MapsVO;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class MapsDTO {
 
+	public List<MapsVO> maps;
 	public boolean success;
 	public String message;
 	public String email;
-	public int map_idx;
 	
 	
 	

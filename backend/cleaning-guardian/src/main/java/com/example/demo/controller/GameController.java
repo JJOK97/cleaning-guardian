@@ -1,7 +1,5 @@
 package com.example.demo.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.GameDTO;
+import com.example.demo.dto.MapsDTO;
 import com.example.demo.service.GameServiceimpl;
-import com.example.demo.vo.CampaignsVO;
-import com.example.demo.vo.MapsVO;
-import com.example.demo.vo.StagesVO;
 
 
 @RestController
@@ -27,9 +23,9 @@ public class GameController {
 	
 	
 	@GetMapping("/maps")
-	public ResponseEntity<GameDTO> maps(@RequestParam("email") String email) {
-		GameDTO game = gameservice.getAllmaps(email);
-		return new ResponseEntity<>(game, HttpStatus.OK);
+	public ResponseEntity<MapsDTO> maps(@RequestParam("email") String email) {
+		MapsDTO maps = gameservice.getAllmaps(email);
+		return new ResponseEntity<>(maps, HttpStatus.OK);
 	}
 	
 	@GetMapping("/maps/{mapIdx}")

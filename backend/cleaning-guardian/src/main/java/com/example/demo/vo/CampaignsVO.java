@@ -13,25 +13,25 @@ import lombok.Setter;
 public class CampaignsVO {
 
 	 // 캠페인 식별자 
-    private long campaign_idx;
+    private long campaignIdx;
 
     // 맵 식별자 
-    private long map_idx;
+    private long mapIdx;
 
     // 캠페인 제목 
-    private String campaign_title;
+    private String campaignTitle;
 
     // 캠페인 설명 
-    private String campaign_desc;
+    private String campaignDesc;
 
     // 캠페인 URL 
-    private String campaign_url;
+    private String campaignUrl;
 
     // 시작 일자 
-    private Timestamp started_at;
+    private Timestamp startedAt;
 
     // 종료 일자 
-    private Timestamp closed_at;
+    private Timestamp closedAt;
 
     // 등록 일자 
     private Timestamp created_at;

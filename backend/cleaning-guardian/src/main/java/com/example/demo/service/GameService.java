@@ -4,10 +4,11 @@ package com.example.demo.service;
 
 
 import com.example.demo.dto.GameDTO;
+import com.example.demo.dto.MapsDTO;
 
 public interface GameService {
 
-	GameDTO getAllmaps(String email);
+	MapsDTO getAllmaps(String email);
 	
 	GameDTO getMap(long map_idx, String email);
 	

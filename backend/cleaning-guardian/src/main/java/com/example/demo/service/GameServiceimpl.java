@@ -1,9 +1,12 @@
 package com.example.demo.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.GameDTO;
+import com.example.demo.dto.MapsDTO;
 import com.example.demo.mapper.GameMapper;
 import com.example.demo.util.TokenGenerator;
 import com.example.demo.vo.CampaignsVO;
@@ -17,27 +20,27 @@ public class GameServiceimpl implements GameService {
 	GameMapper gamemapper;
 
 	@Override
-	public GameDTO getAllmaps(String email) {
-		MapsVO maps = gamemapper.getAllmaps(email);
+	public MapsDTO getAllmaps(String email) {
+		List<MapsVO> maps = gamemapper.getAllmaps(email);
 
 		if (email == null) {
-			return GameDTO.builder()
+			return MapsDTO.builder()
 					.success(false)
 					.message("사용자를 찾을 수 없습니다.")
 					.build();
 		}
 		if (maps == null) {
-			return GameDTO.builder()
+			return MapsDTO.builder()
 					.success(false)
 					.message("맵을 찾을 수 없습니다.")
 					.build();
 		}
 
-		return GameDTO.builder()
+		return MapsDTO.builder()
 					.success(true)
 					.message("성공")
-					.game_idx(maps.getGame_idx())
-					.map_idx(maps.getMap_idx())
+					.maps(maps)
+					.email(email)
 					.build();
 	}
 

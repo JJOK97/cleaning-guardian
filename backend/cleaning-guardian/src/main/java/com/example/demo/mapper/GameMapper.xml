@@ -4,11 +4,17 @@
 
 <!-- 모든 maps 불러오기, clear한 맵 제외 -->
 <select id="getAllmaps" parameterType="String" resultType="com.example.demo.vo.MapsVO">
-  SELECT DISTINCT *
-  FROM "maps"
-  JOIN "stages" ON "maps"."map_idx" = "stages"."map_idx"
-  LEFT JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx" AND "game_clear"."email" = #{email}
-  WHERE "game_clear"."success_yn" IS NULL OR "game_clear"."success_yn" = 'N'
+SELECT 
+"map_idx","game_idx","map_title","map_desc","map_theme","created_at"
+FROM "maps"
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM "stages"
+    JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx"
+    WHERE "stages"."map_idx" = "maps"."map_idx"
+      AND "game_clear"."email" = #{email}
+      AND "game_clear"."success_yn" = 'Y'
+)
 </select>
 <!-- 맵 상세 조회 > 선택한 맵 만 조회-->
 <select id="getMap" resultType="com.example.demo.vo.MapsVO">

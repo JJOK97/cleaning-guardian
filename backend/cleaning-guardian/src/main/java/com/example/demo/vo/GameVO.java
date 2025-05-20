@@ -14,21 +14,21 @@ import lombok.Setter;
 public class GameVO {
 	
 	// 게임 식별자 
-    private long game_idx;
+    private long gameIdx;
 
     // 게임 명 
-    private String game_name;
+    private String gameName;
 
     // 게임 내용 
-    private String game_desc;
+    private String gameDesc;
 
     // 게임 장르 
-    private String game_genre;
+    private String gameGenre;
 
     // 게임 플랫폼 
-    private String game_platform;
+    private String gamePlatform;
 
     // 생성 일자 
-    private Timestamp created_at;
+    private Timestamp createdAt;
 
 }
