@@ -6,7 +6,6 @@ import AppRoutes from './routes';
 import { GlobalStyle } from './styles/theme/GlobalStyle';
 import { theme } from './styles/theme/theme';
 import './index.css';
-import * as serviceWorkerRegistration from '@/serviceWorkerRegistration';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
@@ -18,6 +17,3 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </ThemeProvider>
     </React.StrictMode>,
 );
-
-// 서비스 워커 등록
-serviceWorkerRegistration.register();
