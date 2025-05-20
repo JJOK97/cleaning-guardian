@@ -10,7 +10,7 @@ public interface GameService {
 
 	MapsDTO getAllmaps(String email);
 	
-	GameDTO getMap(long map_idx, String email);
+	MapsDTO getMap(long map_idx, String email);
 	
 	GameDTO getAllstages(long map_idx, String email);
 	

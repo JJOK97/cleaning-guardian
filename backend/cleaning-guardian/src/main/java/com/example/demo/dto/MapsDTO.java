@@ -16,8 +16,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MapsDTO {
 
-	public List<MapsVO> maps;
-	public boolean success;
+	public MapsVO map;
+	public List<MapsVO> maplist;
+    public boolean success;
 	public String message;
 	public String email;
 	

@@ -18,7 +18,7 @@ WHERE NOT EXISTS (
 </select>
 <!-- 맵 상세 조회 > 선택한 맵 만 조회-->
 <select id="getMap" resultType="com.example.demo.vo.MapsVO">
-        SELECT *
+        SELECT "map_idx","game_idx","map_title","map_desc","map_theme","created_at"
 		  FROM "maps"
 		  WHERE "map_idx" = #{map_idx}
     </select>

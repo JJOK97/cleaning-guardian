@@ -29,9 +29,9 @@ public class GameController {
 	}
 	
 	@GetMapping("/maps/{mapIdx}")
-	public ResponseEntity<GameDTO> mapJoin(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
-		GameDTO game = gameservice.getMap(map_idx, email);
-		return new ResponseEntity<>(game, HttpStatus.OK);
+	public ResponseEntity<MapsDTO> mapJoin(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
+		MapsDTO maps = gameservice.getMap(map_idx, email);
+		return new ResponseEntity<>(maps, HttpStatus.OK);
 	}
 	
 	@GetMapping("/maps/{mapIdx}/stages")

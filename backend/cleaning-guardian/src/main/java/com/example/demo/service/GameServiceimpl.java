@@ -39,31 +39,31 @@ public class GameServiceimpl implements GameService {
 		return MapsDTO.builder()
 					.success(true)
 					.message("성공")
-					.maps(maps)
+					.maplist(maps)
 					.email(email)
 					.build();
 	}
 
 	@Override
-	public GameDTO getMap(long map_idx, String email) {
+	public MapsDTO getMap(long map_idx, String email) {
 		MapsVO maps = gamemapper.getMap(map_idx, email);
 
 		if (email == null) {
-			return GameDTO.builder()
+			return MapsDTO.builder()
 					.success(false)
 					.message("사용자를 찾을 수 없습니다.").build();
 		}
 		if (maps == null) {
-			return GameDTO.builder()
+			return MapsDTO.builder()
 					.success(false)
 					.message("맵을 찾을 수 없습니다.").build();
 		}
 
-		return GameDTO.builder()
+		return MapsDTO.builder()
+					.map(maps)
 					.success(true)
 					.message("성공")
-					.game_idx(maps.getGame_idx())
-					.map_idx(maps.getMap_idx())
+					.email(email)
 					.build();
 	}
 
@@ -85,8 +85,7 @@ public class GameServiceimpl implements GameService {
 		return GameDTO.builder()
 					.success(true)
 					.message("성공")
-					.map_idx(stages.getMap_idx())
-					.stage_idx(stages.getStage_idx())
+					.map_idx(stages.getMapIdx())
 					.build();
 	}
 
@@ -108,8 +107,8 @@ public class GameServiceimpl implements GameService {
 		return GameDTO.builder()
 					.success(true)
 					.message("성공")
-					.map_idx(stages.getMap_idx())
-					.stage_idx(stages.getStage_idx())
+					.map_idx(stages.getMapIdx())
+					.stage_idx(stages.getMapIdx())
 					.build();
 	}
 
@@ -130,8 +129,8 @@ public class GameServiceimpl implements GameService {
 
 		return GameDTO.builder()
 					.success(true)
-					.map_idx(campaigns.getMap_idx())
-					.campaign_idx(campaigns.getCampaign_idx())
+					.map_idx(campaigns.getMapIdx())
+					.campaign_idx(campaigns.getCampaignIdx())
 					.message("성공")
 					.build();
 	}
@@ -145,7 +144,7 @@ public class GameServiceimpl implements GameService {
 					.success(false)
 					.message("켐페인을 찾을 수 없습니다.").build();
 		}
-		if (campaigns.getCampaign_idx() != campaign_idx) {
+		if (campaigns.getCampaignIdx() != campaign_idx) {
 			return GameDTO.builder()
 					.success(false)
 					.message("캠페인을 찾을 수 없습니다.").build();
@@ -153,8 +152,8 @@ public class GameServiceimpl implements GameService {
 
 		return GameDTO.builder()
 					.success(true)
-					.map_idx(campaigns.getMap_idx())
-					.campaign_idx(campaigns.getCampaign_idx())
+					.map_idx(campaigns.getMapIdx())
+					.campaign_idx(campaigns.getCampaignIdx())
 					.message("성공")
 					.build();
 		
