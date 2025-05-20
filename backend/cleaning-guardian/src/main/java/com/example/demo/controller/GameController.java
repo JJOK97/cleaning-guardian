@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.GameDTO;
 import com.example.demo.dto.MapsDTO;
+import com.example.demo.dto.StageDTO;
 import com.example.demo.service.GameServiceimpl;
 
 
@@ -23,10 +24,17 @@ public class GameController {
 	
 	
 	@GetMapping("/maps")
-	public ResponseEntity<MapsDTO> maps(@RequestParam("email") String email) {
+	public ResponseEntity<MapsDTO> getAllmaps(@RequestParam("email") String email) {
 		MapsDTO maps = gameservice.getAllmaps(email);
 		return new ResponseEntity<>(maps, HttpStatus.OK);
 	}
+	
+	@GetMapping("/maps/{mapIdx}/clear")
+	public ResponseEntity<MapsDTO> getClearedMaps(@RequestParam("email") String email) {
+		MapsDTO maps = gameservice.getClearedMaps(email);
+		return new ResponseEntity<>(maps, HttpStatus.OK);
+	}
+	
 	
 	@GetMapping("/maps/{mapIdx}")
 	public ResponseEntity<MapsDTO> mapJoin(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
@@ -35,9 +43,9 @@ public class GameController {
 	}
 	
 	@GetMapping("/maps/{mapIdx}/stages")
-	public ResponseEntity<GameDTO> stages(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
-		GameDTO game = gameservice.getAllstages(map_idx,email);
-		return new ResponseEntity<>(game, HttpStatus.OK);
+	public ResponseEntity<StageDTO> stages(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
+		StageDTO stage = gameservice.getAllstages(map_idx,email);
+		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 	
 	@GetMapping("/stages/{stageIdx}")

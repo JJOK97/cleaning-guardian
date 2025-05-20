@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.GameDTO;
 import com.example.demo.dto.MapsDTO;
+import com.example.demo.dto.StageDTO;
 import com.example.demo.mapper.GameMapper;
 import com.example.demo.util.TokenGenerator;
 import com.example.demo.vo.CampaignsVO;
@@ -21,7 +22,7 @@ public class GameServiceimpl implements GameService {
 
 	@Override
 	public MapsDTO getAllmaps(String email) {
-		List<MapsVO> maps = gamemapper.getAllmaps(email);
+		List<MapsVO> maplist = gamemapper.getAllmaps(email);
 
 		if (email == null) {
 			return MapsDTO.builder()
@@ -29,7 +30,7 @@ public class GameServiceimpl implements GameService {
 					.message("사용자를 찾을 수 없습니다.")
 					.build();
 		}
-		if (maps == null) {
+		if (maplist == null) {
 			return MapsDTO.builder()
 					.success(false)
 					.message("맵을 찾을 수 없습니다.")
@@ -39,28 +40,53 @@ public class GameServiceimpl implements GameService {
 		return MapsDTO.builder()
 					.success(true)
 					.message("성공")
-					.maplist(maps)
+					.maplist(maplist)
 					.email(email)
 					.build();
 	}
+	
+	@Override
+	public MapsDTO getClearedMaps(String email) {
+		List<MapsVO> maplist = gamemapper.getClearedMaps(email);
 
+		if (email == null) {
+			return MapsDTO.builder()
+					.success(false)
+					.message("사용자를 찾을 수 없습니다.")
+					.build();
+		}
+		if (maplist == null) {
+			return MapsDTO.builder()
+					.success(false)
+					.message("맵을 찾을 수 없습니다.")
+					.build();
+		}
+
+		return MapsDTO.builder()
+					.success(true)
+					.message("성공")
+					.maplist(maplist)
+					.email(email)
+					.build();
+	}
+	
 	@Override
 	public MapsDTO getMap(long map_idx, String email) {
-		MapsVO maps = gamemapper.getMap(map_idx, email);
+		MapsVO map = gamemapper.getMap(map_idx, email);
 
 		if (email == null) {
 			return MapsDTO.builder()
 					.success(false)
 					.message("사용자를 찾을 수 없습니다.").build();
 		}
-		if (maps == null) {
+		if (map == null) {
 			return MapsDTO.builder()
 					.success(false)
 					.message("맵을 찾을 수 없습니다.").build();
 		}
 
 		return MapsDTO.builder()
-					.map(maps)
+					.map(map)
 					.success(true)
 					.message("성공")
 					.email(email)
@@ -68,24 +94,25 @@ public class GameServiceimpl implements GameService {
 	}
 
 	@Override
-	public GameDTO getAllstages(long map_idx, String email) {
-		StagesVO stages = gamemapper.getAllstages(map_idx, email);
+	public StageDTO getAllstages(long map_idx, String email) {
+		List<StagesVO> stagelist = gamemapper.getAllstages(map_idx, email);
 
 		if (email == null) {
-			return GameDTO.builder()
+			return StageDTO.builder()
 					.success(false)
 					.message("사용자를 찾을 수 없습니다.").build();
 		}
-		if (stages == null) {
-			return GameDTO.builder()
+		if (stagelist == null) {
+			return StageDTO.builder()
 					.success(false)
 					.message("스테이지를 찾을 수 없습니다.").build();
 		}
 
-		return GameDTO.builder()
+		return 		StageDTO.builder()
+					.stagelist(stagelist)
 					.success(true)
 					.message("성공")
-					.map_idx(stages.getMapIdx())
+					.email(email)
 					.build();
 	}
 
@@ -158,5 +185,6 @@ public class GameServiceimpl implements GameService {
 					.build();
 		
 	}
+
 
 }

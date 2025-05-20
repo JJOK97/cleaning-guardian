@@ -16,9 +16,11 @@ public interface GameMapper {
 
 	List<MapsVO> getAllmaps(String email);
 	
+	List<MapsVO> getClearedMaps(String email);
+	
 	MapsVO getMap(@Param("map_idx") long map_idx, @Param("email") String email);
 
-	StagesVO getAllstages(@Param("map_idx") long map_idx, @Param("email") String email);
+	List<StagesVO> getAllstages(@Param("map_idx") long map_idx, @Param("email") String email);
 		
 	StagesVO getStage (@Param("stage_idx") long stage_idx, @Param("email") String email);
 	

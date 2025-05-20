@@ -2,18 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.GameMapper">
 
-<!-- 모든 maps 불러오기, clear한 맵 제외 -->
+<!-- 모든 maps 불러오기 -->
 <select id="getAllmaps" parameterType="String" resultType="com.example.demo.vo.MapsVO">
-SELECT 
-"map_idx","game_idx","map_title","map_desc","map_theme","created_at"
+SELECT *
 FROM "maps"
+</select>
+
+<!-- 클리어한 모든 maps 불러오기-->
+<select id="getClearedMaps" parameterType="String" resultType="com.example.demo.vo.MapsVO">
+SELECT "maps"."map_idx", "maps"."game_idx", "maps"."map_title", DBMS_LOB.SUBSTR("maps"."map_desc", 4000, 1), "maps"."map_theme", "maps"."created_at" 
+FROM "maps" 
 WHERE NOT EXISTS (
-    SELECT 1
-    FROM "stages"
-    JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx"
-    WHERE "stages"."map_idx" = "maps"."map_idx"
-      AND "game_clear"."email" = #{email}
-      AND "game_clear"."success_yn" = 'Y'
+  SELECT 1 FROM "stages" JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx" 
+  WHERE "stages"."map_idx" = "maps"."map_idx" AND "game_clear"."email" = #{email} AND "game_clear"."success_yn" = 'N'
 )
 </select>
 <!-- 맵 상세 조회 > 선택한 맵 만 조회-->
@@ -24,11 +25,11 @@ WHERE NOT EXISTS (
     </select>
 <!-- 모든 stages 불러오기, clear한 stages 제외 -->
     <select id="getAllstages" resultType="com.example.demo.vo.StagesVO">
-   SELECT DISTINCT *
+SELECT *
   FROM "stages"
-  LEFT JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx" AND "game_clear"."email" = #{email}
+  JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx" AND "game_clear"."email" = #{email}
   WHERE "stages"."map_idx" = #{map_idx}
-    AND "game_clear"."success_yn" IS NULL OR "game_clear"."success_yn" = 'N'
+    AND "game_clear"."success_yn" = 'N'
     </select>
     
 <!-- 스테이지 상세 조회 > 선택한 스테이지 만 조회-->
