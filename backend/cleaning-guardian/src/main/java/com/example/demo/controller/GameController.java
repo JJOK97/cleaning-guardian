@@ -22,8 +22,8 @@ public class GameController {
 	GameServiceImpl gameservice;
 
 	@GetMapping("/maps")
-	public ResponseEntity<MapsDTO> getAllmaps(@RequestParam("email") String email) {
-		MapsDTO maps = gameservice.getAllmaps(email);
+	public ResponseEntity<MapsDTO> getAllmaps() {
+		MapsDTO maps = gameservice.getAllmaps();
 		return new ResponseEntity<>(maps, HttpStatus.OK);
 	}
 
@@ -34,15 +34,14 @@ public class GameController {
 	}
 
 	@GetMapping("/maps/{mapIdx}")
-	public ResponseEntity<MapsDTO> mapJoin(@PathVariable("mapIdx") int map_idx, @RequestParam("email") String email) {
-		MapsDTO maps = gameservice.getMap(map_idx, email);
+	public ResponseEntity<MapsDTO> mapJoin(@PathVariable("mapIdx") int map_idx) {
+		MapsDTO maps = gameservice.getMap(map_idx);
 		return new ResponseEntity<>(maps, HttpStatus.OK);
 	}
 
 	@GetMapping("/maps/{mapIdx}/stages")
-	public ResponseEntity<StageDTO> getAllStages(@PathVariable("mapIdx") int map_idx,
-			@RequestParam("email") String email) {
-		StageDTO stage = gameservice.getAllStages(map_idx, email);
+	public ResponseEntity<StageDTO> getAllStages(@PathVariable("mapIdx") int map_idx) {
+		StageDTO stage = gameservice.getAllStages(map_idx);
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 

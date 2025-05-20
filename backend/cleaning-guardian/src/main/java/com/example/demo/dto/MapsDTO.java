@@ -1,6 +1,5 @@
 package com.example.demo.dto;
 
-
 import java.util.List;
 
 import com.example.demo.vo.MapsVO;
@@ -18,21 +17,8 @@ public class MapsDTO {
 
 	public MapsVO map;
 	public List<MapsVO> maplist;
-    public boolean success;
+	public boolean success;
 	public String message;
 	public String email;
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 }

@@ -20,17 +20,14 @@ public class GameServiceImpl implements GameService {
 	GameMapper gamemapper;
 
 	@Override
-	public MapsDTO getAllmaps(String email) {
-		List<MapsVO> maplist = gamemapper.getAllmaps(email);
+	public MapsDTO getAllmaps() {
+		List<MapsVO> maplist = gamemapper.getAllmaps();
 
-		if (email == null) {
-			return MapsDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
-		}
 		if (maplist == null) {
 			return MapsDTO.builder().success(false).message("맵을 찾을 수 없습니다.").build();
 		}
 
-		return MapsDTO.builder().success(true).message("성공").maplist(maplist).email(email).build();
+		return MapsDTO.builder().success(true).message("성공").maplist(maplist).build();
 	}
 
 	@Override
@@ -48,31 +45,25 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public MapsDTO getMap(long map_idx, String email) {
-		MapsVO map = gamemapper.getMap(map_idx, email);
+	public MapsDTO getMap(long map_idx) {
+		MapsVO map = gamemapper.getMap(map_idx);
 
-		if (email == null) {
-			return MapsDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
-		}
 		if (map == null) {
 			return MapsDTO.builder().success(false).message("맵을 찾을 수 없습니다.").build();
 		}
 
-		return MapsDTO.builder().map(map).success(true).message("성공").email(email).build();
+		return MapsDTO.builder().map(map).success(true).message("성공").build();
 	}
 
 	@Override
-	public StageDTO getAllStages(long map_idx, String email) {
-		List<StagesVO> stagelist = gamemapper.getAllStages(map_idx, email);
+	public StageDTO getAllStages(long map_idx) {
+		List<StagesVO> stagelist = gamemapper.getAllStages(map_idx);
 
-		if (email == null) {
-			return StageDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
-		}
 		if (stagelist == null) {
 			return StageDTO.builder().success(false).message("스테이지를 찾을 수 없습니다.").build();
 		}
 
-		return StageDTO.builder().stagelist(stagelist).success(true).message("성공").email(email).build();
+		return StageDTO.builder().stagelist(stagelist).success(true).message("성공").build();
 	}
 
 	@Override

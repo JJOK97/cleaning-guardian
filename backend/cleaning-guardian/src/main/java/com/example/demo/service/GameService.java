@@ -6,13 +6,13 @@ import com.example.demo.dto.StageDTO;
 
 public interface GameService {
 
-	MapsDTO getAllmaps(String email);
+	MapsDTO getAllmaps();
 
 	MapsDTO getClearedMaps(String email);
 
-	MapsDTO getMap(long map_idx, String email);
+	MapsDTO getMap(long map_idx);
 
-	StageDTO getAllStages(long map_idx, String email);
+	StageDTO getAllStages(long map_idx);
 
 	StageDTO getClearedStages(long map_idx, String email);
 
