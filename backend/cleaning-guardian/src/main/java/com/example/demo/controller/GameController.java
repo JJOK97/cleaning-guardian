@@ -56,8 +56,8 @@ public class GameController {
 	
 	
 	@GetMapping("/stages/{stageIdx}")
-	public ResponseEntity<GameDTO> stageJoin(@PathVariable("stageIdx") int stage_idx,@RequestParam("email") String email) {
-		GameDTO game = gameservice.getStage(stage_idx,email);
+	public ResponseEntity<StageDTO> stageJoin(@PathVariable("stageIdx") int stage_idx,@RequestParam("email") String email) {
+		StageDTO game = gameservice.getStage(stage_idx,email);
 		return new ResponseEntity<>(game, HttpStatus.OK);
 	}
 	

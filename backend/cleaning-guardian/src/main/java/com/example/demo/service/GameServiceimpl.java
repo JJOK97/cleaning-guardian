@@ -17,8 +17,14 @@ import com.example.demo.vo.StagesVO;
 @Service
 public class GameServiceimpl implements GameService {
 
+    private final TokenGenerator tokenGenerator;
+
 	@Autowired
 	GameMapper gamemapper;
+
+    GameServiceimpl(TokenGenerator tokenGenerator) {
+        this.tokenGenerator = tokenGenerator;
+    }
 
 	@Override
 	public MapsDTO getAllmaps(String email) {
@@ -140,25 +146,25 @@ public class GameServiceimpl implements GameService {
 	}
 
 	@Override
-	public GameDTO getStage(long stage_idx, String email) {
-		StagesVO stages = gamemapper.getStage(stage_idx, email);
+	public StageDTO getStage(long stage_idx, String email) {
+		StagesVO stage = gamemapper.getStage(stage_idx, email);
 
 		if (email == null) {
-			return GameDTO.builder()
+			return StageDTO.builder()
 					.success(false)
 					.message("사용자를 찾을 수 없습니다.").build();
 		}
-		if (stages == null) {
-			return GameDTO.builder()
+		if (stage == null) {
+			return StageDTO.builder()
 					.success(false)
 					.message("스테이지를 찾을 수 없습니다.").build();
 		}
 
-		return GameDTO.builder()
+		return StageDTO.builder()
+					.stage(stage)
 					.success(true)
 					.message("성공")
-					.map_idx(stages.getMapIdx())
-					.stage_idx(stages.getMapIdx())
+					.email(email)
 					.build();
 	}
 

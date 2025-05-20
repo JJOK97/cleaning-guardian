@@ -20,7 +20,7 @@ public interface GameService {
 	
 	StageDTO getClearedStages(long map_idx, String email);
 	
-	GameDTO getStage(long stage_idx, String email);
+	StageDTO getStage(long stage_idx, String email);
 	
 	GameDTO getAllcampaigns(long map_idx, String email);
 	
