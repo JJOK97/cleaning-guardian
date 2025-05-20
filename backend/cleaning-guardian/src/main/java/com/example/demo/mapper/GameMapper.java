@@ -22,7 +22,7 @@ public interface GameMapper {
 
 	List<StagesVO> getClearedStages(long map_idx, String email);
 
-	StagesVO getStage(long stage_idx, String email);
+	StagesVO getStage(long stage_idx);
 
 	List<CampaignsVO> getAllCampaigns(long map_idx);
 

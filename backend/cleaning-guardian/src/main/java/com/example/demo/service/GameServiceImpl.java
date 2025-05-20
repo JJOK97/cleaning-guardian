@@ -81,17 +81,15 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public StageDTO getStage(long stage_idx, String email) {
-		StagesVO stage = gamemapper.getStage(stage_idx, email);
+	public StageDTO getStage(long stage_idx) {
+		StagesVO stage = gamemapper.getStage(stage_idx);
 
-		if (email == null) {
-			return StageDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
-		}
+		
 		if (stage == null) {
 			return StageDTO.builder().success(false).message("스테이지를 찾을 수 없습니다.").build();
 		}
 
-		return StageDTO.builder().stage(stage).success(true).message("성공").email(email).build();
+		return StageDTO.builder().stage(stage).success(true).message("성공").build();
 	}
 
 	@Override

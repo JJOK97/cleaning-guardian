@@ -10,11 +10,19 @@ FROM "maps"
 
 <!-- 클리어한 모든 maps 불러오기-->
 <select id="getClearedMaps" parameterType="String" resultType="com.example.demo.vo.MapsVO">
-SELECT "maps"."map_idx", "maps"."game_idx", "maps"."map_title", DBMS_LOB.SUBSTR("maps"."map_desc", 4000, 1), "maps"."map_theme", "maps"."created_at" 
-FROM "maps" 
+    SELECT "maps"."map_idx", "maps"."game_idx", "maps"."map_title", DBMS_LOB.SUBSTR("maps"."map_desc", 4000, 1), "maps"."map_theme", "maps"."created_at"
+FROM "maps"
 WHERE NOT EXISTS (
-  SELECT 1 FROM "stages" JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx" 
-  WHERE "stages"."map_idx" = "maps"."map_idx" AND "game_clear"."email" = #{email} AND "game_clear"."success_yn" = 'N'
+  SELECT 1 FROM "stages", "game_clear"
+  WHERE "stages"."stage_idx" = "game_clear"."stage_idx"
+    AND "stages"."map_idx" = "maps"."map_idx"
+    AND "game_clear"."email" = #{email}
+    AND NOT EXISTS (
+      SELECT 1 FROM "game_clear"
+      WHERE "game_clear"."stage_idx" = "stages"."stage_idx"
+        AND "game_clear"."email" = #{email}
+        AND "game_clear"."success_yn" = 'Y'
+    )
 )
 </select>
 
@@ -34,12 +42,16 @@ SELECT *
     
 <!-- 클리어한 모든 stages 불러오기-->
 <select id="getClearedStages" resultType="com.example.demo.vo.StagesVO">
-SELECT *
-FROM "stages"
-JOIN "game_clear" ON "stages"."stage_idx" = "game_clear"."stage_idx"
-                 AND "game_clear"."email" = #{email}
-WHERE "stages"."map_idx" = #{map_idx}
-  AND "game_clear"."success_yn" = 'Y'
+SELECT * 
+FROM "stages" 
+WHERE "stages"."map_idx" = #{map_idx} 
+  AND EXISTS (
+    SELECT 1 
+    FROM "game_clear" 
+    WHERE "game_clear"."stage_idx" = "stages"."stage_idx" 
+      AND "game_clear"."email" = #{email} 
+      AND "game_clear"."success_yn" = 'Y'
+  )
 </select>
     
 <!-- 스테이지 상세 조회 > 선택한 스테이지 만 조회-->
