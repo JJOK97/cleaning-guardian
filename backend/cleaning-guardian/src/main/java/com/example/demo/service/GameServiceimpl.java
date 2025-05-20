@@ -94,8 +94,8 @@ public class GameServiceimpl implements GameService {
 	}
 
 	@Override
-	public StageDTO getAllstages(long map_idx, String email) {
-		List<StagesVO> stagelist = gamemapper.getAllstages(map_idx, email);
+	public StageDTO getAllStages(long map_idx, String email) {
+		List<StagesVO> stagelist = gamemapper.getAllStages(map_idx, email);
 
 		if (email == null) {
 			return StageDTO.builder()

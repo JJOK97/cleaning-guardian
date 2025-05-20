@@ -20,7 +20,7 @@ public interface GameMapper {
 	
 	MapsVO getMap(@Param("map_idx") long map_idx, @Param("email") String email);
 
-	List<StagesVO> getAllstages(@Param("map_idx") long map_idx, @Param("email") String email);
+	List<StagesVO> getAllStages(@Param("map_idx") long map_idx, @Param("email") String email);
 		
 	StagesVO getStage (@Param("stage_idx") long stage_idx, @Param("email") String email);
 	

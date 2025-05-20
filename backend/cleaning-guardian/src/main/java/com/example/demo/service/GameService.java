@@ -16,7 +16,7 @@ public interface GameService {
 	
 	MapsDTO getMap(long map_idx, String email);
 	
-	StageDTO getAllstages(long map_idx, String email);
+	StageDTO getAllStages(long map_idx, String email);
 	
 	GameDTO getStage(long stage_idx, String email);
 	

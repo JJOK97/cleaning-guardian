@@ -43,8 +43,8 @@ public class GameController {
 	}
 	
 	@GetMapping("/maps/{mapIdx}/stages")
-	public ResponseEntity<StageDTO> stages(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
-		StageDTO stage = gameservice.getAllstages(map_idx,email);
+	public ResponseEntity<StageDTO> getAllStages(@PathVariable("mapIdx") int map_idx,@RequestParam("email") String email) {
+		StageDTO stage = gameservice.getAllStages(map_idx,email);
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 	
