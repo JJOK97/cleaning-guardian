@@ -4,6 +4,7 @@ import com.example.demo.dto.CampaignsDTO;
 import com.example.demo.dto.MapsDTO;
 import com.example.demo.dto.StageDTO;
 import com.example.demo.dto.StagePollutionsDTO;
+import com.example.demo.dto.UserPlayDTO;
 
 public interface GameService {
 
@@ -20,6 +21,8 @@ public interface GameService {
 	StageDTO getStage(long stage_idx, String email);
 	
 	StagePollutionsDTO getAllPollutions(long stage_idx);
+	
+	UserPlayDTO gameStart(String email, long stage_idx);
 	
 	
 	

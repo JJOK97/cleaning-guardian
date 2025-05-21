@@ -10,6 +10,7 @@ import com.example.demo.vo.CampaignsVO;
 import com.example.demo.vo.MapsVO;
 import com.example.demo.vo.StagePolutionsVO;
 import com.example.demo.vo.StagesVO;
+import com.example.demo.vo.UserPlayVO;
 
 @Mapper
 public interface GameMapper {
@@ -28,6 +29,7 @@ public interface GameMapper {
 
 	List<StagePolutionsVO> getAllPollutions(long stage_idx);
 
+	int gameStart(String email, long stage_idx);
 	
 	
 	
@@ -35,6 +37,7 @@ public interface GameMapper {
 	List<CampaignsVO> getAllCampaigns(long map_idx);
 
 	CampaignsVO getCampaign(@Param("map_idx") long map_idx, @Param("campaign_idx") long campaign_idx);
+
 
 
 }

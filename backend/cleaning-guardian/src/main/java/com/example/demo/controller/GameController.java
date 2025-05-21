@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +14,9 @@ import com.example.demo.dto.CampaignsDTO;
 import com.example.demo.dto.MapsDTO;
 import com.example.demo.dto.StageDTO;
 import com.example.demo.dto.StagePollutionsDTO;
+import com.example.demo.dto.UserPlayDTO;
 import com.example.demo.service.GameServiceImpl;
+
 
 @RestController
 @RequestMapping("/api/v1")
@@ -66,8 +69,6 @@ public class GameController {
 		return new ResponseEntity<>(game, HttpStatus.OK);
 	}
 	
-	// 여기에 새로운 API 만들기
-	
 	// 스테이지 오염물 조회
 	@GetMapping("/stages/{stageIdx}/pollutions")
 	public ResponseEntity<StagePollutionsDTO> getAllPollutions(@PathVariable("stageIdx") int stage_idx) {
@@ -75,6 +76,12 @@ public class GameController {
 		return new ResponseEntity<>(pollutions, HttpStatus.OK);
 	}
 	
+	// 게임 입장
+	@PostMapping("/user-plays")
+	public ResponseEntity<UserPlayDTO> gameStart(@RequestParam String email, @RequestParam int stage_idx) {
+		UserPlayDTO gamestart = gameservice.gameStart(email, stage_idx);
+		return new ResponseEntity<>(gamestart, HttpStatus.OK);
+	}
 	
 	
 	

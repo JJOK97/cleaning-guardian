@@ -9,6 +9,7 @@ import com.example.demo.dto.CampaignsDTO;
 import com.example.demo.dto.MapsDTO;
 import com.example.demo.dto.StageDTO;
 import com.example.demo.dto.StagePollutionsDTO;
+import com.example.demo.dto.UserPlayDTO;
 import com.example.demo.mapper.GameMapper;
 import com.example.demo.vo.CampaignsVO;
 import com.example.demo.vo.MapsVO;
@@ -100,12 +101,19 @@ public class GameServiceImpl implements GameService {
 		List<StagePolutionsVO> polutions = gamemapper.getAllPollutions(stage_idx);
 
 		if (polutions == null) {
-			return StagePollutionsDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
+			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
 		}
 		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
 	}
 
-	
+	public UserPlayDTO gameStart(String email, long stage_idx) {
+		int result = gamemapper.gameStart(email, stage_idx);
+
+		if (result == 0) {
+			return UserPlayDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
+		}
+		return UserPlayDTO.builder().email(email).stageIdx(stage_idx).success(true).message("성공").build();
+	}
 	
 	
 	
@@ -141,5 +149,7 @@ public class GameServiceImpl implements GameService {
 		return CampaignsDTO.builder().campaign(campaign).success(true).message("성공").build();
 
 	}
+
+	
 
 }

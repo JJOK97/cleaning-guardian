@@ -56,6 +56,18 @@ WHERE "stages"."map_idx" = #{map_idx}
     WHERE "stage_idx" = #{stageIdx}
     </select>
     
+    <!-- 게임 시작 sql 문 -->
+    <insert id="gameStart" parameterType="com.example.demo.vo.UserPlayVO">
+    INSERT INTO "user_play"(
+	"email",
+	"stage_idx",
+	"created_at"
+	) VALUES (
+	#{email},
+	#{stage_idx},
+	SYSDATE
+	)
+    </insert>
     
     
     
