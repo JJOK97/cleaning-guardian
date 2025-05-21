@@ -25,15 +25,13 @@ public interface GameMapper {
 
 	List<StagesVO> getClearedStages(long map_idx, String email);
 
-	StagesVO getStage(long stage_idx, String email);
+	StagesVO getStage(long stage_idx);
 
 	List<StagePolutionsVO> getAllPollutions(long stage_idx);
 
 	int gameStart(String email, long stage_idx);
 	
-	List<StagePolutionsVO> getStagePollutions(int stage_idx);
-	
-	
+	List<StagePolutionsVO> getStagePollutions(long stage_idx);
 	
 	List<CampaignsVO> getAllCampaigns(long map_idx);
 

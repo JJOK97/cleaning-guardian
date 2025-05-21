@@ -18,16 +18,14 @@ public interface GameService {
 
 	StageDTO getClearedStages(long map_idx, String email);
 
-	StageDTO getStage(long stage_idx, String email);
+	StageDTO getStage(long stage_idx);
 	
 	StagePollutionsDTO getAllPollutions(long stage_idx);
 	
 	UserPlayDTO gameStart(String email, long stage_idx);
 	
-	StagePollutionsDTO getStagePollutions(int stage_idx);
+	StagePollutionsDTO getStagePollutions(long stage_idx);
 	
-	
-
 	CampaignsDTO getAllCampaigns(long map_idx);
 
 	CampaignsDTO getCampaign(long map_idx, long campaign_idx);

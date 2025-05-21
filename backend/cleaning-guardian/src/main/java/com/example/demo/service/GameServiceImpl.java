@@ -84,17 +84,14 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public StageDTO getStage(long stage_idx, String email) {
-		StagesVO stage = gamemapper.getStage(stage_idx, email);
+	public StageDTO getStage(long stage_idx) {
+		StagesVO stage = gamemapper.getStage(stage_idx);
 
-		if (email == null) {
-			return StageDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
-		}
 		if (stage == null) {
 			return StageDTO.builder().success(false).message("스테이지를 찾을 수 없습니다.").build();
 		}
 
-		return StageDTO.builder().stage(stage).success(true).message("성공").email(email).build();
+		return StageDTO.builder().stage(stage).success(true).message("성공").build();
 	}
 
 	@Override
@@ -118,7 +115,7 @@ public class GameServiceImpl implements GameService {
 	}
 	
 	@Override
-	public StagePollutionsDTO getStagePollutions(int stage_idx) {
+	public StagePollutionsDTO getStagePollutions(long stage_idx) {
 		List<StagePolutionsVO> polutions = gamemapper.getStagePollutions(stage_idx);
 		
 		if (polutions == null) {
@@ -127,22 +124,12 @@ public class GameServiceImpl implements GameService {
 		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
 	}
 	
-	
-	
-	
-	
-	
 	@Override
 	public CampaignsDTO getAllCampaigns(long map_idx) {
 		List<CampaignsVO> campaignlist = gamemapper.getAllCampaigns(map_idx);
 
 		if (campaignlist == null) {
 			return CampaignsDTO.builder().success(false).message("캠페인을 찾을 수 없습니다.").build();
-		}
-
-		for (CampaignsVO campaign : campaignlist) {
-			System.out.println("하이요");
-			System.out.println(campaign);
 		}
 
 		return CampaignsDTO.builder().campaignlist(campaignlist).success(true).message("성공").build();
