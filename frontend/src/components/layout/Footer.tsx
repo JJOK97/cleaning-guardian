@@ -13,19 +13,41 @@ import medalTextImg from '@/assets/img/footer/medal-text.png';
 import shopImg from '@/assets/img/footer/shop.png';
 import shopTextImg from '@/assets/img/footer/shop-text.png';
 
+const noiseSvgOne = encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+      <filter id="noise1"><feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="2" stitchTiles="stitch"/></filter>
+      <rect width="100%" height="100%" filter="url(#noise1)" opacity="0.06"/>
+    </svg>
+  `);
+const noiseSvgTwo = encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+      <filter id="noise2"><feTurbulence type="fractalNoise" baseFrequency="0.2" numOctaves="4" stitchTiles="stitch"/></filter>
+      <rect width="100%" height="100%" filter="url(#noise2)" opacity="0.04"/>
+    </svg>
+  `);
+
 const StyledFooter = styled.footer`
     height: 4.2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    background-color: rgb(255 249 183);
-    border-top: 1.5px solid rgba(255, 255, 255, 0.1);
     position: fixed;
-    bottom: 0;
     left: 0;
     right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     z-index: 100;
-    box-shadow: 0 -6px 24px 0 rgba(0, 0, 0, 0.12), 0 -1.5px 0 0 rgba(0, 0, 0, 0.04);
+    background-color: #fff8b7;
+    background-image: linear-gradient(
+            to right,
+            rgba(255, 252, 200, 0.6),
+            rgba(255, 246, 160, 0.6) 30%,
+            rgba(255, 249, 183, 0.4) 70%,
+            rgba(254, 244, 150, 0.6)
+        ),
+        url('data:image/svg+xml;utf8,${noiseSvgOne}'), url('data:image/svg+xml;utf8,${noiseSvgTwo}');
+    background-blend-mode: overlay, normal, normal;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
 `;
 
 const NavButton = styled.button<{ $isActive?: boolean }>`
@@ -39,8 +61,8 @@ const NavButton = styled.button<{ $isActive?: boolean }>`
     cursor: pointer;
 
     height: 100%;
-    min-width: 20%;
-    transition: background 0.2s, box-shadow 0.2s, min-width 0.2s;
+    min-width: ${({ $isActive }) => ($isActive ? '24%' : '19%')};
+    transition: background 0.4s, box-shadow 0.2s, min-width 0.3s;
     box-shadow: none;
     border: 1.5px solid rgba(0, 0, 0, 0.06);
 `;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SpaceBackground } from '@/components/splash/SpaceBackground';
-import guardianImg from '@/assets/img/guardian.png';
+import guardianImg from '@/assets/img/profile/default.png';
 import { signup } from '@/api/auth';
 import { getDeviceId } from '@/utils/device';
 import { fixedStars, spaceParticles, planets, planetRings, cleaningIcons } from '@/pages/splash/constants';
