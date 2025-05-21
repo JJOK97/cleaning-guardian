@@ -2,7 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.GamePlayMapper">
 
-
+<!-- 스킨 업데이트 -->
+<update id="patchSkin" parameterType="com.example.demo.dto.UserSkinDTO">
+	UPDATE "user_skins"
+	SET "uskin_idx" = #{skin_idx}
+	WHERE "email" = #{email}
+</update>
 
 
 <!-- 스테이지 클리어 후 stageClear에 정보 입력. -->

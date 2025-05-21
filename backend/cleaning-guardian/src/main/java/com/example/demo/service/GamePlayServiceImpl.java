@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.GameClearDTO;
 import com.example.demo.dto.StageDTO;
+import com.example.demo.dto.UserSkinDTO;
 import com.example.demo.vo.GameClearVO;
 import com.example.demo.vo.StagesVO;
 import com.example.demo.mapper.GamePlayMapper;
@@ -14,6 +15,23 @@ public class GamePlayServiceImpl implements GamePlayService {
 
 	@Autowired
 	GamePlayMapper GamePlayMapper;
+	
+	public UserSkinDTO patchSkin(long skin_idx, String email) {
+		int result = GamePlayMapper.patchSkin(skin_idx, email);
+		
+		if(result == 0) {
+			UserSkinDTO.builder()
+						.success(false)
+						.message("스킨 업데이트 실패")
+						.build();
+		}
+		return UserSkinDTO.builder()
+						.success(true)
+						.message("스킨 업데이트 성공")
+						.email(email)
+						.skinIdx(skin_idx)
+						.build();
+	}
 
 	@Override
 	public GameClearDTO stageClear(long stage_idx, String email, String successYn) {
@@ -38,5 +56,7 @@ public class GamePlayServiceImpl implements GamePlayService {
 				.successYn(successYn)
 				.build();
 	}
+
+	
 
 }

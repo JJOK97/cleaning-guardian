@@ -10,6 +10,8 @@ public interface GamePlayMapper {
 	
 	int stageClear(long stage_idx, String email, String successYn);
 
+	int patchSkin(long skin_idx, String email);
+
 
 	
 }

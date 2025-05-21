@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.StageDTO;
+import com.example.demo.dto.UserSkinDTO;
 import com.example.demo.dto.GameClearDTO;
 import com.example.demo.service.GamePlayServiceImpl;
 
@@ -26,9 +27,13 @@ public class GameplayController {
 	GamePlayServiceImpl GamePlayService;
 
 	// 스킨 설정 PATCH
-//	@PatchMapping
-//	public String patchSkin(@patch)
-//	
+	@PatchMapping("/users/me/{skinIdx}")
+	public ResponseEntity<UserSkinDTO> patchSkin(@PathVariable("skinIdx") long skin_idx,
+												@RequestParam("email") String email) {
+		UserSkinDTO userSkin = GamePlayService.patchSkin(skin_idx, email);
+		return new ResponseEntity<>(userSkin, HttpStatus.OK);
+	}
+	
 	// 스테이지 완료 처리 POST
 	@PostMapping("/stages/{stageIdx}/complete")
 	public ResponseEntity<GameClearDTO> stageClear(@PathVariable("stageIdx") long stage_idx,
