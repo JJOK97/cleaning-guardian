@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.StageDTO;
-import com.example.demo.dto.StageClearDTO;
+import com.example.demo.dto.GameClearDTO;
 import com.example.demo.service.GamePlayServiceImpl;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,11 +31,13 @@ public class GameplayController {
 //	
 	// 스테이지 완료 처리 POST
 	@PostMapping("/stages/{stageIdx}/complete")
-	public ResponseEntity<StageClearDTO> stageClear(@PathVariable("stageIdx") int stage_idx,
-													@RequestBody StageClearDTO clear) {
-		clear.setIsFinalStage(clear.getIsFinalStage().startsWith("Y") ? "Y" : "N");
-		clear.setStageIdx(stage_idx);
-		StageClearDTO stage = GamePlayService.stageClear(clear);
+	public ResponseEntity<GameClearDTO> stageClear(@PathVariable("stageIdx") int stage_idx,@RequestParam("email") String email) {
+		GameClearDTO clear = GameClearDTO.builder()
+		        .email(email)
+		        .stageIdx(stage_idx)
+		        .successYn("Y")
+		        .build();
+		GameClearDTO stage = GamePlayService.stageClear(clear);
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 

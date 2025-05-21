@@ -5,28 +5,23 @@
 
 
 
-
-<insert id="stageClear" parameterType="com.example.demo.dto.StageClearDTO">
-	INSERT INTO "stages" (
+<!-- 스테이지 클리어 후 stageClear에 정보 입력. -->
+<insert id="stageClear" parameterType="com.example.demo.dto.GameClearDTO">
+	INSERT INTO "game_clear" (
+		"email",
 		"stage_idx",
-		"map_idx",
-		"stage_name",
-		"stage_mission",
-		"is_final_stage",
-		"stage_step",
+		"success_yn",
 		"created_at"
 	) VALUES (
+		#{email},
 		#{stageIdx},
-		#{mapIdx},
-		#{stageName},
-		#{stageMission},
-		#{isFinalStage},
-		#{stageStep},
-		#{createdAt}
+		#{successYn},
+		SYSDATE
 	)
 </insert>
 
-    <select id="getstageStatus" resultType="com.example.demo.vo.StagesVO">
+<!-- 스테이지 클리어 정보 추가 해야하는가? -->
+    <select id="getStageStatus" resultType="com.example.demo.vo.StagesVO">
     SELECT *
   FROM "stages"
   WHERE "stage_idx" = #{stage_idx}
