@@ -13,4 +13,6 @@ public interface UserService {
 	ProfilesDTO getAllProfiles();
 
 	ProfilesDTO getProfile(long profileIdx);
+
+	UserInfoResponseDTO patchProfile(String email, long profileIdx);
 }

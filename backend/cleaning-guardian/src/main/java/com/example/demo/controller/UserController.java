@@ -39,9 +39,15 @@ public class UserController {
     }
     
     @GetMapping("/me/profile/{profileIdx}")
-    public ResponseEntity<ProfilesDTO> getProfile(@RequestParam int profileIdx) {
+    public ResponseEntity<ProfilesDTO> getProfile(@PathVariable long profileIdx) {
     	ProfilesDTO profile = userService.getProfile(profileIdx);
         return new ResponseEntity<>(profile, HttpStatus.OK);
+    }
+    
+    @PatchMapping("/me/profile/{email}")
+    public ResponseEntity<UserInfoResponseDTO> patchProfile(@PathVariable String email, @RequestParam long profileIdx){
+    	UserInfoResponseDTO userProfile = userService.patchProfile(email, profileIdx);
+    	return new ResponseEntity<>(userProfile, HttpStatus.OK);
     }
     
     

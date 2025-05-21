@@ -127,6 +127,16 @@ public class UserServiceImpl implements UserService {
 		}
 		return ProfilesDTO.builder().success(true).message("전체 프로필 조회 성공").profile(profile).build();
 	}
+
+	@Override
+	public UserInfoResponseDTO patchProfile(String email, long profileIdx) {
+		int userProfile = userMapper.patchProfile(email, profileIdx);
+		
+		if (userProfile == 0) {
+			return UserInfoResponseDTO.builder().success(false).message("프로필 변경에 실패했습니다.").build();
+		}
+		return UserInfoResponseDTO.builder().success(true).message("프로필 변경에 성공했습니다.").profileIdx(userProfile).build();
+	}
 	
 	
 }	

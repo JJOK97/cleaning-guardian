@@ -40,4 +40,10 @@
 	FROM "profiles"
 	WHERE "profiles"."profile_idx" = #{profileIdx}
 	</select>
+	
+	<update id="patchProfile" parameterType="com.example.demo.vo.UserVO">
+	UPDATE "users"
+	SET "profile_idx" = #{profileIdx}
+	where "email" = #{email}
+	</update>
 </mapper>
