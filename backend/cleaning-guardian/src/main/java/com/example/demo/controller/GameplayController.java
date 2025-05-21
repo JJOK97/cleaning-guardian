@@ -31,23 +31,13 @@ public class GameplayController {
 //	
 	// 스테이지 완료 처리 POST
 	@PostMapping("/stages/{stageIdx}/complete")
-	public ResponseEntity<GameClearDTO> stageClear(@PathVariable("stageIdx") int stage_idx,@RequestParam("email") String email) {
-		GameClearDTO clear = GameClearDTO.builder()
-		        .email(email)
-		        .stageIdx(stage_idx)
-		        .successYn("Y")
-		        .build();
-		GameClearDTO stage = GamePlayService.stageClear(clear);
+	public ResponseEntity<GameClearDTO> stageClear(@PathVariable("stageIdx") long stage_idx,
+													@RequestParam("email") String email) {
+			String successYn = "N";
+		GameClearDTO stage = GamePlayService.stageClear(stage_idx, email, successYn);
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 
-	// 스테이지 상태 조회 GET
-	@GetMapping("/stages/{stageIdx}/status")
-	public ResponseEntity<StageDTO> getstageStatus(@PathVariable("stageIdx") int stage_idx,
-												@RequestParam("email") String email) {
-		StageDTO game = GamePlayService.getStageStatus(stage_idx, email);
-		return new ResponseEntity<>(game, HttpStatus.OK);
-	} 
 	
 	
 }

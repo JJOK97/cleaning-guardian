@@ -14,17 +14,11 @@
 		"created_at"
 	) VALUES (
 		#{email},
-		#{stageIdx},
+		#{stage_idx},
 		#{successYn},
 		SYSDATE
 	)
 </insert>
 
-<!-- 스테이지 클리어 정보 추가 해야하는가? -->
-    <select id="getStageStatus" resultType="com.example.demo.vo.StagesVO">
-    SELECT *
-  FROM "stages"
-  WHERE "stage_idx" = #{stage_idx}
-    </select>
 
 </mapper>

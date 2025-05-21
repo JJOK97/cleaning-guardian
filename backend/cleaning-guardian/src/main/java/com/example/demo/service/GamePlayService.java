@@ -5,9 +5,9 @@ import com.example.demo.dto.StageDTO;
 
 public interface GamePlayService {
 
-	GameClearDTO stageClear(GameClearDTO clear);
+	GameClearDTO stageClear(long stage_idx, String email, String successYn);
 	
-	StageDTO getStageStatus(long stage_idx, String email);
+
 	
 	
 	

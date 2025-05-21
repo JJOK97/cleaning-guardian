@@ -8,9 +8,8 @@ import com.example.demo.vo.StagesVO;
 @Mapper
 public interface GamePlayMapper {
 	
-	int stageClear(GameClearDTO clear);
+	int stageClear(long stage_idx, String email, String successYn);
 
-	StagesVO getStageStatus(long stage_idx, String email);
 
 	
 }

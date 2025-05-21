@@ -16,33 +16,27 @@ public class GamePlayServiceImpl implements GamePlayService {
 	GamePlayMapper GamePlayMapper;
 
 	@Override
-	public GameClearDTO stageClear(GameClearDTO clear) {
-		int result = GamePlayMapper.stageClear(clear);
+	public GameClearDTO stageClear(long stage_idx, String email, String successYn) {
+		int result = GamePlayMapper.stageClear(stage_idx, email, successYn);
 
 		if (result == 0) {
 			return GameClearDTO
 					.builder()
 					.success(false)
-					.message("실패")
+					.message("스테이지 클리어 실패")
+					.email(email)
+					.stageIdx(stage_idx)
+					.successYn(successYn)
 					.build();
 		}
-		return GameClearDTO.builder().success(true).message("성공").build();
+		successYn = "Y";
+		return GameClearDTO.builder()
+				.success(true)
+				.message("스테이지 클리어 성공")
+				.email(email)
+				.stageIdx(stage_idx)
+				.successYn(successYn)
+				.build();
 	}
-	// 만약에 gameClear의 정보 ex) Y/N을 넣을 시 .gameClear
-
-	@Override
-	public StageDTO getStageStatus(long stage_idx, String email) {
-		StagesVO stage = GamePlayMapper.getStageStatus(stage_idx, email);
-		if (email == null) {
-			return StageDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
-		}
-		if (stage == null) {
-			return StageDTO.builder().success(false).message("스테이지를 찾을 수 없습니다.").build();
-		}
-		return StageDTO.builder().stage(stage).success(true).message("성공").email(email).build();
-
-	}
-	
-//	private GameClearVO
 
 }
