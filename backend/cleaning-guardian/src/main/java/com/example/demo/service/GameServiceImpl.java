@@ -52,7 +52,7 @@ public class GameServiceImpl implements GameService {
 			return MapsDTO.builder().success(false).message("맵을 찾을 수 없습니다.").build();
 		}
 
-		return MapsDTO.builder().map(map).success(true).message("성공").build();
+		return MapsDTO.builder().map(map).success(true).message("성공"                                            ).build();
 	}
 
 	@Override

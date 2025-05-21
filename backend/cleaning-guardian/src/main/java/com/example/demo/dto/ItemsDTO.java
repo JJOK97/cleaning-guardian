@@ -17,8 +17,9 @@ public class ItemsDTO {
 	
     private List<ItemsVO> itemlist;
     private boolean success;
-    private String message;
-    private String email;  
+    private String message; 
+    
+    private ItemsVO item;
 }
 
 	

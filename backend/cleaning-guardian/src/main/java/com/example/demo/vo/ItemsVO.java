@@ -1,5 +1,7 @@
 package com.example.demo.vo;
 
+import java.security.PrivateKey;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,10 +26,17 @@ public class ItemsVO {
 	//아이템 타입 
 	private String itemType;
 	
-	//사용여부
-	private String isUsed;
 	
-	//생성일자
-	private String createdAt;
+	//아이템명
+	private String itemName; 
+	
+	//아이템 설명
+	private String itemDesc; 
+	
+	//아이템 가격
+	private long itemPrice; 
+	
+	//가격 타입
+	private String priceType; 
 
 }

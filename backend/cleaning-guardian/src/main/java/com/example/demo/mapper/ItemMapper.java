@@ -10,10 +10,7 @@ import com.example.demo.vo.ItemsVO;
 public interface ItemMapper {
 	
 	
-	List<ItemsVO> getAllItems();
-	List<ItemsVO> getUsersItems(String email);
-	
-	
-	
+	List<ItemsVO> getAlluserItems();
+	ItemsVO getItemDetailByIdx(long itemIdx);
 
 }
