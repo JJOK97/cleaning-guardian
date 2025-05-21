@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import dogamImg from '@/assets/img/footer/dogam.png';
 import dogamTextImg from '@/assets/img/footer/dogam-text.png';
@@ -12,8 +12,6 @@ import medalImg from '@/assets/img/footer/medal.png';
 import medalTextImg from '@/assets/img/footer/medal-text.png';
 import shopImg from '@/assets/img/footer/shop.png';
 import shopTextImg from '@/assets/img/footer/shop-text.png';
-
-const FOOTER_HEIGHT = '4.2rem';
 
 const StyledFooter = styled.footer`
     height: 4.2rem;
@@ -53,14 +51,14 @@ const IconImg = styled.img<{ $isActive?: boolean }>`
     transition: width 0.22s, height 0.22s, filter 0.2s, transform 0.22s;
     filter: ${({ $isActive }) => ($isActive ? 'drop-shadow(0 4px 16px rgba(0,0,0,0.18))' : 'none')};
     z-index: 2;
-    margin-bottom: -0.7rem;
+    margin-bottom: 0.3rem;
     margin-top: ${({ $isActive }) => ($isActive ? '-1.2rem' : '0')};
     transform: ${({ $isActive }) => ($isActive ? 'translateY(-0.7rem) scale(1.12)' : 'none')};
 `;
 
 const TextImg = styled.img`
-    height: 0.95rem;
-    margin-top: -0.7rem;
+    height: 1.1rem;
+    margin-top: -1.8rem;
     margin-bottom: 0.2rem;
     transition: opacity 0.2s;
     z-index: 3;
