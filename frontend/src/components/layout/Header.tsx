@@ -274,7 +274,7 @@ const Header: React.FC = () => {
                     <img
                         src={settingImg}
                         alt='설정'
-                        style={{ width: '2rem', height: '2rem' }}
+                        style={{ width: '1.75rem', height: '1.75rem' }}
                     />
                 </SettingBtn>
             </TopBar>
