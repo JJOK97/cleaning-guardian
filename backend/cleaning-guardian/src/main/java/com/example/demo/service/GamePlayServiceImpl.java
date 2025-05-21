@@ -4,10 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.GameClearDTO;
-import com.example.demo.dto.StageDTO;
+import com.example.demo.dto.PointDTO;
 import com.example.demo.dto.UserSkinDTO;
-import com.example.demo.vo.GameClearVO;
-import com.example.demo.vo.StagesVO;
 import com.example.demo.mapper.GamePlayMapper;
 
 @Service
@@ -55,6 +53,22 @@ public class GamePlayServiceImpl implements GamePlayService {
 				.stageIdx(stage_idx)
 				.successYn(successYn)
 				.build();
+	}
+	
+	@Override
+	public PointDTO postPointReward(String email, int value) {
+		int result = GamePlayMapper.postPointReward(email, value);
+		
+		if(result == 0) {
+			return PointDTO.builder()
+							.success(false)
+							.message("보상 획득에 실패했습니다.")
+							.build();
+		}
+		return PointDTO.builder()
+						.success(true)
+						.message("보상 획득에 성공했습니다.")
+						.build();
 	}
 
 	

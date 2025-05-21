@@ -25,5 +25,12 @@
 	)
 </insert>
 
+<!-- 보상 수령 (포인트) -->
+<insert id="postPointReward" parameterType="com.example.demo.dto.PointDTO">
+	UPDATE "balance" 
+	SET   "point" = "point" + #{value}
+	WHERE "email" = #{email}
+</insert>
+
 
 </mapper>

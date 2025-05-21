@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.StageDTO;
 import com.example.demo.dto.UserSkinDTO;
 import com.example.demo.dto.GameClearDTO;
+import com.example.demo.dto.PointDTO;
 import com.example.demo.service.GamePlayServiceImpl;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,7 +43,14 @@ public class GameplayController {
 		GameClearDTO stage = GamePlayService.stageClear(stage_idx, email, successYn);
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
-
+	
+	// 보상 수령 (포인트) PATCH
+	@PatchMapping("/reward")
+	public ResponseEntity<PointDTO> postPointReward(@RequestParam String email, @RequestParam int value) {
+		PointDTO reward = GamePlayService.postPointReward(email, value);
+		return new ResponseEntity<>(reward, HttpStatus.OK);
+	}
+	
 	
 	
 }

@@ -12,6 +12,8 @@ public interface GamePlayMapper {
 
 	int patchSkin(long skin_idx, String email);
 
+	int postPointReward(String email, int value);
+
 
 	
 }
