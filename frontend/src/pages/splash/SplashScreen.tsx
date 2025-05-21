@@ -4,40 +4,20 @@ import { Container, TapToStart } from '@/styles/components/splash/containers';
 import { SpaceBackground } from '@/components/splash/SpaceBackground';
 import { LoadingBar } from '@/components/splash/LoadingBar';
 import { useSplashAnimation } from './hooks/useSplashAnimation';
-import { useBGM } from '@/hooks/useBGM';
 import { fixedStars, spaceParticles, planets, planetRings, cleaningIcons } from './constants';
-import background from '@/assets/sounds/background.wav';
-
-// Declare global type for the background music
-declare global {
-    interface Window {
-        globalBgm?: HTMLAudioElement;
-    }
-}
+import SoundManager from '@/utils/sound';
 
 const SplashScreen: React.FC = () => {
     const navigate = useNavigate();
     const { progress, loadingComplete } = useSplashAnimation();
-    const { play, setAudio } = useBGM({ type: 'splash', volume: 0.3 });
-
-    React.useEffect(() => {
-        // Create global reference for background music but don't autoplay
-        if (!window.globalBgm) {
-            window.globalBgm = new Audio(background);
-            window.globalBgm.volume = 0.3;
-            window.globalBgm.loop = true;
-        }
-
-        setAudio(window.globalBgm);
-    }, [setAudio]);
+    const soundManager = SoundManager.getInstance();
 
     const handleTapToStart = () => {
-        // Start playing music on user interaction
-        const audio = new Audio(background);
-        play(audio);
+        // BGM 재생
+        soundManager.play('background');
 
-        // Navigate to login page
-        navigate('/login');
+        // 로그인 페이지로 이동
+        navigate('/auth/login');
     };
 
     return (
