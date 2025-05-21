@@ -48,6 +48,19 @@ WHERE "stages"."map_idx" = #{map_idx}
   FROM "stages"
   WHERE "stage_idx" = #{stage_idx}
     </select>
+    
+    <!-- 해당 스테이지 오염물 조회 -->
+    <select id="getAllPollutions" resultType="com.example.demo.vo.StagePolutionsVO">
+    SELECT *
+    FROM "stage_polutions"
+    WHERE "stage_idx" = #{stageIdx}
+    </select>
+    
+    
+    
+    
+    
+    
 <!-- 켐페인 전체 조회 -->
     <select id="getAllCampaigns" parameterType="long" resultType="com.example.demo.vo.CampaignsVO">
 	SELECT "campaigns"."campaign_idx", "campaigns"."map_idx", "campaigns"."campaign_title",

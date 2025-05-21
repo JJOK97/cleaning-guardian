@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.CampaignsDTO;
 import com.example.demo.dto.MapsDTO;
 import com.example.demo.dto.StageDTO;
+import com.example.demo.dto.StagePollutionsDTO;
 import com.example.demo.mapper.GameMapper;
 import com.example.demo.vo.CampaignsVO;
 import com.example.demo.vo.MapsVO;
+import com.example.demo.vo.StagePolutionsVO;
 import com.example.demo.vo.StagesVO;
 
 @Service
@@ -94,6 +96,24 @@ public class GameServiceImpl implements GameService {
 		return StageDTO.builder().stage(stage).success(true).message("성공").email(email).build();
 	}
 
+	public StagePollutionsDTO getAllPollutions(long stage_idx) {
+		List<StagePolutionsVO> polutions = gamemapper.getAllPollutions(stage_idx);
+
+		if (polutions == null) {
+			return StagePollutionsDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
+		}
+		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	@Override
 	public CampaignsDTO getAllCampaigns(long map_idx) {
 		List<CampaignsVO> campaignlist = gamemapper.getAllCampaigns(map_idx);

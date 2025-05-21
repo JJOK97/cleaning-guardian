@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.dto.CampaignsDTO;
 import com.example.demo.dto.MapsDTO;
 import com.example.demo.dto.StageDTO;
+import com.example.demo.dto.StagePollutionsDTO;
 
 public interface GameService {
 
@@ -17,6 +18,11 @@ public interface GameService {
 	StageDTO getClearedStages(long map_idx, String email);
 
 	StageDTO getStage(long stage_idx, String email);
+	
+	StagePollutionsDTO getAllPollutions(long stage_idx);
+	
+	
+	
 
 	CampaignsDTO getAllCampaigns(long map_idx);
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.CampaignsDTO;
 import com.example.demo.dto.MapsDTO;
 import com.example.demo.dto.StageDTO;
+import com.example.demo.dto.StagePollutionsDTO;
 import com.example.demo.service.GameServiceImpl;
 
 @RestController
@@ -21,30 +22,35 @@ public class GameController {
 	@Autowired
 	GameServiceImpl gameservice;
 
+	// 모든 맵 가져오기
 	@GetMapping("/maps")
 	public ResponseEntity<MapsDTO> getAllmaps() {
 		MapsDTO maps = gameservice.getAllmaps();
 		return new ResponseEntity<>(maps, HttpStatus.OK);
 	}
 
+	// 클리어한 모든 맵 가져오기
 	@GetMapping("/maps/{mapIdx}/clear")
 	public ResponseEntity<MapsDTO> getClearedMaps(@RequestParam("email") String email) {
 		MapsDTO maps = gameservice.getClearedMaps(email);
 		return new ResponseEntity<>(maps, HttpStatus.OK);
 	}
 
+	// 선택한 맵 가져오기
 	@GetMapping("/maps/{mapIdx}")
 	public ResponseEntity<MapsDTO> mapJoin(@PathVariable("mapIdx") int map_idx) {
 		MapsDTO maps = gameservice.getMap(map_idx);
 		return new ResponseEntity<>(maps, HttpStatus.OK);
 	}
 
+	// 맵내 모든 스테이지 가져오기
 	@GetMapping("/maps/{mapIdx}/stages")
 	public ResponseEntity<StageDTO> getAllStages(@PathVariable("mapIdx") int map_idx) {
 		StageDTO stage = gameservice.getAllStages(map_idx);
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 
+	// 맵내 클리어한 모든 스테이지 가져오기
 	@GetMapping("/maps/{mapIdx}/stages/clear")
 	public ResponseEntity<StageDTO> getClearedStages(@PathVariable("mapIdx") int map_idx,
 			@RequestParam("email") String email) {
@@ -52,12 +58,30 @@ public class GameController {
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 
+	// 선택한 스테이지 가져오기
 	@GetMapping("/stages/{stageIdx}")
 	public ResponseEntity<StageDTO> stageJoin(@PathVariable("stageIdx") int stage_idx,
 			@RequestParam("email") String email) {
 		StageDTO game = gameservice.getStage(stage_idx, email);
 		return new ResponseEntity<>(game, HttpStatus.OK);
 	}
+	
+	// 여기에 새로운 API 만들기
+	
+	// 스테이지 오염물 조회
+	@GetMapping("/stages/{stageIdx}/pollutions")
+	public ResponseEntity<StagePollutionsDTO> getAllPollutions(@PathVariable("stageIdx") int stage_idx) {
+		StagePollutionsDTO pollutions = gameservice.getAllPollutions(stage_idx);
+		return new ResponseEntity<>(pollutions, HttpStatus.OK);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 
 	@GetMapping("/maps/{mapIdx}/campaigns")
 	public ResponseEntity<CampaignsDTO> getAllCampaigns(@PathVariable("mapIdx") long map_idx) {
