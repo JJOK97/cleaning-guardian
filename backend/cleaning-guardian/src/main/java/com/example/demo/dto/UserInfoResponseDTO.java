@@ -17,4 +17,5 @@ public class UserInfoResponseDTO {
     private String email;
     private String nickname;
     private LocalDateTime joinedAt;
+    private long profileIdx;
 }

@@ -1,6 +1,9 @@
 package com.example.demo.vo;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.util.List;
+
+import com.example.demo.dto.MapsDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +14,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserVO {
-	private String email;
-	private String password;
-	private String nickname;
-	private LocalDateTime joinedAt;
+public class ProfilesVO {
+
 	private long profileIdx;
+	private String name;
+	private String url;
+	private Timestamp createdAt;
 }

@@ -30,4 +30,8 @@
         )
     </insert>
 
+	<select id="getAllProfiles" resultType="com.example.demo.vo.ProfilesVO">
+	SELECT *
+	FROM "profiles"
+	</select>
 </mapper>

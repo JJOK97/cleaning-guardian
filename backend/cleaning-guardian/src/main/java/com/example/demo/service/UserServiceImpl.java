@@ -1,14 +1,18 @@
 package com.example.demo.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.BalanceResponseDTO;
+import com.example.demo.dto.ProfilesDTO;
 import com.example.demo.dto.UserInfoResponseDTO;
 import com.example.demo.mapper.BalanceMapper;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.mapper.UserTokenMapper;
 import com.example.demo.vo.BalanceVO;
+import com.example.demo.vo.ProfilesVO;
 import com.example.demo.vo.UserTokenVO;
 import com.example.demo.vo.UserVO;
 
@@ -103,4 +107,14 @@ public class UserServiceImpl implements UserService {
         
         return null;
     }
+
+	@Override
+	public ProfilesDTO getAllProfiles() {
+		List<ProfilesVO> profileList = userMapper.getAllProfiles();
+		
+		if (profileList == null) {
+			return ProfilesDTO.builder().success(false).message("프로필을 불러오는데 실패했습니다.").build();
+		}
+		return ProfilesDTO.builder().success(true).message("전체 프로필 조회 성공").profilesList(profileList).build();
+	}
 }	
