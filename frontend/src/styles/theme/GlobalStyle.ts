@@ -3,7 +3,7 @@ import { createGlobalStyle } from 'styled-components';
 export const GlobalStyle = createGlobalStyle`
   @font-face {
     font-family: 'Cafe24Ssurround';
-    src: url('/src/assets/fonts/Cafe24Ssurround-v2.0.ttf') format('truetype');
+    src: url('@/assets/fonts/Cafe24Ssurround-v2.0.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
