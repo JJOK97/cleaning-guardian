@@ -24,11 +24,13 @@ public interface GameService {
 	
 	UserPlayDTO gameStart(String email, long stage_idx);
 	
+	StagePollutionsDTO getStagePollutions(int stage_idx);
 	
 	
 
 	CampaignsDTO getAllCampaigns(long map_idx);
 
 	CampaignsDTO getCampaign(long map_idx, long campaign_idx);
+
 
 }

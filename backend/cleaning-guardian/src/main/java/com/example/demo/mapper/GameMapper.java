@@ -31,12 +31,14 @@ public interface GameMapper {
 
 	int gameStart(String email, long stage_idx);
 	
+	List<StagePolutionsVO> getStagePollutions(int stage_idx);
 	
 	
 	
 	List<CampaignsVO> getAllCampaigns(long map_idx);
 
 	CampaignsVO getCampaign(@Param("map_idx") long map_idx, @Param("campaign_idx") long campaign_idx);
+
 
 
 

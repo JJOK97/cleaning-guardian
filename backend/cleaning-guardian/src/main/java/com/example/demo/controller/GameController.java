@@ -83,6 +83,12 @@ public class GameController {
 		return new ResponseEntity<>(gamestart, HttpStatus.OK);
 	}
 	
+	// 게임 입장시 스테이지 오염물 가져오기
+	@GetMapping("/user-plays/{stageIdx}")
+	public ResponseEntity<StagePollutionsDTO> getStagePollutions(@RequestParam int stage_idx) {
+		StagePollutionsDTO pollutions = gameservice.getStagePollutions(stage_idx);
+		return new ResponseEntity<>(pollutions, HttpStatus.OK);
+	}
 	
 	
 	

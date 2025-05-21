@@ -97,6 +97,7 @@ public class GameServiceImpl implements GameService {
 		return StageDTO.builder().stage(stage).success(true).message("성공").email(email).build();
 	}
 
+	@Override
 	public StagePollutionsDTO getAllPollutions(long stage_idx) {
 		List<StagePolutionsVO> polutions = gamemapper.getAllPollutions(stage_idx);
 
@@ -106,6 +107,7 @@ public class GameServiceImpl implements GameService {
 		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
 	}
 
+	@Override
 	public UserPlayDTO gameStart(String email, long stage_idx) {
 		int result = gamemapper.gameStart(email, stage_idx);
 
@@ -115,7 +117,15 @@ public class GameServiceImpl implements GameService {
 		return UserPlayDTO.builder().email(email).stageIdx(stage_idx).success(true).message("성공").build();
 	}
 	
-	
+	@Override
+	public StagePollutionsDTO getStagePollutions(int stage_idx) {
+		List<StagePolutionsVO> polutions = gamemapper.getStagePollutions(stage_idx);
+		
+		if (polutions == null) {
+			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
+		}
+		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
+	}
 	
 	
 	
@@ -149,6 +159,8 @@ public class GameServiceImpl implements GameService {
 		return CampaignsDTO.builder().campaign(campaign).success(true).message("성공").build();
 
 	}
+
+	
 
 	
 

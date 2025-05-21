@@ -69,6 +69,14 @@ WHERE "stages"."map_idx" = #{map_idx}
 	)
     </insert>
     
+    <!-- 게임 시작시 해당 stage의 오염물 가져오기 -->
+    <select id="getStagePollutions" resultType="com.example.demo.vo.StagePolutionsVO">
+    SELECT *
+    FROM "stage_pollutions"
+    JOIN "stages" ON "stage_pollutions"."stage_idx" = "stages"."stage_idx"
+    WHERE "stage_pollutions"."stage_idx" = #{stage_idx}
+    </select>
+    
     
     
     
