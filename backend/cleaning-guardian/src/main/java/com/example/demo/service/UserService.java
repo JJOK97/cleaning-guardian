@@ -11,4 +11,6 @@ public interface UserService {
     BalanceResponseDTO getUserBalance(String token);
 
 	ProfilesDTO getAllProfiles();
+
+	ProfilesDTO getProfile(long profileIdx);
 }

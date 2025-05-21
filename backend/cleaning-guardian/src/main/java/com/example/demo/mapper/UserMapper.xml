@@ -34,4 +34,10 @@
 	SELECT *
 	FROM "profiles"
 	</select>
+	
+	<select id="getProfile" resultType="com.example.demo.vo.ProfilesVO">
+	SELECT *
+	FROM "profiles"
+	WHERE "profiles"."profile_idx" = #{profileIdx}
+	</select>
 </mapper>

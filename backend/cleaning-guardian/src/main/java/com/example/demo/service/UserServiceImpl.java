@@ -117,4 +117,16 @@ public class UserServiceImpl implements UserService {
 		}
 		return ProfilesDTO.builder().success(true).message("전체 프로필 조회 성공").profilesList(profileList).build();
 	}
+
+	@Override
+	public ProfilesDTO getProfile(long profileIdx) {
+		ProfilesVO profile = userMapper.getProfile(profileIdx);
+		
+		if (profile == null) {
+			return ProfilesDTO.builder().success(false).message("프로필을 불러오는데 실패했습니다.").build();
+		}
+		return ProfilesDTO.builder().success(true).message("전체 프로필 조회 성공").profile(profile).build();
+	}
+	
+	
 }	

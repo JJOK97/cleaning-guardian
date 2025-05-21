@@ -16,4 +16,6 @@ public interface UserMapper {
     int insertUser(UserVO user);
 
 	List<ProfilesVO> getAllProfiles();
+
+	ProfilesVO getProfile(long profileIdx);
 }

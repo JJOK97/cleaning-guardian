@@ -35,7 +35,14 @@ public class UserController {
     @GetMapping("/me/profile")
     public ResponseEntity<ProfilesDTO> getAllProfiles() {
     	ProfilesDTO profiles = userService.getAllProfiles();
-        return new ResponseEntity<ProfilesDTO>(profiles,HttpStatus.OK);
+        return new ResponseEntity<>(profiles, HttpStatus.OK);
     }
+    
+    @GetMapping("/me/profile/{profileIdx}")
+    public ResponseEntity<ProfilesDTO> getProfile(@RequestParam int profileIdx) {
+    	ProfilesDTO profile = userService.getProfile(profileIdx);
+        return new ResponseEntity<>(profile, HttpStatus.OK);
+    }
+    
     
 }
