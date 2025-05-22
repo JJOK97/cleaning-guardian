@@ -14,6 +14,13 @@ public class GamePlayServiceImpl implements GamePlayService {
 	@Autowired
 	GamePlayMapper GamePlayMapper;
 	
+	/**
+	 * Updates the user's skin to the specified skin index.
+	 *
+	 * @param skinIdx the index of the skin to apply
+	 * @param email the user's email address
+	 * @return a UserSkinDTO indicating whether the update was successful, including a message and relevant user data on success
+	 */
 	@Override
 	public UserSkinDTO patchSkin(long skinIdx, String email) {
 		int result = GamePlayMapper.patchSkin(skinIdx, email);
@@ -32,6 +39,17 @@ public class GamePlayServiceImpl implements GamePlayService {
 						.build();
 	}
 
+	/**
+	 * Records the user's attempt to clear a game stage and returns the result.
+	 *
+	 * If the stage clear operation is successful, returns a {@link GameClearDTO} indicating success with the updated status.
+	 * If the operation fails, returns a {@link GameClearDTO} indicating failure with the provided parameters.
+	 *
+	 * @param stageIdx the identifier of the stage to clear
+	 * @param email the user's email address
+	 * @param successYn the initial success flag ("Y" or "N")
+	 * @return a {@link GameClearDTO} containing the outcome, message, and relevant data
+	 */
 	@Override
 	public GameClearDTO stageClear(long stageIdx, String email, String successYn) {
 		int result = GamePlayMapper.stageClear(stageIdx, email, successYn);
@@ -56,6 +74,13 @@ public class GamePlayServiceImpl implements GamePlayService {
 				.build();
 	}
 	
+	/**
+	 * Awards points to a user and returns the result.
+	 *
+	 * @param email the user's email address
+	 * @param value the number of points to award
+	 * @return a PointDTO indicating whether the points were successfully awarded, including a message and the awarded value on success
+	 */
 	@Override
 	public PointDTO postPointReward(String email, int value) {
 		int result = GamePlayMapper.postPointReward(email, value);

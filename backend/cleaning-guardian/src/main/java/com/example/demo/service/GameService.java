@@ -14,11 +14,30 @@ public interface GameService {
 
 	StageDTO getAllStages(long map_idx);
 
-	StageDTO getClearedStages(long map_idx, String email);
+	/**
+ * Retrieves the stages within the specified map that have been cleared by the user.
+ *
+ * @param map_idx the identifier of the map
+ * @param email the user's email address
+ * @return a StageDTO containing the cleared stages for the user in the given map
+ */
+StageDTO getClearedStages(long map_idx, String email);
 
-	StageDTO getStage(long stage_idx);
+	/**
+ * Retrieves the stage data transfer object (DTO) for the specified stage.
+ *
+ * @param stage_idx the unique identifier of the stage
+ * @return the StageDTO corresponding to the given stage index
+ */
+StageDTO getStage(long stage_idx);
 
-	CampaignsDTO getAllCampaigns(long map_idx);
+	/**
+ * Retrieves all campaigns associated with the specified map.
+ *
+ * @param map_idx the unique identifier of the map
+ * @return a CampaignsDTO containing all campaigns for the given map
+ */
+CampaignsDTO getAllCampaigns(long map_idx);
 
 	CampaignsDTO getCampaign(long map_idx, long campaign_idx);
 

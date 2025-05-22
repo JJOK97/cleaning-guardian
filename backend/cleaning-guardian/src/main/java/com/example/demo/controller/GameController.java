@@ -45,6 +45,13 @@ public class GameController {
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 
+	/**
+	 * Retrieves the stages cleared by a user for a specific map.
+	 *
+	 * @param map_idx the identifier of the map
+	 * @param email the user's email address
+	 * @return a ResponseEntity containing the cleared stages for the specified map and user
+	 */
 	@GetMapping("/maps/{mapIdx}/stages/clear")
 	public ResponseEntity<StageDTO> getClearedStages(@PathVariable("mapIdx") int map_idx,
 			@RequestParam("email") String email) {
@@ -52,6 +59,12 @@ public class GameController {
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 
+	/**
+	 * Retrieves details of a specific stage by its index.
+	 *
+	 * @param stage_idx the index of the stage to retrieve
+	 * @return a ResponseEntity containing the stage details and HTTP status 200
+	 */
 	@GetMapping("/stages/{stageIdx}")
 	public ResponseEntity<StageDTO> stageJoin(@PathVariable("stageIdx") int stage_idx) {
 		StageDTO game = gameservice.getStage(stage_idx);
