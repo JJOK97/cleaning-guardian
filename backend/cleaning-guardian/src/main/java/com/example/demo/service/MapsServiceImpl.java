@@ -10,7 +10,7 @@ import com.example.demo.mapper.MapsMapper;
 import com.example.demo.vo.MapsVO;
 
 @Service
-public class MapsServiceImpl implements Mapsservice {
+public class MapsServiceImpl implements MapsService {
 
 	@Autowired
 	MapsMapper mapsMapper;
