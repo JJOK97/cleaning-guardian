@@ -1,20 +1,25 @@
 package com.example.demo.vo;
 
-import java.sql.Timestamp;
+import java.security.Timestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @Builder
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-public class UserPlayVO {
+@NoArgsConstructor
+public class UserItemVO {
 
-	private long playIdx;
+	private Long uskinIdx;
+
 	private String email;
-	private long spIdx;
+
+	private Long skinIdx;
+
+	private String getType;
+
 	private Timestamp createdAt;
 }

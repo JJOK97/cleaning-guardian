@@ -35,7 +35,7 @@ public class GameServiceImpl implements GameService {
 		if (polutions == null) {
 			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
 		}
-		return StagePollutionsDTO.builder().success(true).message("오염물을 찾았습니다.").splist(polutions).build();
+		return StagePollutionsDTO.builder().success(true).message("오염물질을 불러옵니다.").build();
 	}
 
 }

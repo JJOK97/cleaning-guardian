@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPlayVO {
+public class ProfilesVO {
 
-	private long playIdx;
-	private String email;
-	private long spIdx;
+	private long profileIdx;
+	private String name;
+	private String url;
 	private Timestamp createdAt;
 }
