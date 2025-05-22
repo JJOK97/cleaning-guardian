@@ -5,8 +5,7 @@
 <mapper namespace="com.example.demo.mapper.SkinMapper">
 
 	<select id="getAllSkins" resultType="com.example.demo.vo.SkinsVO">
-		SELECT "game_skins"."skin_idx",
-				"game_skins"."skin_img"
+		SELECT *
 		FROM "game_skins"
 	</select>
 	

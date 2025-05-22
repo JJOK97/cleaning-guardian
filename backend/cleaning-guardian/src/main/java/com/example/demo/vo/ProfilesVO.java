@@ -1,9 +1,6 @@
 package com.example.demo.vo;
 
 import java.sql.Timestamp;
-import java.util.List;
-
-import com.example.demo.dto.MapsDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

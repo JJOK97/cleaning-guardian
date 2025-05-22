@@ -2,41 +2,18 @@
 <!DOCTYPE mapper
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.PurchaseeMapper">
+<mapper namespace="com.example.demo.mapper.BalanceMapper">
 
-
-    <select id="selectItemById" resultType="GameItemVO">
-        SELECT * FROM game_items WHERE item_idx = #{itemIdx}
+    <select id="findByEmail" resultType="com.example.demo.vo.BalanceVO">
+        SELECT
+            "receipt_idx" AS receiptIdx,
+            "email",
+            "point",
+            "cash"
+        FROM
+            "balance"
+        WHERE
+            "email" = #{email}
     </select>
-
-    <select id="selectUserBalance" resultType="long">
-        SELECT NVL(SUM(cash), 0) FROM balance WHERE email = #{email}
-    </select>
-
-    <select id="selectUserItem" resultType="UserItemVO">
-        SELECT * FROM user_skins WHERE email = #{email} AND skin_idx = #{skinIdx}
-    </select>
-
-    <insert id="insertUserItem">
-        INSERT INTO user_skins (email, skin_idx, get_type, created_at)
-        VALUES (#{email}, #{skinIdx}, #{getType}, SYSTIMESTAMP)
-    </insert>
-
-    <update id="updateUserItem">
-        UPDATE user_skins
-        SET get_type = #{getType}, created_at = SYSTIMESTAMP
-        WHERE email = #{email} AND skin_idx = #{skinIdx}
-    </update>
-
-    <update id="updateUserBalance">
-        INSERT INTO balance (receipt_idx, email, point, cash)
-        VALUES (seq_balance.NEXTVAL, #{email}, 0, -#{amount})
-    </update>
-
-    <insert id="insertReceipt">
-        INSERT INTO receipt (receipt_idx, email, cash_type, io_type, pay_at)
-        VALUES (seq_receipt.NEXTVAL, #{email}, #{cashType}, #{ioType}, SYSTIMESTAMP)
-    </insert>
-
 
 </mapper>
