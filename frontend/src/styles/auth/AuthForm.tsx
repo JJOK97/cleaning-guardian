@@ -71,7 +71,6 @@ export const LinkRow = styled.div`
 
 export const LinkBtn = styled.span`
     cursor: pointer;
-    text-decoration: underline;
     margin-left: 8px;
 `;
 

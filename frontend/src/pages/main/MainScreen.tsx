@@ -1,116 +1,210 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    gap: 2rem;
-`;
-
-const Title = styled.h1`
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 3rem;
-    text-align: center;
-    margin: 0;
-`;
-
-const Subtitle = styled.p`
-    color: ${({ theme }) => theme.colors.text.secondary};
-    font-size: 1.2rem;
-    text-align: center;
-    margin: 0;
-`;
-
-const MapGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    width: 100%;
-    max-width: 1200px;
-    padding: 1rem;
-`;
-
-const MapCard = styled.div`
-    background-color: ${({ theme }) => theme.colors.background.card};
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    cursor: pointer;
-    transition: transform 0.2s;
-
-    &:hover {
-        transform: translateY(-4px);
-    }
-`;
-
-const MapIcon = styled.div`
-    font-size: 3rem;
-`;
-
-const MapName = styled.h3`
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 1.2rem;
-    text-align: center;
-    margin: 0;
-`;
-
-const MapDescription = styled.p`
-    color: ${({ theme }) => theme.colors.text.secondary};
-    font-size: 0.9rem;
-    text-align: center;
-    margin: 0;
-`;
+import { getClearedMaps, getMapDetail } from '@/api/maps';
+import { getUserInfo } from '@/api/user';
+import MapInfoModal from '@/components/modal/MapInfoModal';
+import { ProcessedMap } from '@/types/map';
+import { getMapImage, getMapTitle } from '@/utils/mapUtils';
+import {
+    BackgroundWave,
+    Container,
+    ScrollContainer,
+    ContentWrapper,
+    MapGrid,
+    MapContainer,
+    MapContentWrapper,
+    FactoryMapImage,
+    DefaultMapImage,
+    MapNameWrapper,
+    MapName,
+    InfoIcon,
+    StartButtonContainer,
+    StartButton,
+} from '@/styles/MainScreen.styles';
 
 const MainScreen: React.FC = () => {
     const navigate = useNavigate();
+    const [maps, setMaps] = useState<ProcessedMap[]>([]);
+    const [visibleMap, setVisibleMap] = useState<ProcessedMap | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedMap, setSelectedMap] = useState<ProcessedMap | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    const maps = [
-        {
-            id: 'ocean',
-            name: '바다',
-            description: '플라스틱으로 오염된 바다를 정화하세요',
-            icon: '🌊',
-            unlocked: true,
-        },
-        {
-            id: 'forest',
-            name: '숲',
-            description: '쓰레기로 오염된 숲을 정화하세요',
-            icon: '🌲',
-            unlocked: false,
-        },
-        {
-            id: 'city',
-            name: '도시',
-            description: '미세먼지로 오염된 도시를 정화하세요',
-            icon: '🏙️',
-            unlocked: false,
-        },
-    ];
+    useEffect(() => {
+        const fetchMaps = async () => {
+            try {
+                const userInfo = await getUserInfo();
+                if (!userInfo.success) {
+                    console.error('유저 정보 조회 실패');
+                    return;
+                }
+
+                const clearedResponse = await getClearedMaps(userInfo.email);
+                console.log('클리어한 맵 응답 전체:', clearedResponse);
+                console.log('클리어한 맵 목록 원본:', clearedResponse.maplist);
+
+                if (!clearedResponse.success) {
+                    console.error('API 요청 실패');
+                    return;
+                }
+
+                const mapList = clearedResponse.maplist;
+                const clearedMaps = clearedResponse.maplist;
+
+                if (!Array.isArray(mapList)) {
+                    console.error('맵 데이터가 배열이 아님');
+                    return;
+                }
+
+                console.log('원본 맵 목록:', mapList);
+                const processedMaps = mapList.map((map) => {
+                    console.log('맵 처리 중:', {
+                        mapIdx: map.mapIdx,
+                        mapTheme: map.mapTheme,
+                        mapTitle: map.mapTitle,
+                    });
+                    const parsedDesc = JSON.parse(map.mapDesc);
+                    const isUnlocked =
+                        map.mapIdx === 1 || clearedMaps.some((clearedMap) => clearedMap.mapIdx === map.mapIdx);
+
+                    const processed = {
+                        mapIdx: map.mapIdx,
+                        gameIdx: map.gameIdx,
+                        mapTitle: map.mapTitle,
+                        mapTheme: map.mapTheme,
+                        createdAt: map.createdAt,
+                        map_desc: map.mapDesc,
+                        mapDesc: parsedDesc,
+                        unlocked: isUnlocked,
+                    } as ProcessedMap;
+                    console.log('처리된 맵:', processed);
+                    return processed;
+                });
+
+                console.log('최종 처리된 맵 목록:', processedMaps);
+                setMaps(processedMaps);
+                setVisibleMap(processedMaps[0]);
+            } catch (error) {
+                console.error('맵 데이터 로딩 실패:', error);
+            }
+        };
+
+        fetchMaps();
+    }, []);
+
+    const handleScroll = () => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+        const scrollTop = container.scrollTop;
+        const viewportHeight = container.clientHeight;
+        const mapIndex = Math.round(scrollTop / viewportHeight);
+        if (maps[mapIndex] && visibleMap !== maps[mapIndex]) {
+            setVisibleMap(maps[mapIndex]);
+        }
+    };
+
+    const handleInfoClick = async (e: React.MouseEvent, map: ProcessedMap) => {
+        e.stopPropagation();
+        try {
+            const response = await getMapDetail(map.mapIdx);
+            console.log('맵 상세 정보:', response);
+
+            if (!response.success || !response.map) {
+                console.error('맵 상세 정보 조회 실패');
+                return;
+            }
+
+            const mapDetail = response.map;
+            const parsedDesc = JSON.parse(mapDetail.mapDesc);
+            const processedDetail: ProcessedMap = {
+                mapIdx: mapDetail.mapIdx,
+                gameIdx: mapDetail.gameIdx,
+                mapTitle: getMapTitle(mapDetail.mapIdx),
+                mapTheme: mapDetail.mapTheme,
+                createdAt: mapDetail.createdAt,
+                map_desc: mapDetail.mapDesc,
+                mapDesc: parsedDesc,
+                unlocked: map.unlocked,
+            };
+
+            setSelectedMap(processedDetail);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('맵 상세 정보 로딩 실패:', error);
+        }
+    };
+
+    const handleStartClick = () => {
+        if (visibleMap?.unlocked) {
+            console.log('현재 선택된 맵 정보:', {
+                mapIdx: visibleMap.mapIdx,
+                mapTitle: visibleMap.mapTitle,
+                mapTheme: visibleMap.mapTheme,
+            });
+            console.log('스테이지 선택 화면으로 이동:', visibleMap.mapTitle);
+            navigate(`/stage-select/${visibleMap.mapIdx}`);
+        }
+    };
 
     return (
         <Container>
-            <Title>맵 선택</Title>
-            <MapGrid>
-                {maps.map((map) => (
-                    <MapCard
-                        key={map.id}
-                        onClick={() => map.unlocked && navigate(`/stage-select/${map.id}`)}
-                    >
-                        <MapIcon>{map.icon}</MapIcon>
-                        <MapName>{map.name}</MapName>
-                        <MapDescription>{map.description}</MapDescription>
-                        {!map.unlocked && <span>🔒 잠겨있음</span>}
-                    </MapCard>
-                ))}
-            </MapGrid>
+            <BackgroundWave />
+            <ScrollContainer
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+            >
+                <ContentWrapper>
+                    <MapGrid>
+                        {maps.map((map, index) => (
+                            <MapContainer
+                                key={`map-${map.mapIdx}`}
+                                $index={index}
+                                onClick={() => setVisibleMap(map)}
+                            >
+                                <MapContentWrapper>
+                                    <InfoIcon onClick={(e) => handleInfoClick(e, map)}>!</InfoIcon>
+                                    {map.mapIdx === 3 ? (
+                                        <FactoryMapImage
+                                            src={getMapImage(map.mapIdx)}
+                                            alt={getMapTitle(map.mapIdx)}
+                                            $unlocked={map.unlocked}
+                                        />
+                                    ) : (
+                                        <DefaultMapImage
+                                            src={getMapImage(map.mapIdx)}
+                                            alt={getMapTitle(map.mapIdx)}
+                                            $unlocked={map.unlocked}
+                                        />
+                                    )}
+                                    <MapNameWrapper>
+                                        <MapName>{getMapTitle(map.mapIdx)}</MapName>
+                                    </MapNameWrapper>
+                                </MapContentWrapper>
+                            </MapContainer>
+                        ))}
+                    </MapGrid>
+                </ContentWrapper>
+            </ScrollContainer>
+            <StartButtonContainer>
+                <StartButton
+                    $unlocked={visibleMap?.unlocked || false}
+                    onClick={handleStartClick}
+                    disabled={!visibleMap?.unlocked}
+                >
+                    {visibleMap?.unlocked ? '정화하기' : '잠긴 스테이지'}
+                </StartButton>
+            </StartButtonContainer>
+            {selectedMap && (
+                <MapInfoModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    mapData={{
+                        mapTitle: getMapTitle(selectedMap.mapIdx),
+                        mapDesc: selectedMap.mapDesc,
+                    }}
+                    images={[getMapImage(selectedMap.mapIdx)]}
+                />
+            )}
         </Container>
     );
 };

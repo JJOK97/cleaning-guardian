@@ -59,7 +59,6 @@ const NavButton = styled.button<{ $isActive?: boolean }>`
     border: none;
     outline: none;
     cursor: pointer;
-
     height: 100%;
     min-width: ${({ $isActive }) => ($isActive ? '24%' : '19%')};
     transition: background 0.4s, box-shadow 0.2s, min-width 0.3s;
@@ -98,7 +97,6 @@ const Footer: React.FC = () => {
             text: shopTextImg,
             alt: '상점',
         },
-
         {
             path: '/inventory',
             icon: gabangImg,
@@ -125,7 +123,21 @@ const Footer: React.FC = () => {
         },
     ];
 
-    const isActive = (path: string) => location.pathname.startsWith(path);
+    const isActive = (path: string) => {
+        if (path === '/main') {
+            return location.pathname.startsWith('/main') || location.pathname.startsWith('/stage-select');
+        }
+        return location.pathname.startsWith(path);
+    };
+
+    const handleNavigation = (path: string) => {
+        if (path === location.pathname) return;
+        if (location.pathname.startsWith('/stage-select') && path === '/main') {
+            navigate('/main');
+            return;
+        }
+        navigate(path);
+    };
 
     return (
         <StyledFooter>
@@ -135,7 +147,7 @@ const Footer: React.FC = () => {
                     <NavButton
                         key={path}
                         $isActive={active}
-                        onClick={() => navigate(path)}
+                        onClick={() => handleNavigation(path)}
                     >
                         <IconImg
                             src={icon}
