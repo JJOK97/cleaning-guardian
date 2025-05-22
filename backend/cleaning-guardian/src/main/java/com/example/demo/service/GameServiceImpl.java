@@ -66,6 +66,13 @@ public class GameServiceImpl implements GameService {
 		return StageDTO.builder().stagelist(stagelist).success(true).message("성공").build();
 	}
 
+	/**
+	 * Retrieves the list of stages cleared by a user for a specific map.
+	 *
+	 * @param map_idx the index of the map
+	 * @param email the user's email address
+	 * @return a StageDTO containing the cleared stages and user email if found; otherwise, a failure message
+	 */
 	@Override
 	public StageDTO getClearedStages(long map_idx, String email) {
 		List<StagesVO> stagelist = gamemapper.getClearedStages(map_idx, email);
@@ -80,6 +87,12 @@ public class GameServiceImpl implements GameService {
 		return StageDTO.builder().stagelist(stagelist).success(true).message("성공").email(email).build();
 	}
 
+	/**
+	 * Retrieves a stage by its index.
+	 *
+	 * @param stage_idx the unique identifier of the stage to retrieve
+	 * @return a StageDTO containing the stage data if found, or a failure message if not found
+	 */
 	@Override
 	public StageDTO getStage(long stage_idx) {
 		StagesVO stage = gamemapper.getStage(stage_idx);
@@ -92,6 +105,12 @@ public class GameServiceImpl implements GameService {
 		return StageDTO.builder().stage(stage).success(true).message("성공").build();
 	}
 
+	/**
+	 * Retrieves all campaigns associated with the specified map index.
+	 *
+	 * @param map_idx the index of the map for which to retrieve campaigns
+	 * @return a CampaignsDTO containing the list of campaigns and success status; if no campaigns are found, returns a failure status with an appropriate message
+	 */
 	@Override
 	public CampaignsDTO getAllCampaigns(long map_idx) {
 		List<CampaignsVO> campaignlist = gamemapper.getAllCampaigns(map_idx);

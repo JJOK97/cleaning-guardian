@@ -14,6 +14,13 @@ public class GamePlayServiceImpl implements GamePlayService {
 	@Autowired
 	GamePlayMapper GamePlayMapper;
 	
+	/**
+	 * Updates the user's skin to the specified skin index.
+	 *
+	 * @param skin_idx the index of the new skin to apply
+	 * @param email the user's email address
+	 * @return a UserSkinDTO indicating whether the skin update was successful, along with a message and the updated skin information
+	 */
 	public UserSkinDTO patchSkin(long skin_idx, String email) {
 		int result = GamePlayMapper.patchSkin(skin_idx, email);
 		
@@ -31,6 +38,14 @@ public class GamePlayServiceImpl implements GamePlayService {
 						.build();
 	}
 
+	/**
+	 * Marks a game stage as cleared for a user and returns the result.
+	 *
+	 * @param stage_idx the index of the stage to clear
+	 * @param email the user's email address
+	 * @param successYn the initial success flag ("Y" or "N")
+	 * @return a GameClearDTO indicating whether the stage clear operation was successful, including relevant details
+	 */
 	@Override
 	public GameClearDTO stageClear(long stage_idx, String email, String successYn) {
 		int result = GamePlayMapper.stageClear(stage_idx, email, successYn);
@@ -55,6 +70,13 @@ public class GamePlayServiceImpl implements GamePlayService {
 				.build();
 	}
 	
+	/**
+	 * Awards points to a user as a reward and returns the result.
+	 *
+	 * @param email the user's email address
+	 * @param value the number of points to award
+	 * @return a PointDTO indicating whether the points were successfully awarded, including a message and the awarded point value if successful
+	 */
 	@Override
 	public PointDTO postPointReward(String email, int value) {
 		int result = GamePlayMapper.postPointReward(email, value);

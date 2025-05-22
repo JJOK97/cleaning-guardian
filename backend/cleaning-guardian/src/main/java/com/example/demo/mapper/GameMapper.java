@@ -20,11 +20,30 @@ public interface GameMapper {
 
 	List<StagesVO> getAllStages(long map_idx);
 
-	List<StagesVO> getClearedStages(long map_idx, String email);
+	/**
+ * Retrieves the list of stages cleared by a specific user for a given map.
+ *
+ * @param map_idx the unique identifier of the map
+ * @param email the email address of the user
+ * @return a list of stages that the user has cleared for the specified map
+ */
+List<StagesVO> getClearedStages(long map_idx, String email);
 
-	StagesVO getStage(long stage_idx);
+	/**
+ * Retrieves a stage record by its unique identifier.
+ *
+ * @param stage_idx the unique identifier of the stage
+ * @return the stage record corresponding to the given identifier, or null if not found
+ */
+StagesVO getStage(long stage_idx);
 
-	List<CampaignsVO> getAllCampaigns(long map_idx);
+	/**
+ * Retrieves all campaigns associated with the specified map.
+ *
+ * @param map_idx the unique identifier of the map
+ * @return a list of campaigns for the given map
+ */
+List<CampaignsVO> getAllCampaigns(long map_idx);
 
 	CampaignsVO getCampaign(@Param("map_idx") long map_idx, @Param("campaign_idx") long campaign_idx);
 

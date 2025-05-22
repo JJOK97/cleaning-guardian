@@ -27,7 +27,13 @@ public class GameplayController {
 	@Autowired
 	GamePlayServiceImpl GamePlayService;
 
-	// 스킨 설정 PATCH
+	/**
+	 * Updates the user's skin to the specified skin index.
+	 *
+	 * @param skin_idx the index of the skin to set for the user
+	 * @param email the email address identifying the user
+	 * @return a ResponseEntity containing the updated UserSkinDTO with HTTP 200 status
+	 */
 	@PatchMapping("/users/me/{skinIdx}")
 	public ResponseEntity<UserSkinDTO> patchSkin(@PathVariable("skinIdx") long skin_idx,
 												@RequestParam("email") String email) {
@@ -35,7 +41,13 @@ public class GameplayController {
 		return new ResponseEntity<>(userSkin, HttpStatus.OK);
 	}
 	
-	// 스테이지 완료 처리 POST
+	/**
+	 * Marks a stage as completed for a user.
+	 *
+	 * @param stage_idx the index of the stage to complete
+	 * @param email the email address of the user
+	 * @return a {@link GameClearDTO} containing the result of the stage completion, wrapped in an HTTP 200 OK response
+	 */
 	@PostMapping("/stages/{stageIdx}/complete")
 	public ResponseEntity<GameClearDTO> stageClear(@PathVariable("stageIdx") long stage_idx,
 													@RequestParam("email") String email) {
@@ -44,7 +56,13 @@ public class GameplayController {
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 	
-	// 보상 수령 (포인트) PATCH
+	/**
+	 * Processes a point reward for a user and returns the updated point information.
+	 *
+	 * @param email the user's email address
+	 * @param value the amount of points to reward
+	 * @return the user's updated point information wrapped in an HTTP 200 OK response
+	 */
 	@PatchMapping("/reward/point")
 	public ResponseEntity<PointDTO> postPointReward(@RequestParam String email, @RequestParam int value) {
 		PointDTO reward = GamePlayService.postPointReward(email, value);
