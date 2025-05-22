@@ -5,9 +5,12 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.example.demo.dto.StagePollutionsDTO;
 import com.example.demo.vo.CampaignsVO;
 import com.example.demo.vo.MapsVO;
+import com.example.demo.vo.StagePolutionsVO;
 import com.example.demo.vo.StagesVO;
+import com.example.demo.vo.UserPlayVO;
 
 @Mapper
 public interface GameMapper {
@@ -24,8 +27,17 @@ public interface GameMapper {
 
 	StagesVO getStage(long stage_idx);
 
+	List<StagePolutionsVO> getAllPollutions(long stage_idx);
+
+	int gameStart(String email, long stage_idx);
+	
+	List<StagePolutionsVO> getStagePollutions(long stage_idx);
+	
 	List<CampaignsVO> getAllCampaigns(long map_idx);
 
 	CampaignsVO getCampaign(@Param("map_idx") long map_idx, @Param("campaign_idx") long campaign_idx);
+
+
+
 
 }

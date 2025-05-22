@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.CampaignsDTO;
 import com.example.demo.dto.MapsDTO;
 import com.example.demo.dto.StageDTO;
+import com.example.demo.dto.StagePollutionsDTO;
+import com.example.demo.dto.UserPlayDTO;
 import com.example.demo.mapper.GameMapper;
 import com.example.demo.vo.CampaignsVO;
 import com.example.demo.vo.MapsVO;
+import com.example.demo.vo.StagePolutionsVO;
 import com.example.demo.vo.StagesVO;
 
 @Service
@@ -84,7 +87,6 @@ public class GameServiceImpl implements GameService {
 	public StageDTO getStage(long stage_idx) {
 		StagesVO stage = gamemapper.getStage(stage_idx);
 
-		
 		if (stage == null) {
 			return StageDTO.builder().success(false).message("스테이지를 찾을 수 없습니다.").build();
 		}
@@ -93,16 +95,41 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
+	public StagePollutionsDTO getAllPollutions(long stage_idx) {
+		List<StagePolutionsVO> polutions = gamemapper.getAllPollutions(stage_idx);
+
+		if (polutions == null) {
+			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
+		}
+		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
+	}
+
+	@Override
+	public UserPlayDTO gameStart(String email, long stage_idx) {
+		int result = gamemapper.gameStart(email, stage_idx);
+
+		if (result == 0) {
+			return UserPlayDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
+		}
+		return UserPlayDTO.builder().email(email).stageIdx(stage_idx).success(true).message("성공").build();
+	}
+
+	@Override
+	public StagePollutionsDTO getStagePollutions(long stage_idx) {
+		List<StagePolutionsVO> polutions = gamemapper.getStagePollutions(stage_idx);
+
+		if (polutions == null) {
+			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
+		}
+		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
+	}
+
+	@Override
 	public CampaignsDTO getAllCampaigns(long map_idx) {
 		List<CampaignsVO> campaignlist = gamemapper.getAllCampaigns(map_idx);
 
 		if (campaignlist == null) {
 			return CampaignsDTO.builder().success(false).message("캠페인을 찾을 수 없습니다.").build();
-		}
-
-		for (CampaignsVO campaign : campaignlist) {
-			System.out.println("하이요");
-			System.out.println(campaign);
 		}
 
 		return CampaignsDTO.builder().campaignlist(campaignlist).success(true).message("성공").build();

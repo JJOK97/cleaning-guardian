@@ -3,15 +3,15 @@
 <mapper namespace="com.example.demo.mapper.GameMapper">
 
 <!-- 모든 maps 불러오기 -->
-<select id="getAllmaps" parameterType="String" resultType="com.example.demo.vo.MapsVO">
+<select id="getAllmaps" resultType="com.example.demo.vo.MapsVO">
 SELECT *
 FROM "maps"
 </select>
 
 <!-- 클리어한 모든 maps 불러오기-->
-<select id="getClearedMaps" parameterType="String" resultType="com.example.demo.vo.MapsVO">
-    SELECT "maps"."map_idx", "maps"."game_idx", "maps"."map_title", DBMS_LOB.SUBSTR("maps"."map_desc", 4000, 1), "maps"."map_theme", "maps"."created_at"
-FROM "maps"
+<select id="getClearedMaps" resultType="com.example.demo.vo.MapsVO">
+SELECT "map_idx", "game_idx", "map_title", DBMS_LOB.SUBSTR("map_desc", 4000, 1) AS "map_desc", "map_theme", "created_at" 
+FROM "maps" 
 WHERE NOT EXISTS (
   SELECT 1 FROM "stages", "game_clear"
   WHERE "stages"."stage_idx" = "game_clear"."stage_idx"
@@ -60,17 +60,44 @@ WHERE "stages"."map_idx" = #{map_idx}
   FROM "stages"
   WHERE "stage_idx" = #{stage_idx}
     </select>
+    
+    <!-- 해당 스테이지 오염물 조회 -->
+    <select id="getAllPollutions" resultType="com.example.demo.vo.StagePolutionsVO">
+    SELECT *
+    FROM "stage_pollutions"
+    WHERE "stage_idx" = #{stageIdx}
+    </select>
+    
+    <!-- 게임 시작 sql 문 -->
+    <insert id="gameStart" parameterType="com.example.demo.vo.UserPlayVO">
+    INSERT INTO "user_play"(
+	"email",
+	"stage_idx",
+	"created_at"
+	) VALUES (
+	#{email},
+	#{stage_idx},
+	SYSDATE
+	)
+    </insert>
+    
+    <!-- 게임 시작시 해당 stage의 오염물 가져오기 -->
+    <select id="getStagePollutions" resultType="com.example.demo.vo.StagePolutionsVO">
+    SELECT *
+    FROM "stage_pollutions"
+    JOIN "stages" ON "stage_pollutions"."stage_idx" = "stages"."stage_idx"
+    WHERE "stage_pollutions"."stage_idx" = #{stage_idx}
+    </select>
+    
 <!-- 켐페인 전체 조회 -->
     <select id="getAllCampaigns" parameterType="long" resultType="com.example.demo.vo.CampaignsVO">
-	SELECT "campaigns"."campaign_idx", "campaigns"."map_idx", "campaigns"."campaign_title",
-	 "campaigns"."campaign_desc", "campaigns"."campaign_url", "campaigns"."started_at", "campaigns"."closed_at", "campaigns"."created_at"
+	SELECT *
 	FROM "campaigns"
 	WHERE "campaigns"."map_idx" = #{map_idx}
     </select>
 <!-- 켐페인 선택 조회 -->
 	<select id="getCampaign" parameterType="map" resultType="com.example.demo.vo.CampaignsVO">
-	select "campaigns"."campaign_idx", "campaigns"."map_idx", "campaigns"."campaign_title",
-	 "campaigns"."campaign_desc", "campaigns"."campaign_url", "campaigns"."started_at", "campaigns"."closed_at", "campaigns"."created_at"
+	select *
 	from "campaigns"
 	JOIN "maps" ON "campaigns"."map_idx" = "maps"."map_idx"
 	where "campaigns"."map_idx" = #{map_idx} and "campaigns"."campaign_idx" = #{campaign_idx}
