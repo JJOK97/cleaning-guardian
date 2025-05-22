@@ -66,8 +66,9 @@ public class GamePlayServiceImpl implements GamePlayService {
 							.build();
 		}
 		return PointDTO.builder()
+						.point(value)
 						.success(true)
-						.message("보상 획득에 성공했습니다.")
+						.message(value + "Point 획득에 성공했습니다.")
 						.build();
 	}
 

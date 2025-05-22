@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PointDTO {
 
+	private long point;
 	private boolean success;
 	private String message;
 	

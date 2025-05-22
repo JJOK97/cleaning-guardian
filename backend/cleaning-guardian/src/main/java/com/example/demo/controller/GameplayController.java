@@ -45,7 +45,7 @@ public class GameplayController {
 	}
 	
 	// 보상 수령 (포인트) PATCH
-	@PatchMapping("/reward")
+	@PatchMapping("/reward/point")
 	public ResponseEntity<PointDTO> postPointReward(@RequestParam String email, @RequestParam int value) {
 		PointDTO reward = GamePlayService.postPointReward(email, value);
 		return new ResponseEntity<>(reward, HttpStatus.OK);
