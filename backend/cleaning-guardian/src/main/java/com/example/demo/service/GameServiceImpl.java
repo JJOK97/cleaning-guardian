@@ -5,146 +5,37 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.CampaignsDTO;
-import com.example.demo.dto.MapsDTO;
-import com.example.demo.dto.StageDTO;
 import com.example.demo.dto.StagePollutionsDTO;
 import com.example.demo.dto.UserPlayDTO;
 import com.example.demo.mapper.GameMapper;
-import com.example.demo.vo.CampaignsVO;
-import com.example.demo.vo.MapsVO;
 import com.example.demo.vo.StagePolutionsVO;
-import com.example.demo.vo.StagesVO;
 
 @Service
 public class GameServiceImpl implements GameService {
 
 	@Autowired
-	GameMapper gamemapper;
+	GameMapper gameMapper;
 
+	// 게임 입장
 	@Override
-	public MapsDTO getAllmaps() {
-		List<MapsVO> maplist = gamemapper.getAllmaps();
-
-		if (maplist == null) {
-			return MapsDTO.builder().success(false).message("맵을 찾을 수 없습니다.").build();
-		}
-
-		return MapsDTO.builder().success(true).message("성공").maplist(maplist).build();
-	}
-
-	@Override
-	public MapsDTO getClearedMaps(String email) {
-		List<MapsVO> maplist = gamemapper.getClearedMaps(email);
-
-		if (email == null) {
-			return MapsDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
-		}
-		if (maplist == null) {
-			return MapsDTO.builder().success(false).message("맵을 찾을 수 없습니다.").build();
-		}
-
-		return MapsDTO.builder().success(true).message("성공").maplist(maplist).email(email).build();
-	}
-
-	@Override
-	public MapsDTO getMap(long map_idx) {
-		MapsVO map = gamemapper.getMap(map_idx);
-
-		if (map == null) {
-			return MapsDTO.builder().success(false).message("맵을 찾을 수 없습니다.").build();
-		}
-
-		return MapsDTO.builder().map(map).success(true).message("성공").build();
-	}
-
-	@Override
-	public StageDTO getAllStages(long map_idx) {
-		List<StagesVO> stagelist = gamemapper.getAllStages(map_idx);
-
-		if (stagelist == null) {
-			return StageDTO.builder().success(false).message("스테이지를 찾을 수 없습니다.").build();
-		}
-
-		return StageDTO.builder().stagelist(stagelist).success(true).message("성공").build();
-	}
-
-	@Override
-	public StageDTO getClearedStages(long map_idx, String email) {
-		List<StagesVO> stagelist = gamemapper.getClearedStages(map_idx, email);
-
-		if (email == null) {
-			return StageDTO.builder().success(false).message("사용자를 찾을 수 없습니다.").build();
-		}
-		if (stagelist == null) {
-			return StageDTO.builder().success(false).message("스테이지를 찾을 수 없습니다.").build();
-		}
-
-		return StageDTO.builder().stagelist(stagelist).success(true).message("성공").email(email).build();
-	}
-
-	@Override
-	public StageDTO getStage(long stage_idx) {
-		StagesVO stage = gamemapper.getStage(stage_idx);
-
-		if (stage == null) {
-			return StageDTO.builder().success(false).message("스테이지를 찾을 수 없습니다.").build();
-		}
-
-		return StageDTO.builder().stage(stage).success(true).message("성공").build();
-	}
-
-	@Override
-	public StagePollutionsDTO getAllPollutions(long stage_idx) {
-		List<StagePolutionsVO> polutions = gamemapper.getAllPollutions(stage_idx);
-
-		if (polutions == null) {
-			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
-		}
-		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
-	}
-
-	@Override
-	public UserPlayDTO gameStart(String email, long stage_idx) {
-		int result = gamemapper.gameStart(email, stage_idx);
+	public UserPlayDTO gameStart(String email, long stageIdx) {
+		int result = gameMapper.gameStart(email, stageIdx);
 
 		if (result == 0) {
-			return UserPlayDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
+			return UserPlayDTO.builder().success(false).message("계정을 찾을 수 없습니다.").build();
 		}
-		return UserPlayDTO.builder().email(email).stageIdx(stage_idx).success(true).message("성공").build();
+		return UserPlayDTO.builder().email(email).stageIdx(stageIdx).success(true).message("게임 시작").build();
 	}
 
+	// 게임 입장 시 스테이지 오염물 가져오기
 	@Override
-	public StagePollutionsDTO getStagePollutions(long stage_idx) {
-		List<StagePolutionsVO> polutions = gamemapper.getStagePollutions(stage_idx);
+	public StagePollutionsDTO getStagePollutions(long stageIdx) {
+		List<StagePolutionsVO> polutions = gameMapper.getStagePollutions(stageIdx);
 
 		if (polutions == null) {
 			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
 		}
-		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
-	}
-
-	@Override
-	public CampaignsDTO getAllCampaigns(long map_idx) {
-		List<CampaignsVO> campaignlist = gamemapper.getAllCampaigns(map_idx);
-
-		if (campaignlist == null) {
-			return CampaignsDTO.builder().success(false).message("캠페인을 찾을 수 없습니다.").build();
-		}
-
-		return CampaignsDTO.builder().campaignlist(campaignlist).success(true).message("성공").build();
-	}
-
-	@Override
-	public CampaignsDTO getCampaign(long map_idx, long campaign_idx) {
-		CampaignsVO campaign = gamemapper.getCampaign(map_idx, campaign_idx);
-
-		if (campaign == null) {
-			return CampaignsDTO.builder().success(false).message("캠페인을 찾을 수 없습니다.").build();
-		}
-
-		return CampaignsDTO.builder().campaign(campaign).success(true).message("성공").build();
-
+		return StagePollutionsDTO.builder().success(true).message("오염물을 찾았습니다.").splist(polutions).build();
 	}
 
 }

@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
- public class CashDTO {
-    private Long userId;
-    private Integer amount;
-    private String currencyType;
-    private Boolean success;
-    private String message;
+public class RewardDTO {
+
+	private long point;
+	private boolean success;
+	private String message;
+
 }
