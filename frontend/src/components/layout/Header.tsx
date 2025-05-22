@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle, keyframes } from 'styled-components';
 import pointImg from '@/assets/img/header/point.png';
 import cashImg from '@/assets/img/header/cash.png';
 import settingImg from '@/assets/img/header/setting.png';
@@ -218,7 +218,7 @@ const NumberImage: React.FC<{ value: number | string; height?: string }> = ({ va
 
 const HeaderContainer = styled.header`
     width: 100%;
-    height: 3.6rem;
+    height: 4.6rem;
     display: flex;
     align-items: flex-start;
     position: fixed;

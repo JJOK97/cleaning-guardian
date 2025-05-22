@@ -37,10 +37,10 @@ export const maps: Map[] = [
         },
     },
     {
-        id: 'city',
-        name: '도시',
-        description: '미세먼지로 오염된 도시를 정화하세요',
-        icon: '🏙️',
+        id: 'factory',
+        name: '공장',
+        description: '스모그로 오염된 공장 지대를 정화하세요',
+        icon: '🏭',
         unlocked: false,
         difficulty: 'hard',
         rewards: {
