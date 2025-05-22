@@ -103,7 +103,7 @@ const shakeAnimation = keyframes`
     }
 `;
 
-const MapContainer = styled.div<{ $isNext?: boolean; $index: number }>`
+const MapContainer = styled.div<{ $index: number }>`
     position: absolute;
     top: ${({ $index }) => $index * 100}vh;
     left: 0;
@@ -116,11 +116,6 @@ const MapContainer = styled.div<{ $isNext?: boolean; $index: number }>`
     scroll-snap-align: start;
     scroll-snap-stop: always;
     padding: 2rem;
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-style: preserve-3d;
-    transform: ${({ $isNext }) => ($isNext ? 'translateZ(-100px) scale(0.85)' : 'translateZ(0)')};
-    opacity: ${({ $isNext }) => ($isNext ? 0.3 : 1)};
-    pointer-events: ${({ $isNext }) => ($isNext ? 'none' : 'auto')};
 `;
 
 const MapContentWrapper = styled.div`
@@ -333,47 +328,31 @@ const StartButton = styled.button<{ $unlocked: boolean }>`
 const MainScreen: React.FC = () => {
     const navigate = useNavigate();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const [currentMapIndex, setCurrentMapIndex] = useState(maps.length - 1);
+    const [currentMapIndex, setCurrentMapIndex] = useState(0);
     const [visibleMap, setVisibleMap] = useState(maps[0]);
-    const reversedMaps = [...maps].reverse();
-    const observerRef = useRef<IntersectionObserver | null>(null);
 
     useEffect(() => {
-        // Intersection Observer 설정
-        observerRef.current = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        const mapId = entry.target.getAttribute('data-map-id');
-                        const map = reversedMaps.find((m) => m.id === mapId);
-                        if (map) {
-                            setVisibleMap(map);
-                            const index = reversedMaps.findIndex((m) => m.id === mapId);
-                            setCurrentMapIndex(index);
-                        }
-                    }
-                });
-            },
-            {
-                root: scrollContainerRef.current,
-                threshold: 0.7, // 70% 이상 보일 때 해당 맵으로 인식
-            },
-        );
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const scrollTop = container.scrollTop;
+            const viewportHeight = container.clientHeight;
+            const mapIndex = Math.floor(scrollTop / viewportHeight);
+            setCurrentMapIndex(mapIndex);
+            setVisibleMap(maps[mapIndex]);
+        };
+
+        container.addEventListener('scroll', handleScroll);
+
+        // 초기 위치 설정 - 1번 맵이 보이도록
+        container.scrollTop = 0;
+        handleScroll();
 
         return () => {
-            if (observerRef.current) {
-                observerRef.current.disconnect();
-            }
+            container.removeEventListener('scroll', handleScroll);
         };
-    }, [reversedMaps]);
-
-    // 맵 컨테이너가 마운트될 때마다 observer 연결
-    const observeMap = (element: HTMLDivElement | null, mapId: string) => {
-        if (element && observerRef.current) {
-            element.setAttribute('data-map-id', mapId);
-            observerRef.current.observe(element);
-        }
-    };
+    }, []);
 
     const handleInfoClick = (e: React.MouseEvent, map: (typeof maps)[0]) => {
         e.stopPropagation();
@@ -393,11 +372,9 @@ const MainScreen: React.FC = () => {
             <ScrollContainer ref={scrollContainerRef}>
                 <ContentWrapper>
                     <MapGrid>
-                        {reversedMaps.map((map, index) => (
+                        {maps.map((map, index) => (
                             <MapContainer
                                 key={map.id}
-                                ref={(el) => observeMap(el, map.id)}
-                                $isNext={index > currentMapIndex}
                                 $index={index}
                             >
                                 <MapContentWrapper>
