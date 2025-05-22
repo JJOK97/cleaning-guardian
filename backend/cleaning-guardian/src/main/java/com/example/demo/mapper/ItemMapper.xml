@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.ItemMapper">
+
+    <select id="getAllItems" resultType="com.example.demo.vo.ItemsVO">
+		SELECT "game_items"."item_idx",
+		 		"game_items"."item_img"
+		FROM "game_items"
+    </select>
+    
+	<select id="getItemsDetail" resultType="com.example.demo.vo.ItemsVO">
+	  SELECT *
+	  FROM "user_items"
+	  WHERE "item_idx" = #{itemIdx}
+	</select>
+
+</mapper>
