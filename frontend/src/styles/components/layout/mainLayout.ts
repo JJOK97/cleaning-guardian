@@ -3,7 +3,6 @@ export const mainLayoutStyles = {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column' as const,
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
     },
     main: {
         flex: 1,

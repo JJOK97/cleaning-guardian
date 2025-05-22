@@ -31,6 +31,9 @@ class SoundManager {
         Object.entries(soundFiles).forEach(([key, path]) => {
             const audio = new Audio(path);
             audio.preload = 'auto';
+            if (key === 'background') {
+                audio.loop = true;
+            }
             this.sounds.set(key, audio);
         });
     }

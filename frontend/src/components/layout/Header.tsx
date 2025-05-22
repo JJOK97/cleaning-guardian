@@ -221,7 +221,9 @@ const HeaderContainer = styled.header`
     height: 3.6rem;
     display: flex;
     align-items: flex-start;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
     z-index: 101;
     flex-direction: row;
 `;
