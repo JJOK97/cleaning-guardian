@@ -113,17 +113,17 @@ public class GameServiceImpl implements GameService {
 		}
 		return UserPlayDTO.builder().email(email).stageIdx(stage_idx).success(true).message("성공").build();
 	}
-	
+
 	@Override
 	public StagePollutionsDTO getStagePollutions(long stage_idx) {
 		List<StagePolutionsVO> polutions = gamemapper.getStagePollutions(stage_idx);
-		
+
 		if (polutions == null) {
 			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
 		}
 		return StagePollutionsDTO.builder().success(true).message("성공").splist(polutions).build();
 	}
-	
+
 	@Override
 	public CampaignsDTO getAllCampaigns(long map_idx) {
 		List<CampaignsVO> campaignlist = gamemapper.getAllCampaigns(map_idx);
@@ -146,9 +146,5 @@ public class GameServiceImpl implements GameService {
 		return CampaignsDTO.builder().campaign(campaign).success(true).message("성공").build();
 
 	}
-
-	
-
-	
 
 }

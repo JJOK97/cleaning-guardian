@@ -2,7 +2,7 @@ package com.example.demo.dto;
 
 import java.util.List;
 
-import com.example.demo.vo.MapsVO;
+import com.example.demo.vo.UserSkinVO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MapsDTO {
+public class UserSkinDTO {
 
-	private MapsVO map;
-	private List<MapsVO> maplist;
+	private List<UserSkinVO> userSkinList;
+	private UserSkinVO userSkin;
 	private boolean success;
 	private String message;
 	private String email;
-
+	private long skinIdx;
 }
