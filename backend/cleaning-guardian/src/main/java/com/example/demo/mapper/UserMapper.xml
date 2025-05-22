@@ -30,4 +30,20 @@
         )
     </insert>
 
+	<select id="getAllProfiles" resultType="com.example.demo.vo.ProfilesVO">
+	SELECT *
+	FROM "profiles"
+	</select>
+	
+	<select id="getProfile" resultType="com.example.demo.vo.ProfilesVO">
+	SELECT *
+	FROM "profiles"
+	WHERE "profiles"."profile_idx" = #{profileIdx}
+	</select>
+	
+	<update id="patchProfile" parameterType="com.example.demo.vo.UserVO">
+	UPDATE "users"
+	SET "profile_idx" = #{profileIdx}
+	where "email" = #{email}
+	</update>
 </mapper>

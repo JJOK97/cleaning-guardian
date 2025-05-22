@@ -6,8 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.BalanceResponseDTO;
+import com.example.demo.dto.ProfilesDTO;
 import com.example.demo.dto.UserInfoResponseDTO;
 import com.example.demo.service.UserService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -27,4 +31,24 @@ public class UserController {
         BalanceResponseDTO response = userService.getUserBalance(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
+    @GetMapping("/me/profile")
+    public ResponseEntity<ProfilesDTO> getAllProfiles() {
+    	ProfilesDTO profiles = userService.getAllProfiles();
+        return new ResponseEntity<>(profiles, HttpStatus.OK);
+    }
+    
+    @GetMapping("/me/profile/{profileIdx}")
+    public ResponseEntity<ProfilesDTO> getProfile(@PathVariable long profileIdx) {
+    	ProfilesDTO profile = userService.getProfile(profileIdx);
+        return new ResponseEntity<>(profile, HttpStatus.OK);
+    }
+    
+    @PatchMapping("/me/profile/{email}")
+    public ResponseEntity<UserInfoResponseDTO> patchProfile(@PathVariable String email, @RequestParam long profileIdx){
+    	UserInfoResponseDTO userProfile = userService.patchProfile(email, profileIdx);
+    	return new ResponseEntity<>(userProfile, HttpStatus.OK);
+    }
+    
+    
 }
