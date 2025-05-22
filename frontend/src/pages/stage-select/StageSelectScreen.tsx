@@ -1,49 +1,96 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate, useParams } from 'react-router-dom';
-import Button from '@/components/common/Button';
+import { useParams } from 'react-router-dom';
+import { getMapStages, getClearedStages } from '@/api/maps';
 
-interface Stage {
-    id: string;
-    name: string;
-    description: string;
-    difficulty: 'easy' | 'normal' | 'hard';
-    unlocked: boolean;
-    stars: number;
+// 배경 이미지 import
+import trashIsland from '@/assets/img/stage/trash-island.png';
+import metalLand from '@/assets/img/stage/metal-land.png';
+import smogeCity from '@/assets/img/stage/smoge-city.png';
+
+interface StageMission {
+    mission: string;
+    target: string;
+    action: string;
 }
 
-const Container = styled.div`
+interface StageInfo {
+    stageIdx: number;
+    mapIdx: number;
+    stageName: string;
+    stageMission: string;
+    isFinalStage: string;
+    stageStep: number;
+}
+
+interface ProcessedStageInfo extends Omit<StageInfo, 'stageMission'> {
+    stageMission: StageMission;
+}
+
+const getBackgroundImage = (mapId: string) => {
+    const mapIdx = Number(mapId);
+    switch (mapIdx) {
+        case 1:
+            return `url(${trashIsland})`;
+        case 2:
+            return `url(${metalLand})`;
+        case 3:
+            return `url(${smogeCity})`;
+        default:
+            return 'none';
+    }
+};
+
+const Container = styled.div<{ $mapTheme: string }>`
+    width: 100%;
+    min-height: calc(100vh - 120px);
+    padding: 20px;
+    background: ${(props) => getBackgroundImage(props.$mapTheme)} no-repeat center center;
+    background-size: cover;
+    position: relative;
+    margin-bottom: 60px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2rem;
-    gap: 2rem;
-`;
-
-const Title = styled.h1`
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 2rem;
-    margin-bottom: 1rem;
 `;
 
 const StageGrid = styled.div`
+    margin-top: 4rem;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    gap: 1rem;
     width: 100%;
     max-width: 1200px;
 `;
 
 const StageCard = styled.div<{ $unlocked: boolean }>`
+    background: rgba(255, 255, 255, ${(props) => (props.$unlocked ? '0.9' : '0.3')});
+    border-radius: 20px;
+    padding: 20px;
+    aspect-ratio: 16/9;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: ${(props) => (props.$unlocked ? 'pointer' : 'not-allowed')};
+    transform-style: preserve-3d;
+    transition: all 0.5s ease;
     position: relative;
-    background-color: ${({ theme }) => theme.colors.background.card};
-    border-radius: 16px;
-    padding: 1.5rem;
-    cursor: ${({ $unlocked }) => ($unlocked ? 'pointer' : 'not-allowed')};
-    transition: transform 0.2s ease;
+    overflow: hidden;
 
     &:hover {
-        transform: ${({ $unlocked }) => ($unlocked ? 'translateY(-5px)' : 'none')};
+        transform: ${(props) => (props.$unlocked ? 'translateY(-5px)' : 'none')};
+        box-shadow: ${(props) => (props.$unlocked ? '0 10px 20px rgba(0,0,0,0.2)' : 'none')};
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
+        z-index: 1;
     }
 `;
 
@@ -66,11 +113,11 @@ const DifficultyBadge = styled.div<{ $difficulty: string }>`
     font-size: 0.9rem;
     background-color: ${({ $difficulty, theme }) => {
         switch ($difficulty) {
-            case 'easy':
+            case '#4CAF50':
                 return theme.colors.primary.main;
-            case 'normal':
+            case '#2196F3':
                 return theme.colors.secondary.main;
-            case 'hard':
+            case '#f44336':
                 return theme.colors.error.main;
             default:
                 return theme.colors.background.light;
@@ -93,138 +140,110 @@ const LockedOverlay = styled.div`
     font-size: 2rem;
 `;
 
-const Stars = styled.div`
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-`;
-
-const stages: Record<string, Stage[]> = {
-    ocean: [
-        {
-            id: '1',
-            name: '해변의 쓰레기',
-            description: '해변에 쌓인 플라스틱 쓰레기를 정화하세요',
-            difficulty: 'easy',
-            unlocked: true,
-            stars: 0,
-        },
-        {
-            id: '2',
-            name: '깊은 바다',
-            description: '깊은 바다 속의 오염물질을 제거하세요',
-            difficulty: 'normal',
-            unlocked: true,
-            stars: 0,
-        },
-        {
-            id: '3',
-            name: '해저 유적',
-            description: '고대 유적지의 오염물질을 정화하세요',
-            difficulty: 'hard',
-            unlocked: false,
-            stars: 0,
-        },
-    ],
-    forest: [
-        {
-            id: '4',
-            name: '숲속 오솔길',
-            description: '숲속 오솔길의 쓰레기를 정화하세요',
-            difficulty: 'easy',
-            unlocked: false,
-            stars: 0,
-        },
-        {
-            id: '5',
-            name: '깊은 숲',
-            description: '깊은 숲 속의 오염물질을 제거하세요',
-            difficulty: 'normal',
-            unlocked: false,
-            stars: 0,
-        },
-        {
-            id: '6',
-            name: '고대 나무',
-            description: '고대 나무 주변의 오염물질을 정화하세요',
-            difficulty: 'hard',
-            unlocked: false,
-            stars: 0,
-        },
-    ],
-    city: [
-        {
-            id: '7',
-            name: '도시 공원',
-            description: '도시 공원의 쓰레기를 정화하세요',
-            difficulty: 'easy',
-            unlocked: false,
-            stars: 0,
-        },
-        {
-            id: '8',
-            name: '고층 빌딩',
-            description: '고층 빌딩 주변의 오염물질을 제거하세요',
-            difficulty: 'normal',
-            unlocked: false,
-            stars: 0,
-        },
-        {
-            id: '9',
-            name: '지하철',
-            description: '지하철의 오염물질을 정화하세요',
-            difficulty: 'hard',
-            unlocked: false,
-            stars: 0,
-        },
-    ],
-};
-
 const StageSelectScreen: React.FC = () => {
-    const navigate = useNavigate();
-    const { mapId } = useParams<{ mapId: string }>();
-    const mapStages = stages[mapId || ''] || [];
+    const { mapId } = useParams();
+    const [stages, setStages] = useState<ProcessedStageInfo[]>([]);
+    const [clearedStages, setClearedStages] = useState<number[]>([]);
 
-    const handleStageSelect = (stageId: string) => {
-        console.log('Selected stage:', stageId);
-        navigate(`/game/${stageId}`);
+    useEffect(() => {
+        const fetchStages = async () => {
+            try {
+                console.log('현재 선택된 맵 ID:', mapId);
+                const stagesResponse = await getMapStages(Number(mapId));
+                console.log('API 응답 전체:', stagesResponse);
+                console.log('스테이지 목록 원본:', stagesResponse.stagelist);
+
+                const processedStages =
+                    stagesResponse.stagelist?.map((stage: StageInfo) => {
+                        console.log(`스테이지 처리 중:`, {
+                            stageIdx: stage.stageIdx,
+                            mapIdx: stage.mapIdx,
+                            stageName: stage.stageName,
+                            rawMission: stage.stageMission,
+                        });
+                        try {
+                            const processed = {
+                                ...stage,
+                                stageMission: JSON.parse(stage.stageMission),
+                            };
+                            console.log('처리된 스테이지:', processed);
+                            return processed;
+                        } catch (error) {
+                            console.error('스테이지 미션 파싱 실패:', stage.stageMission);
+                            return {
+                                ...stage,
+                                stageMission: {
+                                    mission: stage.stageName,
+                                    target: '',
+                                    action: '',
+                                },
+                            };
+                        }
+                    }) || [];
+
+                console.log('최종 처리된 스테이지 목록:', processedStages);
+                setStages(processedStages);
+
+                const email = localStorage.getItem('email');
+                if (email) {
+                    const clearedResponse = await getClearedStages(Number(mapId), email);
+                    console.log('클리어한 스테이지 응답:', clearedResponse);
+                    setClearedStages(clearedResponse.stagelist?.map((stage: StageInfo) => stage.stageIdx) || []);
+                }
+            } catch (error) {
+                console.error('스테이지 정보 로딩 실패:', error);
+            }
+        };
+
+        fetchStages();
+    }, [mapId]);
+
+    const handleStageSelect = (stageIdx: number) => {
+        console.log('Selected stage:', stageIdx);
+        // Implement the logic to navigate to the game page
     };
 
-    const getDifficultyText = (difficulty: 'easy' | 'normal' | 'hard') => {
-        switch (difficulty) {
-            case 'easy':
+    const getDifficultyText = (step: number) => {
+        switch (step) {
+            case 1:
                 return '쉬움';
-            case 'normal':
+            case 2:
                 return '보통';
-            case 'hard':
+            case 3:
                 return '어려움';
+            default:
+                return '알 수 없음';
+        }
+    };
+
+    const getDifficultyColor = (step: number) => {
+        switch (step) {
+            case 1:
+                return '#4CAF50'; // 초록색 (쉬움)
+            case 2:
+                return '#2196F3'; // 파란색 (보통)
+            case 3:
+                return '#f44336'; // 빨간색 (어려움)
+            default:
+                return '#9E9E9E'; // 회색 (기본)
         }
     };
 
     return (
-        <Container>
-            <Title>스테이지 선택</Title>
+        <Container $mapTheme={mapId || ''}>
             <StageGrid>
-                {mapStages.map((stage) => (
+                {stages.map((stage) => (
                     <StageCard
-                        key={stage.id}
-                        $unlocked={stage.unlocked}
-                        onClick={() => stage.unlocked && handleStageSelect(stage.id)}
+                        key={`stage-${stage.stageIdx}`}
+                        $unlocked={clearedStages.includes(stage.stageIdx)}
+                        onClick={() => clearedStages.includes(stage.stageIdx) && handleStageSelect(stage.stageIdx)}
                     >
-                        <StageName>{stage.name}</StageName>
-                        <StageDescription>{stage.description}</StageDescription>
-                        <DifficultyBadge $difficulty={stage.difficulty}>
-                            {getDifficultyText(stage.difficulty)}
+                        <StageName>{stage.stageName}</StageName>
+                        <StageDescription>{stage.stageMission.mission}</StageDescription>
+                        <DifficultyBadge $difficulty={getDifficultyColor(stage.stageStep)}>
+                            {getDifficultyText(stage.stageStep)}
                         </DifficultyBadge>
-                        {!stage.unlocked && <LockedOverlay>🔒</LockedOverlay>}
-                        <Stars>
-                            {Array.from({ length: 3 }).map((_, i) => (
-                                <span key={i}>{i < stage.stars ? '⭐' : '☆'}</span>
-                            ))}
-                        </Stars>
+                        {!clearedStages.includes(stage.stageIdx) && <LockedOverlay>🔒</LockedOverlay>}
                     </StageCard>
                 ))}
             </StageGrid>

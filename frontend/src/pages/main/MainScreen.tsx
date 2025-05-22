@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMaps, getClearedMaps, getMapDetail } from '@/api/maps';
+import { getClearedMaps, getMapDetail } from '@/api/maps';
 import { getUserInfo } from '@/api/user';
 import MapInfoModal from '@/components/modal/MapInfoModal';
-import { ProcessedMap, MapResponse } from '@/types/map';
+import { ProcessedMap } from '@/types/map';
 import { getMapImage, getMapTitle } from '@/utils/mapUtils';
 import {
     BackgroundWave,
@@ -13,7 +13,6 @@ import {
     MapGrid,
     MapContainer,
     MapContentWrapper,
-    MapImage,
     FactoryMapImage,
     DefaultMapImage,
     MapNameWrapper,
@@ -27,7 +26,6 @@ const MainScreen: React.FC = () => {
     const navigate = useNavigate();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [maps, setMaps] = useState<ProcessedMap[]>([]);
-    const [currentMapIndex, setCurrentMapIndex] = useState(0);
     const [visibleMap, setVisibleMap] = useState<ProcessedMap | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMap, setSelectedMap] = useState<ProcessedMap | null>(null);
@@ -42,7 +40,8 @@ const MainScreen: React.FC = () => {
                 }
 
                 const clearedResponse = await getClearedMaps(userInfo.email);
-                console.log('클리어한 맵 응답:', clearedResponse);
+                console.log('클리어한 맵 응답 전체:', clearedResponse);
+                console.log('클리어한 맵 목록 원본:', clearedResponse.maplist);
 
                 if (!clearedResponse.success) {
                     console.error('API 요청 실패');
@@ -57,13 +56,19 @@ const MainScreen: React.FC = () => {
                     return;
                 }
 
-                const reversedMaps = [...mapList].reverse();
-                const processedMaps = reversedMaps.map((map) => {
+                console.log('원본 맵 목록:', mapList);
+                // 맵 리스트를 그대로 사용 (reverse 제거)
+                const processedMaps = mapList.map((map) => {
+                    console.log('맵 처리 중:', {
+                        mapIdx: map.mapIdx,
+                        mapTheme: map.mapTheme,
+                        mapTitle: map.mapTitle,
+                    });
                     const parsedDesc = JSON.parse(map.mapDesc);
                     // 클리어한 맵 목록에 있으면 언락
                     const isUnlocked = clearedMaps.some((clearedMap) => clearedMap.mapIdx === map.mapIdx);
 
-                    return {
+                    const processed = {
                         mapIdx: map.mapIdx,
                         gameIdx: map.gameIdx,
                         mapTitle: map.mapTitle,
@@ -73,10 +78,12 @@ const MainScreen: React.FC = () => {
                         mapDesc: parsedDesc,
                         unlocked: isUnlocked,
                     } as ProcessedMap;
+                    console.log('처리된 맵:', processed);
+                    return processed;
                 });
 
+                console.log('최종 처리된 맵 목록:', processedMaps);
                 setMaps(processedMaps);
-                setCurrentMapIndex(0);
                 setVisibleMap(processedMaps[0]);
 
                 if (scrollContainerRef.current) {
@@ -101,10 +108,16 @@ const MainScreen: React.FC = () => {
         const scrollTop = container.scrollTop;
         const viewportHeight = container.clientHeight;
         const totalHeight = container.scrollHeight;
-        const reversedIndex = Math.floor((totalHeight - scrollTop - viewportHeight) / viewportHeight);
-        const mapIndex = reversedIndex;
+        const mapIndex = Math.floor(scrollTop / viewportHeight);
 
-        setCurrentMapIndex(mapIndex);
+        console.log('스크롤 정보:', {
+            scrollTop,
+            viewportHeight,
+            totalHeight,
+            calculatedIndex: mapIndex,
+            mapsLength: maps.length,
+        });
+
         setVisibleMap(maps[mapIndex]);
     };
 
@@ -124,7 +137,7 @@ const MainScreen: React.FC = () => {
             const processedDetail: ProcessedMap = {
                 mapIdx: mapDetail.mapIdx,
                 gameIdx: mapDetail.gameIdx,
-                mapTitle: getMapTitle(mapDetail.mapTheme),
+                mapTitle: getMapTitle(mapDetail.mapIdx),
                 mapTheme: mapDetail.mapTheme,
                 createdAt: mapDetail.createdAt,
                 map_desc: mapDetail.mapDesc,
@@ -141,6 +154,11 @@ const MainScreen: React.FC = () => {
 
     const handleStartClick = () => {
         if (visibleMap?.unlocked) {
+            console.log('현재 선택된 맵 정보:', {
+                mapIdx: visibleMap.mapIdx,
+                mapTitle: visibleMap.mapTitle,
+                mapTheme: visibleMap.mapTheme,
+            });
             console.log('스테이지 선택 화면으로 이동:', visibleMap.mapTitle);
             navigate(`/stage-select/${visibleMap.mapIdx}`);
         }
@@ -162,21 +180,21 @@ const MainScreen: React.FC = () => {
                             >
                                 <MapContentWrapper>
                                     <InfoIcon onClick={(e) => handleInfoClick(e, map)}>!</InfoIcon>
-                                    {map.mapTheme === 'city' ? (
+                                    {map.mapIdx === 3 ? (
                                         <FactoryMapImage
-                                            src={getMapImage(map.mapTheme)}
-                                            alt={getMapTitle(map.mapTheme)}
+                                            src={getMapImage(map.mapIdx)}
+                                            alt={getMapTitle(map.mapIdx)}
                                             $unlocked={map.unlocked}
                                         />
                                     ) : (
                                         <DefaultMapImage
-                                            src={getMapImage(map.mapTheme)}
-                                            alt={getMapTitle(map.mapTheme)}
+                                            src={getMapImage(map.mapIdx)}
+                                            alt={getMapTitle(map.mapIdx)}
                                             $unlocked={map.unlocked}
                                         />
                                     )}
                                     <MapNameWrapper>
-                                        <MapName>{getMapTitle(map.mapTheme)}</MapName>
+                                        <MapName>{getMapTitle(map.mapIdx)}</MapName>
                                     </MapNameWrapper>
                                 </MapContentWrapper>
                             </MapContainer>
@@ -198,10 +216,10 @@ const MainScreen: React.FC = () => {
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     mapData={{
-                        mapTitle: getMapTitle(selectedMap.mapTheme),
+                        mapTitle: getMapTitle(selectedMap.mapIdx),
                         mapDesc: selectedMap.mapDesc,
                     }}
-                    images={[getMapImage(selectedMap.mapTheme)]}
+                    images={[getMapImage(selectedMap.mapIdx)]}
                 />
             )}
         </Container>
