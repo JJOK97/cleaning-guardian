@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.example.demo.vo.ItemsVO;
+import com.example.demo.vo.GameItemVO;
 
 @Mapper
 public interface ItemMapper {
 	
 	
-	List<ItemsVO> getAlluserItems();
-	ItemsVO getItemDetailByIdx(long itemIdx);
+	List<GameItemVO> getAllItems();
+	GameItemVO getItemsDetail(long itemIdx);
 
 }

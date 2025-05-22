@@ -2,8 +2,7 @@ package com.example.demo.dto;
 
 import java.util.List;
 
-import com.example.demo.vo.GameItemVO;
-
+import com.example.demo.vo.SkinsVO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,16 +13,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemsDTO {
+public class SkinsDTO {
 	
-    private List<GameItemVO> itemlist;
+	private List<SkinsVO> skinList;
     private boolean success;
     private String message; 
-    private GameItemVO item;
+    private SkinsVO skin;
+
 }
-
-	
-	
-	
-
-

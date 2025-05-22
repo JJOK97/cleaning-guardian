@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SkinMapper">
+
+	<select id="getAllSkins" resultType="com.example.demo.vo.SkinsVO">
+		SELECT "game_skins"."skin_idx",
+				"game_skins"."skin_img"
+		FROM "game_skins"
+	</select>
+	
+	<select id="getSkinsDetail" resultType="com.example.demo.vo.SkinsVO">
+		 SELECT * FROM "game_skins"
+   		 WHERE "skin_idx" = #{skinIdx}
+	</select>
+
+
+
+</mapper>

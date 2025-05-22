@@ -6,7 +6,7 @@ import com.example.demo.dto.ItemsDTO;
 
 public interface ItemService {
 	
-	ItemsDTO getAlluserItems();
-	ItemsDTO getUserItemsDetail(long itemIdx);
+	ItemsDTO getAllItems();
+	ItemsDTO getItemsDetail(long itemIdx);
 
 }

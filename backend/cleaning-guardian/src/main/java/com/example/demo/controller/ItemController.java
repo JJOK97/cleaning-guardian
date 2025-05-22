@@ -11,24 +11,32 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.ItemsDTO;
 import com.example.demo.dto.MapsDTO;
+import com.example.demo.service.ItemService;
 import com.example.demo.service.ItemServiceImpl;
 
 @RestController
 @RequestMapping("/api/v1")
 public class ItemController {
 	
-	@Autowired private ItemServiceImpl itemservices;
+	@Autowired
+	private ItemService itemService;
+
 	
 	@GetMapping("/items") 
-	public ResponseEntity<ItemsDTO> getAlluserItems(){ 
-		ItemsDTO items = itemservices.getAlluserItems();
+	public ResponseEntity<ItemsDTO> getAllItems(){ 
+		ItemsDTO items = itemService.getAllItems();
 	return new ResponseEntity<>(items, HttpStatus.OK);
 	}
 	
 	@GetMapping("/items/{itemIdx}") 
-	public ResponseEntity<ItemsDTO> getUserItemsDetail(@PathVariable Long itemIdx){ 
-		ItemsDTO items = itemservices.getUserItemsDetail(itemIdx);
+	public ResponseEntity<ItemsDTO> getItemsDetail(@PathVariable Long itemIdx){ 
+		ItemsDTO items = itemService.getItemsDetail(itemIdx);
 	return new ResponseEntity<>(items, HttpStatus.OK);
 	}
 		
+	/*
+	 * @GetMapping("/skins") public ResponseEntity<ItemsDTO> getAllskins(){ ItemsDTO
+	 * skins = itemservices.getAllskins(); return new ResponseEntity<>(items,
+	 * HttpStatus.OK); }
+	 */
 }
