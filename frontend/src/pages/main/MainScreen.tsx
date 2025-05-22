@@ -4,7 +4,7 @@ import { getMaps, getClearedMaps, getMapDetail } from '@/api/maps';
 import { getUserInfo } from '@/api/user';
 import MapInfoModal from '@/components/modal/MapInfoModal';
 import { ProcessedMap, MapResponse } from '@/types/map';
-import { getMapImage } from '@/utils/mapUtils';
+import { getMapImage, getMapTitle } from '@/utils/mapUtils';
 import {
     BackgroundWave,
     Container,
@@ -124,7 +124,7 @@ const MainScreen: React.FC = () => {
             const processedDetail: ProcessedMap = {
                 mapIdx: mapDetail.mapIdx,
                 gameIdx: mapDetail.gameIdx,
-                mapTitle: mapDetail.mapTitle,
+                mapTitle: getMapTitle(mapDetail.mapTheme),
                 mapTheme: mapDetail.mapTheme,
                 createdAt: mapDetail.createdAt,
                 map_desc: mapDetail.mapDesc,
@@ -165,18 +165,18 @@ const MainScreen: React.FC = () => {
                                     {map.mapTheme === 'city' ? (
                                         <FactoryMapImage
                                             src={getMapImage(map.mapTheme)}
-                                            alt={map.mapTitle}
+                                            alt={getMapTitle(map.mapTheme)}
                                             $unlocked={map.unlocked}
                                         />
                                     ) : (
                                         <DefaultMapImage
                                             src={getMapImage(map.mapTheme)}
-                                            alt={map.mapTitle}
+                                            alt={getMapTitle(map.mapTheme)}
                                             $unlocked={map.unlocked}
                                         />
                                     )}
                                     <MapNameWrapper>
-                                        <MapName>{map.mapTitle}</MapName>
+                                        <MapName>{getMapTitle(map.mapTheme)}</MapName>
                                     </MapNameWrapper>
                                 </MapContentWrapper>
                             </MapContainer>
@@ -198,7 +198,7 @@ const MainScreen: React.FC = () => {
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     mapData={{
-                        mapTitle: selectedMap.mapTitle,
+                        mapTitle: getMapTitle(selectedMap.mapTheme),
                         mapDesc: selectedMap.mapDesc,
                     }}
                     images={[getMapImage(selectedMap.mapTheme)]}
