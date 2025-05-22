@@ -16,4 +16,5 @@ public class UserVO {
 	private String password;
 	private String nickname;
 	private LocalDateTime joinedAt;
+	private long profileIdx;
 }

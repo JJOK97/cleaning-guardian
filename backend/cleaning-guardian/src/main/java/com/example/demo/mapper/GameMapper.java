@@ -3,29 +3,15 @@ package com.example.demo.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import com.example.demo.vo.CampaignsVO;
-import com.example.demo.vo.MapsVO;
-import com.example.demo.vo.StagesVO;
+import com.example.demo.vo.StagePolutionsVO;
 
 @Mapper
 public interface GameMapper {
 
-	List<MapsVO> getAllmaps();
+	int gameStart(String email, long stageIdx);
 
-	List<MapsVO> getClearedMaps(String email);
-
-	MapsVO getMap(long map_idx);
-
-	List<StagesVO> getAllStages(long map_idx);
-
-	List<StagesVO> getClearedStages(long map_idx, String email);
-
-	StagesVO getStage(long stage_idx, String email);
-
-	List<CampaignsVO> getAllCampaigns(long map_idx);
-
-	CampaignsVO getCampaign(@Param("map_idx") long map_idx, @Param("campaign_idx") long campaign_idx);
+	List<StagePolutionsVO> getStagePollutions(long stageIdx);
 
 }

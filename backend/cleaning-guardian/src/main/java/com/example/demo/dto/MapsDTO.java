@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MapsDTO {
 
-	public MapsVO map;
-	public List<MapsVO> maplist;
-	public boolean success;
-	public String message;
-	public String email;
+	private MapsVO map;
+	private List<MapsVO> maplist;
+	private boolean success;
+	private String message;
+	private String email;
 
 }
