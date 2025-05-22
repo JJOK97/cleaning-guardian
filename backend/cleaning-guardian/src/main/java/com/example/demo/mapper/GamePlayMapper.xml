@@ -3,34 +3,34 @@
 <mapper namespace="com.example.demo.mapper.GamePlayMapper">
 
 <!-- 스킨 업데이트 -->
-<update id="patchSkin" parameterType="com.example.demo.dto.UserSkinDTO">
+<update id="patchSkin">
 	UPDATE "user_skins"
-	SET "uskin_idx" = #{skin_idx}
-	WHERE "email" = #{email}
+	SET "uskin_idx" = #{param1}
+	WHERE "email" = #{param2}
 </update>
 
 
 <!-- 스테이지 클리어 후 stageClear에 정보 입력. -->
-<insert id="stageClear" parameterType="com.example.demo.dto.GameClearDTO">
+<insert id="stageClear">
 	INSERT INTO "game_clear" (
-		"email",
 		"stage_idx",
+		"email",
 		"success_yn",
 		"created_at"
 	) VALUES (
-		#{email},
-		#{stage_idx},
-		#{successYn},
+		#{param1},
+		#{param2},
+		#{param3},
 		SYSDATE
 	)
 </insert>
 
 <!-- 보상 수령 (포인트) -->
-<insert id="postPointReward" parameterType="com.example.demo.dto.PointDTO">
+<update id="postPointReward">
 	UPDATE "balance" 
-	SET   "point" = "point" + #{value}
-	WHERE "email" = #{email}
-</insert>
+	SET   "point" = "point" + #{param2}
+	WHERE "email" = #{param1}
+</update>
 
 
 </mapper>

@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 public class GameDTO {
 	
 	
-	public List<GameVO> maps;
-	public boolean success;
-	public String message;
-	public String email;
+	private List<GameVO> maps;
+	private boolean success;
+	private String message;
+	private String email;
 
 }

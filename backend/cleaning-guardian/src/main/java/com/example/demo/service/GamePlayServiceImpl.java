@@ -14,11 +14,12 @@ public class GamePlayServiceImpl implements GamePlayService {
 	@Autowired
 	GamePlayMapper GamePlayMapper;
 	
-	public UserSkinDTO patchSkin(long skin_idx, String email) {
-		int result = GamePlayMapper.patchSkin(skin_idx, email);
+	@Override
+	public UserSkinDTO patchSkin(long skinIdx, String email) {
+		int result = GamePlayMapper.patchSkin(skinIdx, email);
 		
 		if(result == 0) {
-			UserSkinDTO.builder()
+			return UserSkinDTO.builder()
 						.success(false)
 						.message("스킨 업데이트 실패")
 						.build();
@@ -27,13 +28,13 @@ public class GamePlayServiceImpl implements GamePlayService {
 						.success(true)
 						.message("스킨 업데이트 성공")
 						.email(email)
-						.skinIdx(skin_idx)
+						.skinIdx(skinIdx)
 						.build();
 	}
 
 	@Override
-	public GameClearDTO stageClear(long stage_idx, String email, String successYn) {
-		int result = GamePlayMapper.stageClear(stage_idx, email, successYn);
+	public GameClearDTO stageClear(long stageIdx, String email, String successYn) {
+		int result = GamePlayMapper.stageClear(stageIdx, email, successYn);
 
 		if (result == 0) {
 			return GameClearDTO
@@ -41,7 +42,7 @@ public class GamePlayServiceImpl implements GamePlayService {
 					.success(false)
 					.message("스테이지 클리어 실패")
 					.email(email)
-					.stageIdx(stage_idx)
+					.stageIdx(stageIdx)
 					.successYn(successYn)
 					.build();
 		}
@@ -50,7 +51,7 @@ public class GamePlayServiceImpl implements GamePlayService {
 				.success(true)
 				.message("스테이지 클리어 성공")
 				.email(email)
-				.stageIdx(stage_idx)
+				.stageIdx(stageIdx)
 				.successYn(successYn)
 				.build();
 	}

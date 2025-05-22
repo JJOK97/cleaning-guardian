@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 public class GameClearDTO {
 	
 	
-	public boolean success;
-	public String message;
-	public String email;
-    public long stageIdx;
-    public String successYn;
+	private boolean success;
+	private String message;
+	private String email;
+	private long stageIdx;
+	private String successYn;
 }

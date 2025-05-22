@@ -8,9 +8,9 @@ import com.example.demo.vo.StagesVO;
 @Mapper
 public interface GamePlayMapper {
 	
-	int stageClear(long stage_idx, String email, String successYn);
+	int stageClear(long stageIdx, String email, String successYn);
 
-	int patchSkin(long skin_idx, String email);
+	int patchSkin(long skinIdx, String email);
 
 	int postPointReward(String email, int value);
 
