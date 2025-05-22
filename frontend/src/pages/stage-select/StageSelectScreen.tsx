@@ -7,6 +7,10 @@ import { getMapStages, getClearedStages } from '@/api/maps';
 import trashIsland from '@/assets/img/stage/trash-island.png';
 import metalLand from '@/assets/img/stage/metal-land.png';
 import smogeCity from '@/assets/img/stage/smoge-city.png';
+import beginIcon from '@/assets/img/stage/begin.png';
+import lockerIcon from '@/assets/img/stage/locker.png';
+import fireIcon from '@/assets/img/stage/fire.png';
+import waveIcon from '@/assets/img/stage/wave.png';
 
 interface StageMission {
     mission: string;
@@ -43,87 +47,133 @@ const getBackgroundImage = (mapId: string) => {
 
 const Container = styled.div<{ $mapTheme: string }>`
     width: 100%;
-    min-height: calc(100vh - 120px);
+    min-height: 100vh;
     padding: 20px;
     background: ${(props) => getBackgroundImage(props.$mapTheme)} no-repeat center center;
     background-size: cover;
+    background-attachment: fixed;
     position: relative;
-    margin-bottom: 60px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-top: calc(3rem + 20px);
+    padding-bottom: calc(3rem + 20px);
 `;
 
 const StageGrid = styled.div`
-    margin-top: 4rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    width: 100%;
-    max-width: 1200px;
-`;
-
-const StageCard = styled.div<{ $unlocked: boolean }>`
-    background: rgba(255, 255, 255, ${(props) => (props.$unlocked ? '0.9' : '0.3')});
-    border-radius: 20px;
-    padding: 20px;
-    aspect-ratio: 16/9;
+    margin-top: 2rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    cursor: ${(props) => (props.$unlocked ? 'pointer' : 'not-allowed')};
-    transform-style: preserve-3d;
-    transition: all 0.5s ease;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+    min-width: 320px;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+    &::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+    }
+`;
+
+const getStageCardBg = (unlocked: boolean) =>
+    unlocked
+        ? 'linear-gradient(135deg, rgba(120, 200, 120, 0.25) 0%, rgba(200, 240, 200, 0.25) 100%)'
+        : 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)';
+
+const StageCard = styled.div<{ $unlocked: boolean }>`
+    background: ${({ $unlocked }) =>
+        $unlocked
+            ? 'linear-gradient(135deg, rgba(40,60,40,0.85) 0%, rgba(80,120,80,0.7) 100%)'
+            : 'linear-gradient(135deg, rgba(60,60,60,0.7) 0%, rgba(30,30,30,0.6) 100%)'};
+    border-radius: 18px;
+    padding: clamp(35px, 4vw, 45px) clamp(25px, 3vw, 35px) clamp(20px, 2vw, 28px) clamp(25px, 3vw, 35px);
+    width: 100%;
+    min-height: clamp(140px, 20vh, 180px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    cursor: ${({ $unlocked }) => ($unlocked ? 'pointer' : 'not-allowed')};
     position: relative;
     overflow: hidden;
+    border: 2.5px solid ${({ $unlocked }) => ($unlocked ? 'rgba(120,255,120,0.18)' : 'rgba(120,120,120,0.12)')};
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.18), 0 1.5px 0.5px 0 rgba(120, 255, 120, 0.08) inset;
+    backdrop-filter: blur(8px);
 
-    &:hover {
-        transform: ${(props) => (props.$unlocked ? 'translateY(-5px)' : 'none')};
-        box-shadow: ${(props) => (props.$unlocked ? '0 10px 20px rgba(0,0,0,0.2)' : 'none')};
+    @media (min-width: 768px) {
+        min-height: clamp(160px, 22vh, 200px);
+    }
+
+    @media (min-width: 1024px) {
+        min-height: clamp(180px, 25vh, 220px);
     }
 
     &::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
+        inset: 0;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
         z-index: 1;
+        pointer-events: none;
+        animation: shine 2.5s linear infinite;
+    }
+
+    @keyframes shine {
+        0% {
+            opacity: 0.7;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0.7;
+        }
     }
 `;
 
 const StageName = styled.h2`
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    color: #fff;
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    font-weight: 700;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.32), 0 0.5px 0 #222;
 `;
 
 const StageDescription = styled.p`
-    color: ${({ theme }) => theme.colors.text.secondary};
-    font-size: 1rem;
+    color: #e0ffe0;
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
     margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
+    opacity: 0.96;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.22);
+    line-height: 1.4;
 `;
 
 const DifficultyBadge = styled.div<{ $difficulty: string }>`
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    background-color: ${({ $difficulty, theme }) => {
-        switch ($difficulty) {
-            case '#4CAF50':
-                return theme.colors.primary.main;
-            case '#2196F3':
-                return theme.colors.secondary.main;
-            case '#f44336':
-                return theme.colors.error.main;
-            default:
-                return theme.colors.background.light;
-        }
-    }};
-    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: clamp(6px, 1.2vw, 10px) clamp(12px, 2.2vw, 18px);
+    border-radius: 16px;
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    font-weight: 600;
+    background: ${({ $difficulty }) => $difficulty + '22'};
+    color: ${({ $difficulty }) => $difficulty};
+    border: 1.5px solid ${({ $difficulty }) => $difficulty + '66'};
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 2;
+    margin-top: auto;
 `;
 
 const LockedOverlay = styled.div`
@@ -132,12 +182,14 @@ const LockedOverlay = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 2rem;
+    backdrop-filter: blur(2px);
+    z-index: 3;
 `;
 
 const StageSelectScreen: React.FC = () => {
@@ -232,20 +284,50 @@ const StageSelectScreen: React.FC = () => {
     return (
         <Container $mapTheme={mapId || ''}>
             <StageGrid>
-                {stages.map((stage) => (
-                    <StageCard
-                        key={`stage-${stage.stageIdx}`}
-                        $unlocked={clearedStages.includes(stage.stageIdx)}
-                        onClick={() => clearedStages.includes(stage.stageIdx) && handleStageSelect(stage.stageIdx)}
-                    >
-                        <StageName>{stage.stageName}</StageName>
-                        <StageDescription>{stage.stageMission.mission}</StageDescription>
-                        <DifficultyBadge $difficulty={getDifficultyColor(stage.stageStep)}>
-                            {getDifficultyText(stage.stageStep)}
-                        </DifficultyBadge>
-                        {!clearedStages.includes(stage.stageIdx) && <LockedOverlay>🔒</LockedOverlay>}
-                    </StageCard>
-                ))}
+                {stages.map((stage) => {
+                    const difficulty = getDifficultyColor(stage.stageStep);
+                    let diffIcon = null;
+                    if (stage.stageStep === 1) diffIcon = beginIcon;
+                    else if (stage.stageStep === 2) diffIcon = waveIcon;
+                    else if (stage.stageStep === 3) diffIcon = fireIcon;
+                    return (
+                        <StageCard
+                            key={`stage-${stage.stageIdx}`}
+                            $unlocked={stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx)}
+                            onClick={() =>
+                                (stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx)) &&
+                                handleStageSelect(stage.stageIdx)
+                            }
+                        >
+                            <div>
+                                <StageName>{stage.stageName}</StageName>
+                                <StageDescription>{stage.stageMission.mission}</StageDescription>
+                            </div>
+                            <DifficultyBadge
+                                $difficulty={difficulty}
+                                style={{ marginTop: 'auto', alignSelf: 'flex-start' }}
+                            >
+                                {diffIcon && (
+                                    <img
+                                        src={diffIcon}
+                                        alt='난이도'
+                                        style={{ width: 22, height: 22, marginRight: 6 }}
+                                    />
+                                )}
+                                {getDifficultyText(stage.stageStep)}
+                            </DifficultyBadge>
+                            {stage.stageIdx !== 1 && !clearedStages.includes(stage.stageIdx) && (
+                                <LockedOverlay>
+                                    <img
+                                        src={lockerIcon}
+                                        alt='잠김'
+                                        style={{ width: 48, height: 48 }}
+                                    />
+                                </LockedOverlay>
+                            )}
+                        </StageCard>
+                    );
+                })}
             </StageGrid>
         </Container>
     );

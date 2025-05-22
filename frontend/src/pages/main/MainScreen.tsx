@@ -24,11 +24,11 @@ import {
 
 const MainScreen: React.FC = () => {
     const navigate = useNavigate();
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [maps, setMaps] = useState<ProcessedMap[]>([]);
     const [visibleMap, setVisibleMap] = useState<ProcessedMap | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMap, setSelectedMap] = useState<ProcessedMap | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchMaps = async () => {
@@ -57,7 +57,6 @@ const MainScreen: React.FC = () => {
                 }
 
                 console.log('원본 맵 목록:', mapList);
-                // 맵 리스트를 그대로 사용 (reverse 제거)
                 const processedMaps = mapList.map((map) => {
                     console.log('맵 처리 중:', {
                         mapIdx: map.mapIdx,
@@ -65,8 +64,8 @@ const MainScreen: React.FC = () => {
                         mapTitle: map.mapTitle,
                     });
                     const parsedDesc = JSON.parse(map.mapDesc);
-                    // 클리어한 맵 목록에 있으면 언락
-                    const isUnlocked = clearedMaps.some((clearedMap) => clearedMap.mapIdx === map.mapIdx);
+                    const isUnlocked =
+                        map.mapIdx === 1 || clearedMaps.some((clearedMap) => clearedMap.mapIdx === map.mapIdx);
 
                     const processed = {
                         mapIdx: map.mapIdx,
@@ -85,14 +84,6 @@ const MainScreen: React.FC = () => {
                 console.log('최종 처리된 맵 목록:', processedMaps);
                 setMaps(processedMaps);
                 setVisibleMap(processedMaps[0]);
-
-                if (scrollContainerRef.current) {
-                    setTimeout(() => {
-                        if (scrollContainerRef.current) {
-                            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-                        }
-                    }, 100);
-                }
             } catch (error) {
                 console.error('맵 데이터 로딩 실패:', error);
             }
@@ -104,21 +95,12 @@ const MainScreen: React.FC = () => {
     const handleScroll = () => {
         const container = scrollContainerRef.current;
         if (!container) return;
-
         const scrollTop = container.scrollTop;
         const viewportHeight = container.clientHeight;
-        const totalHeight = container.scrollHeight;
-        const mapIndex = Math.floor(scrollTop / viewportHeight);
-
-        console.log('스크롤 정보:', {
-            scrollTop,
-            viewportHeight,
-            totalHeight,
-            calculatedIndex: mapIndex,
-            mapsLength: maps.length,
-        });
-
-        setVisibleMap(maps[mapIndex]);
+        const mapIndex = Math.round(scrollTop / viewportHeight);
+        if (maps[mapIndex] && visibleMap !== maps[mapIndex]) {
+            setVisibleMap(maps[mapIndex]);
+        }
     };
 
     const handleInfoClick = async (e: React.MouseEvent, map: ProcessedMap) => {
@@ -177,6 +159,7 @@ const MainScreen: React.FC = () => {
                             <MapContainer
                                 key={`map-${map.mapIdx}`}
                                 $index={index}
+                                onClick={() => setVisibleMap(map)}
                             >
                                 <MapContentWrapper>
                                     <InfoIcon onClick={(e) => handleInfoClick(e, map)}>!</InfoIcon>

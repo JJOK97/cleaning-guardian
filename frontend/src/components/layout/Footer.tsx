@@ -123,10 +123,19 @@ const Footer: React.FC = () => {
         },
     ];
 
-    const isActive = (path: string) => location.pathname.startsWith(path);
+    const isActive = (path: string) => {
+        if (path === '/main') {
+            return location.pathname.startsWith('/main') || location.pathname.startsWith('/stage-select');
+        }
+        return location.pathname.startsWith(path);
+    };
 
     const handleNavigation = (path: string) => {
         if (path === location.pathname) return;
+        if (location.pathname.startsWith('/stage-select') && path === '/main') {
+            navigate('/main');
+            return;
+        }
         navigate(path);
     };
 
