@@ -1,6 +1,5 @@
 package com.example.demo.vo;
 
-import java.security.PrivateKey;
 import java.security.Timestamp;
 
 import lombok.AllArgsConstructor;
@@ -13,18 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserItemVO {
-		
-	    private Long uskinIdx;
-	    
-	    private String email;
-	    
-	    private Long skinIdx;
-	    
-	    private String getType;
-	    
-	    private Timestamp createdAt;
-	}
 
+	private Long uskinIdx;
 
-	
+	private String email;
 
+	private Long skinIdx;
+
+	private String getType;
+
+	private Timestamp createdAt;
+}
