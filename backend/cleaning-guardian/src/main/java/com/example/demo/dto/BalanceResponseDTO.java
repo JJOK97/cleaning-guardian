@@ -13,6 +13,6 @@ public class BalanceResponseDTO {
     private boolean success;
     private String message;
     private String email;
-    private int point; // 포인트 잔액
-    private int cash;  // 캐시 잔액
+    private long point; // 포인트 잔액
+    private long cash;  // 캐시 잔액
 }

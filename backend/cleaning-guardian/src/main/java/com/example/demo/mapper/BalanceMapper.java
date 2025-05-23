@@ -6,4 +6,12 @@ public interface BalanceMapper {
 
 	BalanceVO findByEmail(String email);
 
+	int decreasePoint(String email, long amount);
+
+	int increasePoint(String email, long amount);
+
+	int decreaseCash(String email, long amount);
+
+	int increaseCash(String email, long amount);
+
 }

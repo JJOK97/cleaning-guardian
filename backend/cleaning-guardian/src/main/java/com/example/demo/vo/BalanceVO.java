@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class BalanceVO {
     private Long receiptIdx;
     private String email;
-    private int point;
-    private int cash;
+    private long point;
+    private long cash;
 }

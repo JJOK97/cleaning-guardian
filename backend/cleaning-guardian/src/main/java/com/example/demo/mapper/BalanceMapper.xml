@@ -15,5 +15,35 @@
         WHERE
             "email" = #{email}
     </select>
+    
+    <!-- 포인트 차감 -->
+    <update id="decreasePoint">
+        UPDATE "balance"
+        SET "point" = "point" - #{amount}
+        WHERE "email" = #{email}
+        AND "point" >= #{amount}
+    </update>
+    
+    <!-- 포인트 증가 -->
+    <update id="increasePoint">
+        UPDATE "balance"
+        SET "point" = "point" + #{amount}
+        WHERE "email" = #{email}
+    </update>
+    
+    <!-- 캐시 차감 -->
+    <update id="decreaseCash">
+        UPDATE "balance"
+        SET "cash" = "cash" - #{amount}
+        WHERE "email" = #{email}
+        AND "cash" >= #{amount}
+    </update>
+    
+    <!-- 캐시 증가 -->
+    <update id="increaseCash">
+        UPDATE "balance"
+        SET "cash" = "cash" + #{amount}
+        WHERE "email" = #{email}
+    </update>
 
 </mapper>
