@@ -5,8 +5,8 @@
 <!-- 보상 수령 (포인트) -->
 <update id="postPointReward">
 	UPDATE "balance" 
-	SET   "point" = "point" + #{param2}
-	WHERE "email" = #{param1}
+	SET   "point" = "point" + #{value}
+	WHERE "email" = #{email}
 </update>
 
 </mapper>
