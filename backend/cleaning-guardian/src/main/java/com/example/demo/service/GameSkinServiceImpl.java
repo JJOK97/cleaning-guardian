@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.example.demo.mapper.BalanceMapper;
 import com.example.demo.mapper.GameSkinMapper;
@@ -12,6 +14,7 @@ import com.example.demo.vo.UserSkinVO;
 
 @Service
 public class GameSkinServiceImpl implements GameSkinService {
+	private static final Logger log = LoggerFactory.getLogger(GameSkinServiceImpl.class);
 
 	@Autowired
 	private GameSkinMapper skinMapper;
@@ -128,16 +131,19 @@ public class GameSkinServiceImpl implements GameSkinService {
 	public String equipSkin(String email, long skinIdx) {
 		GameSkinVO skin = skinMapper.getSkin(skinIdx);
 		if (skin == null) {
+			log.error("존재하지 않는 스킨 장착 시도 - skinIdx: {}", skinIdx);
 			return "존재하지 않는 스킨입니다.";
 		}
 
 		UserSkinVO userSkin = skinMapper.getUserSkin(email, skinIdx);
 		if (userSkin == null) {
+			log.error("미보유 스킨 장착 시도 - email: {}, skinIdx: {}", email, skinIdx);
 			return "보유하지 않은 스킨입니다.";
 		}
 
 		skinMapper.unequipSameTypeSkins(email, skinIdx);
 		skinMapper.equipSkin(email, skinIdx);
+		log.info("스킨 장착 완료 - email: {}, skinIdx: {}", email, skinIdx);
 		return "스킨 장착이 완료되었습니다.";
 	}
 
@@ -145,10 +151,12 @@ public class GameSkinServiceImpl implements GameSkinService {
 	public String unequipSkin(String email, long skinIdx) {
 		UserSkinVO userSkin = skinMapper.getUserSkin(email, skinIdx);
 		if (userSkin == null) {
+			log.error("미보유 스킨 해제 시도 - email: {}, skinIdx: {}", email, skinIdx);
 			return "보유하지 않은 스킨입니다.";
 		}
 
 		skinMapper.unequipSkin(email, skinIdx);
+		log.info("스킨 해제 완료 - email: {}, skinIdx: {}", email, skinIdx);
 		return "스킨 해제가 완료되었습니다.";
 	}
 
@@ -158,12 +166,14 @@ public class GameSkinServiceImpl implements GameSkinService {
 		// 스킨 존재 여부 확인
 		GameSkinVO skin = skinMapper.getSkin(skinIdx);
 		if (skin == null) {
+			log.error("존재하지 않는 스킨 구매 시도 - skinIdx: {}", skinIdx);
 			return "존재하지 않는 스킨입니다.";
 		}
 
 		// 이미 보유한 스킨인지 확인
 		UserSkinVO userSkin = skinMapper.getUserSkin(email, skinIdx);
 		if (userSkin != null) {
+			log.error("이미 보유한 스킨 구매 시도 - email: {}, skinIdx: {}", email, skinIdx);
 			return "이미 보유한 스킨입니다.";
 		}
 
@@ -176,18 +186,21 @@ public class GameSkinServiceImpl implements GameSkinService {
 			// 캐시 차감
 			int result = balanceMapper.decreaseCash(email, price);
 			if (result == 0) {
+				log.error("캐시 부족으로 구매 실패 - email: {}, skinIdx: {}, price: {}", email, skinIdx, price);
 				return "캐시가 부족합니다.";
 			}
 		} else {
 			// 포인트 차감
 			int result = balanceMapper.decreasePoint(email, price);
 			if (result == 0) {
+				log.error("포인트 부족으로 구매 실패 - email: {}, skinIdx: {}, price: {}", email, skinIdx, price);
 				return "포인트가 부족합니다.";
 			}
 		}
 
 		// 스킨 구매
 		skinMapper.purchaseSkin(email, skinIdx, priceType);
+		log.info("스킨 구매 완료 - email: {}, skinIdx: {}, priceType: {}, price: {}", email, skinIdx, priceType, price);
 		return "스킨 구매가 완료되었습니다.";
 	}
 }
