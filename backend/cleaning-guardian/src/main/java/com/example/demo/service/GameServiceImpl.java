@@ -6,11 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.PollutionsDTO;
-import com.example.demo.dto.StagePollutionsDTO;
 import com.example.demo.dto.UserPlayDTO;
 import com.example.demo.mapper.GameMapper;
 import com.example.demo.vo.PollutionsVO;
-import com.example.demo.vo.StagePolutionsVO;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -39,7 +37,7 @@ public class GameServiceImpl implements GameService {
 		}
 		return PollutionsDTO.builder().pollutionsList(polutionsList).success(true).message("오염물질을 불러옵니다.").build();
 	}
-	
+
 	// 전체 오염물 조회하기
 	@Override
 	public PollutionsDTO getAllPollutions() {
