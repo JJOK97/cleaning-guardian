@@ -2,11 +2,14 @@ class SoundManager {
     private static instance: SoundManager;
     private sounds: Map<string, HTMLAudioElement>;
     private isMuted: boolean;
+    private isBackground: boolean;
 
     private constructor() {
         this.sounds = new Map();
         this.isMuted = false;
+        this.isBackground = false;
         this.loadSounds();
+        this.setupVisibilityHandlers();
     }
 
     public static getInstance(): SoundManager {
@@ -28,12 +31,55 @@ class SoundManager {
         Object.entries(soundFiles).forEach(([key, path]) => {
             const audio = new Audio(path);
             audio.preload = 'auto';
+            if (key === 'background') {
+                audio.loop = true;
+            }
             this.sounds.set(key, audio);
         });
     }
 
-    public play(soundName: string) {
+    private setupVisibilityHandlers() {
+        // 앱이 백그라운드로 가거나 화면이 꺼질 때
+        const handleVisibilityChange = () => {
+            this.isBackground = document.hidden;
+            if (this.isBackground) {
+                this.pauseAll();
+            } else {
+                this.resumeAll();
+            }
+        };
+
+        // 앱이 포그라운드로 돌아올 때
+        const handleFocus = () => {
+            if (!this.isBackground) {
+                this.resumeAll();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', handleFocus);
+    }
+
+    private pauseAll() {
+        this.sounds.forEach((sound) => {
+            if (!sound.paused) {
+                sound.pause();
+            }
+        });
+    }
+
+    private resumeAll() {
         if (this.isMuted) return;
+
+        this.sounds.forEach((sound) => {
+            if (sound.paused) {
+                sound.play().catch((error) => console.log('Sound resume failed:', error));
+            }
+        });
+    }
+
+    public play(soundName: string) {
+        if (this.isMuted || this.isBackground) return;
 
         const sound = this.sounds.get(soundName);
         if (sound) {
@@ -55,6 +101,21 @@ class SoundManager {
             sound.volume = Math.max(0, Math.min(1, volume));
         });
     }
+
+    public stop(soundName: string) {
+        const sound = this.sounds.get(soundName);
+        if (sound) {
+            sound.pause();
+            sound.currentTime = 0;
+        }
+    }
+
+    public stopAll() {
+        this.sounds.forEach((sound) => {
+            sound.pause();
+            sound.currentTime = 0;
+        });
+    }
 }
 
-export const soundManager = SoundManager.getInstance();
+export default SoundManager;

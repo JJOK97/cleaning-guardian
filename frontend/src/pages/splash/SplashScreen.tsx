@@ -1,50 +1,40 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled, { keyframes } from 'styled-components';
-
-const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-`;
-
-const Container = styled.div`
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const Title = styled.div`
-    font-size: clamp(2rem, 5vw, 4rem);
-    margin-bottom: 1rem;
-    animation: ${fadeIn} 1s ease-in-out;
-`;
-
-const Subtitle = styled.div`
-    font-size: clamp(1rem, 2vw, 1.5rem);
-    opacity: 0.8;
-    animation: ${fadeIn} 1s ease-in-out 0.5s both;
-`;
+import { Container, TapToStart } from '@/styles/components/splash/containers';
+import { SpaceBackground } from '@/components/splash/SpaceBackground';
+import { LoadingBar } from '@/components/splash/LoadingBar';
+import { useSplashAnimation } from './hooks/useSplashAnimation';
+import { fixedStars, spaceParticles, planets, planetRings, cleaningIcons } from './constants';
+import SoundManager from '@/utils/sound';
 
 const SplashScreen: React.FC = () => {
     const navigate = useNavigate();
+    const { progress, loadingComplete } = useSplashAnimation();
+    const soundManager = SoundManager.getInstance();
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            navigate('/main');
-        }, 2000);
+    const handleTapToStart = () => {
+        // BGM 재생
+        soundManager.play('background');
 
-        return () => clearTimeout(timer);
-    }, [navigate]);
+        // 로그인 페이지로 이동
+        navigate('/auth/login');
+    };
 
     return (
         <Container>
-            <Title>청소의 신</Title>
-            <Subtitle>지구를 지켜라!</Subtitle>
+            <SpaceBackground
+                fixedStars={fixedStars}
+                spaceParticles={spaceParticles}
+                planets={planets}
+                planetRings={planetRings}
+                cleaningIcons={cleaningIcons}
+            />
+
+            {!loadingComplete ? (
+                <LoadingBar progress={progress} />
+            ) : (
+                <TapToStart onClick={handleTapToStart}>탭하여 게임 시작</TapToStart>
+            )}
         </Container>
     );
 };

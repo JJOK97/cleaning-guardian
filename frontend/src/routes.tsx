@@ -11,15 +11,36 @@ import InventoryScreen from '@/pages/inventory/InventoryScreen';
 import ShopScreen from '@/pages/shop/ShopScreen';
 import SettingsScreen from '@/pages/settings/SettingsScreen';
 import SplashScreen from '@/pages/splash/SplashScreen';
+import LoginScreen from '@/pages/auth/LoginScreen';
+import SignupScreen from '@/pages/auth/SignupScreen';
+import SignupTermsScreen from '@/pages/auth/SignupTermsScreen';
 
 const AppRoutes: React.FC = () => {
-    // 나머지 코드는 변경 없음
     return (
         <Routes>
+            {/* 헤더/푸터 없는 화면 */}
             <Route
                 path='/'
                 element={<SplashScreen />}
             />
+            <Route
+                path='/login'
+                element={<LoginScreen />}
+            />
+            <Route
+                path='/auth/login'
+                element={<LoginScreen />}
+            />
+            <Route
+                path='/auth/signup/terms'
+                element={<SignupTermsScreen />}
+            />
+            <Route
+                path='/auth/signup'
+                element={<SignupScreen />}
+            />
+
+            {/* 헤더/푸터 있는 화면 */}
             <Route element={<MainLayout />}>
                 <Route
                     path='/main'
