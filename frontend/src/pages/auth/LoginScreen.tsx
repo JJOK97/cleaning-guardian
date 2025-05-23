@@ -32,6 +32,7 @@ const LoginScreen: React.FC = () => {
             const res = await login({ email, password, deviceId });
             if (res.data.success) {
                 localStorage.setItem('accessToken', res.data.accessToken);
+                localStorage.setItem('email', email);
                 navigate('/main'); // TODO: 메인화면 경로로 수정
             } else {
                 console.log(res.data.message || '로그인 실패');
