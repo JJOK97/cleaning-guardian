@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.PollutionsDTO;
 import com.example.demo.dto.StageDTO;
-import com.example.demo.dto.StagePollutionsDTO;
 
 public interface StagesService {
 
@@ -11,6 +11,5 @@ public interface StagesService {
 
 	StageDTO getStage(long stageIdx);
 
-	StagePollutionsDTO getAllPollutions(long stageIdx);
 
 }

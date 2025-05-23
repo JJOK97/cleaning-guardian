@@ -39,5 +39,16 @@ public class GameServiceImpl implements GameService {
 		}
 		return PollutionsDTO.builder().pollutionsList(polutionsList).success(true).message("오염물질을 불러옵니다.").build();
 	}
+	
+	// 전체 오염물 조회하기
+	@Override
+	public PollutionsDTO getAllPollutions() {
+		List<PollutionsVO> polutions = gameMapper.getAllPollutions();
+
+		if (polutions == null) {
+			return PollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
+		}
+		return PollutionsDTO.builder().success(true).message("오염물질을 불러옵니다.").pollutionsList(polutions).build();
+	}
 
 }

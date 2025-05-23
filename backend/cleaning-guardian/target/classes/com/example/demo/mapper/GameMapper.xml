@@ -25,4 +25,13 @@
     WHERE "stage_pollutions"."stage_idx" = #{stageIdx}
     </select>
     
+    <!-- 전체 스테이지 오염물 조회 -->
+    <select id="getAllPollutions" resultType="com.example.demo.vo.PollutionsVO">
+    SELECT "pol_idx", "game_idx", "pol_name", 
+    DBMS_LOB.SUBSTR("pollutions"."pol_desc", 4000, 1) AS "pol_desc", 
+    "pol_img1", "pol_img2", "pol_img3", "type", "created_at"
+    FROM "pollutions"
+    </select>
+    
+    
 </mapper>

@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.StageDTO;
-import com.example.demo.dto.StagePollutionsDTO;
 import com.example.demo.mapper.StagesMapper;
-import com.example.demo.vo.StagePolutionsVO;
 import com.example.demo.vo.StagesVO;
 
 @Service
@@ -53,13 +51,4 @@ public class StagesServiceImpl implements StagesService {
 		return StageDTO.builder().stage(stage).success(true).message("스테이지를 불러옵니다.").build();
 	}
 
-	@Override
-	public StagePollutionsDTO getAllPollutions(long stageIdx) {
-		List<StagePolutionsVO> polutions = stagesMapper.getAllPollutions(stageIdx);
-
-		if (polutions == null) {
-			return StagePollutionsDTO.builder().success(false).message("오염물질을 찾을 수 없습니다.").build();
-		}
-		return StagePollutionsDTO.builder().success(true).message("오염물질을 불러옵니다.").splist(polutions).build();
-	}
 }

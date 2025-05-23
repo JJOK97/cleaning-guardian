@@ -12,5 +12,7 @@ public interface GameMapper {
 	int gameStart(String email, long stageIdx);
 
 	List<PollutionsVO> getStagePollutions(long stageIdx);
+	
+	List<PollutionsVO> getAllPollutions();
 
 }

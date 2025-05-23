@@ -29,9 +29,16 @@ public class GameController {
 	}
 
 	// 게임 입장시 스테이지 오염물 가져오기
-	@GetMapping("/user-plays/{stageIdx}")
+	@GetMapping("/user-plays/{stageIdx}/pollutions")
 	public ResponseEntity<PollutionsDTO> getStagePollutions(@PathVariable("stageIdx") long stageIdx) {
 		PollutionsDTO pollutions = gameService.getStagePollutions(stageIdx);
+		return new ResponseEntity<>(pollutions, HttpStatus.OK);
+	}
+
+	// 전체 스테이지 오염물 조회	
+	@GetMapping("/pollutions")
+	public ResponseEntity<PollutionsDTO> getAllPollutions() {
+		PollutionsDTO pollutions = gameService.getAllPollutions();
 		return new ResponseEntity<>(pollutions, HttpStatus.OK);
 	}
 

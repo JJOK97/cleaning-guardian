@@ -9,4 +9,6 @@ public interface GameService {
 
 	PollutionsDTO getStagePollutions(long stageIdx);
 
+	PollutionsDTO getAllPollutions();
+
 }
