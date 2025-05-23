@@ -2,7 +2,7 @@ package com.example.demo.mapper;
 
 import java.util.List;
 
-import com.example.demo.vo.StagePolutionsVO;
+import com.example.demo.vo.PollutionsVO;
 import com.example.demo.vo.StagesVO;
 
 public interface StagesMapper {
@@ -13,5 +13,4 @@ public interface StagesMapper {
 
 	StagesVO getStage(long stageIdx);
 
-	List<StagePolutionsVO> getAllPollutions(long stageIdx);
 }

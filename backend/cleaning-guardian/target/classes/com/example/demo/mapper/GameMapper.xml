@@ -16,11 +16,22 @@
     </insert>
     
     <!-- 게임 시작시 해당 stage의 오염물 가져오기 -->
-    <select id="getStagePollutions" resultType="com.example.demo.vo.StagePolutionsVO">
-    SELECT *
-    FROM "stage_pollutions"
-    JOIN "stages" ON "stage_pollutions"."stage_idx" = "stages"."stage_idx"
+    <select id="getStagePollutions" parameterType="long" resultType="com.example.demo.vo.PollutionsVO">
+    SELECT "pollutions"."pol_idx", "pollutions"."game_idx", "pollutions"."pol_name",
+     		DBMS_LOB.SUBSTR("pollutions"."pol_desc", 4000, 1) AS "pol_desc",
+     		"pollutions"."pol_img1", "pollutions"."pol_img2", "pollutions"."pol_img3", "pollutions"."type", "pollutions"."created_at"
+    FROM "pollutions"
+    JOIN "stage_pollutions" ON "stage_pollutions"."pol_idx" = "pollutions"."pol_idx"
     WHERE "stage_pollutions"."stage_idx" = #{stageIdx}
     </select>
+    
+    <!-- 전체 스테이지 오염물 조회 -->
+    <select id="getAllPollutions" resultType="com.example.demo.vo.PollutionsVO">
+    SELECT "pol_idx", "game_idx", "pol_name", 
+    DBMS_LOB.SUBSTR("pollutions"."pol_desc", 4000, 1) AS "pol_desc", 
+    "pol_img1", "pol_img2", "pol_img3", "type", "created_at"
+    FROM "pollutions"
+    </select>
+    
     
 </mapper>
