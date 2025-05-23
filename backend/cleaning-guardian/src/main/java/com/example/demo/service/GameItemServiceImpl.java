@@ -209,4 +209,40 @@ public class GameItemServiceImpl implements GameItemService {
 				.message("아이템 사용 성공")
 				.build();
 	}
+
+	@Override
+	public GameItemsDTO getPointItems() {
+		List<GameItemVO> items = gameItemMapper.getPointItems();
+		
+		if (items == null) {
+			return GameItemsDTO.builder()
+					.success(false)
+					.message("포인트 아이템 목록을 불러오는데 실패했습니다.")
+					.build();
+		}
+		
+		return GameItemsDTO.builder()
+				.success(true)
+				.message("포인트 아이템 목록 조회 성공")
+				.items(items)
+				.build();
+	}
+
+	@Override
+	public GameItemsDTO getCashItems() {
+		List<GameItemVO> items = gameItemMapper.getCashItems();
+		
+		if (items == null) {
+			return GameItemsDTO.builder()
+					.success(false)
+					.message("캐시 아이템 목록을 불러오는데 실패했습니다.")
+					.build();
+		}
+		
+		return GameItemsDTO.builder()
+				.success(true)
+				.message("캐시 아이템 목록 조회 성공")
+				.items(items)
+				.build();
+	}
 }

@@ -67,4 +67,24 @@ public class GameItemController {
 		UserItemDTO response = gameItemService.useItem(email, itemIdx);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+
+	/**
+	 * 포인트로 구매 가능한 아이템 목록을 조회합니다.
+	 * @return 포인트 아이템 목록과 응답 상태
+	 */
+	@GetMapping("/point")
+	public ResponseEntity<GameItemsDTO> getPointItems() {
+		GameItemsDTO response = gameItemService.getPointItems();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	/**
+	 * 캐시로 구매 가능한 아이템 목록을 조회합니다.
+	 * @return 캐시 아이템 목록과 응답 상태
+	 */
+	@GetMapping("/cash")
+	public ResponseEntity<GameItemsDTO> getCashItems() {
+		GameItemsDTO response = gameItemService.getCashItems();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

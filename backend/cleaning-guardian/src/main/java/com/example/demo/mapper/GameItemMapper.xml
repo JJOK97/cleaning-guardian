@@ -136,4 +136,36 @@
 		AND "count" > 0
 	</update>
 	
+	<!-- 포인트 아이템 목록 조회 -->
+	<select id="getPointItems" resultType="com.example.demo.vo.GameItemVO">
+		SELECT 
+			"item_idx" as itemIdx,
+			"game_idx" as gameIdx,
+			"item_name" as itemName,
+			"item_desc" as itemDesc,
+			"item_img" as itemImg,
+			"item_price" as itemPrice,
+			TRIM("price_type") as priceType,
+			"created_at" as createdAt
+		FROM "game_items"
+		WHERE TRIM("price_type") = 'P'
+		ORDER BY "item_idx"
+	</select>
+
+	<!-- 캐시 아이템 목록 조회 -->
+	<select id="getCashItems" resultType="com.example.demo.vo.GameItemVO">
+		SELECT 
+			"item_idx" as itemIdx,
+			"game_idx" as gameIdx,
+			"item_name" as itemName,
+			"item_desc" as itemDesc,
+			"item_img" as itemImg,
+			"item_price" as itemPrice,
+			TRIM("price_type") as priceType,
+			"created_at" as createdAt
+		FROM "game_items"
+		WHERE TRIM("price_type") = 'C'
+		ORDER BY "item_idx"
+	</select>
+
 </mapper> 

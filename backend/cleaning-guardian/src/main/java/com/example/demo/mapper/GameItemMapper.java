@@ -58,4 +58,16 @@ public interface GameItemMapper {
 	 * @return 업데이트된 행 수
 	 */
 	int decreaseItemCount(UserItemVO userItem);
+
+	/**
+	 * 포인트로 구매 가능한 아이템 목록을 조회합니다.
+	 * @return 포인트 아이템 목록
+	 */
+	List<GameItemVO> getPointItems();
+
+	/**
+	 * 캐시로 구매 가능한 아이템 목록을 조회합니다.
+	 * @return 캐시 아이템 목록
+	 */
+	List<GameItemVO> getCashItems();
 }

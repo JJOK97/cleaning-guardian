@@ -17,4 +17,10 @@ public interface GameItemService {
 	// 아이템 사용
 	UserItemDTO useItem(String email, Long itemIdx);
 
+	// 포인트 아이템 목록 조회
+	GameItemsDTO getPointItems();
+
+	// 캐시 아이템 목록 조회
+	GameItemsDTO getCashItems();
+
 }
