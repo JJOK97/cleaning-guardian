@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.StagePollutionsDTO;
+import com.example.demo.dto.PollutionsDTO;
 import com.example.demo.dto.UserPlayDTO;
 import com.example.demo.service.GameServiceImpl;
 
@@ -30,8 +30,8 @@ public class GameController {
 
 	// 게임 입장시 스테이지 오염물 가져오기
 	@GetMapping("/user-plays/{stageIdx}")
-	public ResponseEntity<StagePollutionsDTO> getStagePollutions(@PathVariable("stageIdx") long stageIdx) {
-		StagePollutionsDTO pollutions = gameService.getStagePollutions(stageIdx);
+	public ResponseEntity<PollutionsDTO> getStagePollutions(@PathVariable("stageIdx") long stageIdx) {
+		PollutionsDTO pollutions = gameService.getStagePollutions(stageIdx);
 		return new ResponseEntity<>(pollutions, HttpStatus.OK);
 	}
 
