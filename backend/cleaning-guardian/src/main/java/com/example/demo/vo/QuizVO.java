@@ -15,7 +15,7 @@ import lombok.Setter;
 public class QuizVO {
 	
 	//퀴즈 식별자 
-	private long quiz_Idx;
+	private long quizIdx;
 	//퀴즈 문제
 	private String quizDesc;
 	//퀴즈 정답
