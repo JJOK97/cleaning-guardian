@@ -2,27 +2,17 @@
 <!DOCTYPE mapper
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-           
 <mapper namespace="com.example.demo.mapper.QuizMapper">
-
-
 
 	<!-- 랜덤 퀴즈 불러오기-->
 <select id="getRandomQuiz" resultType="com.example.demo.vo.QuizVO">
+SELECT *
+FROM (
     SELECT *
-    FROM (
-        SELECT
-            quiz_idx AS quizIdx,
-            quiz_desc AS quizDesc,
-            quiz_answer AS quizAnswer
-        FROM quiz
-        ORDER BY DBMS_RANDOM.VALUE
-    )
-    WHERE ROWNUM = 1
+    FROM "quiz"
+    ORDER BY DBMS_RANDOM.VALUE
+)
+WHERE ROWNUM = 1
 </select>
-
-
-
-
 
 </mapper>

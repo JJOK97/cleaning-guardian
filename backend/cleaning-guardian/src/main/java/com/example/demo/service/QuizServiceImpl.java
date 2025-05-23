@@ -9,30 +9,20 @@ import com.example.demo.vo.QuizVO;
 
 @Service
 public class QuizServiceImpl implements QuizService {
-	
+
 	@Autowired
 	QuizMapper quizMapper;
-	
+
 	// 랜덤 퀴즈 로직 구현
 	@Override
 	public QuizDTO getRandomQuiz() {
-	    QuizVO quiz = quizMapper.getRandomQuiz();
+		QuizVO quiz = quizMapper.getRandomQuiz();
 
-	    if (quiz == null) {
-	        return QuizDTO.builder()
-	                .success(false)
-	                .message("랜덤 퀴즈를 찾을 수 없습니다.")
-	                .build();
-	    }
+		if (quiz == null) {
+			return QuizDTO.builder().success(false).message("랜덤 퀴즈를 찾을 수 없습니다.").build();
+		}
 
-	    return QuizDTO.builder()
-	            .success(true)
-	            .message("랜덤 퀴즈를 불러왔습니다.")
-	            .quiz(quiz)
-	            .build();
+		return QuizDTO.builder().success(true).message("랜덤 퀴즈를 불러왔습니다.").quiz(quiz).build();
 	}
-
-	
-	
 
 }
