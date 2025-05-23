@@ -38,11 +38,6 @@ public class GameSkinServiceImpl implements GameSkinService {
 		return skinMapper.getUserSkin(email, skinIdx);
 	}
 
-	@Override
-	public UserSkinVO getEquippedSkin(String email) {
-		return skinMapper.getEquippedSkin(email);
-	}
-
 	// 슬라이스 스킨 조회
 	@Override
 	public List<GameSkinVO> getAllSliceSkins() {
@@ -66,7 +61,12 @@ public class GameSkinServiceImpl implements GameSkinService {
 
 	@Override
 	public UserSkinVO getEquippedSliceSkin(String email) {
-		return skinMapper.getEquippedSliceSkin(email);
+		UserSkinVO userSkin = skinMapper.getEquippedSliceSkin(email);
+		if (userSkin != null && userSkin.getSkin() != null) {
+			GameSkinVO skinInfo = skinMapper.getSkin(userSkin.getSkinIdx());
+			userSkin.setSkin(skinInfo);
+		}
+		return userSkin;
 	}
 
 	// 탭 스킨 조회
@@ -92,7 +92,12 @@ public class GameSkinServiceImpl implements GameSkinService {
 
 	@Override
 	public UserSkinVO getEquippedTapSkin(String email) {
-		return skinMapper.getEquippedTapSkin(email);
+		UserSkinVO userSkin = skinMapper.getEquippedTapSkin(email);
+		if (userSkin != null && userSkin.getSkin() != null) {
+			GameSkinVO skinInfo = skinMapper.getSkin(userSkin.getSkinIdx());
+			userSkin.setSkin(skinInfo);
+		}
+		return userSkin;
 	}
 
 	// 캐시/포인트 스킨 조회

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.GameItemMapper">
+	
+	<resultMap id="userItemResultMap" type="com.example.demo.vo.UserItemVO">
+		<id property="userItemIdx" column="userItemIdx"/>
+		<result property="email" column="email"/>
+		<result property="itemIdx" column="itemIdx"/>
+		<result property="itemType" column="itemType"/>
+		<result property="isUsed" column="isUsed"/>
+		<result property="createdAt" column="createdAt"/>
+		<result property="count" column="count"/>
+		<association property="item" javaType="com.example.demo.vo.GameItemVO">
+			<id property="itemIdx" column="item_itemIdx"/>
+			<result property="gameIdx" column="item_gameIdx"/>
+			<result property="itemName" column="item_itemName"/>
+			<result property="itemDesc" column="item_itemDesc"/>
+			<result property="itemImg" column="item_itemImg"/>
+			<result property="itemPrice" column="item_itemPrice"/>
+			<result property="priceType" column="item_priceType"/>
+			<result property="createdAt" column="item_createdAt"/>
+		</association>
+	</resultMap>
+	
+	<!-- 모든 게임 아이템 목록 조회 -->
+	<select id="getAllItems" resultType="com.example.demo.vo.GameItemVO">
+		SELECT 
+			"item_idx" as itemIdx,
+			"game_idx" as gameIdx,
+			"item_name" as itemName,
+			"item_desc" as itemDesc,
+			"item_img" as itemImg,
+			"item_price" as itemPrice,
+			TRIM("price_type") as priceType,
+			"created_at" as createdAt
+		FROM "game_items"
+		ORDER BY "item_idx"
+	</select>
+	
+	<!-- 특정 아이템 상세 정보 조회 -->
+	<select id="getItem" parameterType="long" resultType="com.example.demo.vo.GameItemVO">
+		SELECT 
+			"item_idx" as itemIdx,
+			"game_idx" as gameIdx,
+			"item_name" as itemName,
+			"item_desc" as itemDesc,
+			"item_img" as itemImg,
+			"item_price" as itemPrice,
+			TRIM("price_type") as priceType,
+			"created_at" as createdAt
+		FROM "game_items"
+		WHERE "item_idx" = #{itemIdx}
+	</select>
+	
+	<!-- 사용자가 보유한 아이템 목록 조회 -->
+	<select id="getUserItems" parameterType="string" resultMap="userItemResultMap">
+		SELECT 
+			ui."user_item_idx" as userItemIdx,
+			ui."email" as email,
+			ui."item_idx" as itemIdx,
+			ui."item_type" as itemType,
+			ui."is_used" as isUsed,
+			ui."created_at" as createdAt,
+			ui."count" as count,
+			gi."item_idx" as item_itemIdx,
+			gi."game_idx" as item_gameIdx,
+			gi."item_name" as item_itemName,
+			gi."item_desc" as item_itemDesc,
+			gi."item_img" as item_itemImg,
+			gi."item_price" as item_itemPrice,
+			TRIM(gi."price_type") as item_priceType,
+			gi."created_at" as item_createdAt
+		FROM "user_items" ui
+		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
+		WHERE ui."email" = #{email}
+		ORDER BY ui."created_at" DESC
+	</select>
+	
+	<!-- 사용자의 특정 아이템 보유 정보 조회 -->
+	<select id="getUserItem" resultMap="userItemResultMap">
+		SELECT 
+			ui."user_item_idx" as userItemIdx,
+			ui."email" as email,
+			ui."item_idx" as itemIdx,
+			ui."item_type" as itemType,
+			ui."is_used" as isUsed,
+			ui."created_at" as createdAt,
+			ui."count" as count,
+			gi."item_idx" as item_itemIdx,
+			gi."game_idx" as item_gameIdx,
+			gi."item_name" as item_itemName,
+			gi."item_desc" as item_itemDesc,
+			gi."item_img" as item_itemImg,
+			gi."item_price" as item_itemPrice,
+			TRIM(gi."price_type") as item_priceType,
+			gi."created_at" as item_createdAt
+		FROM "user_items" ui
+		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
+		WHERE ui."email" = #{email}
+		AND ui."item_idx" = #{itemIdx}
+	</select>
+	
+	<!-- 새로운 사용자 아이템 추가 -->
+	<insert id="insertUserItem" parameterType="com.example.demo.vo.UserItemVO">
+		INSERT INTO "user_items" (
+			"email",
+			"item_idx",
+			"item_type",
+			"is_used",
+			"count",
+			"created_at"
+		) VALUES (
+			#{email},
+			#{itemIdx},
+			#{itemType},
+			'N',
+			#{count},
+			SYSDATE
+		)
+	</insert>
+	
+	<!-- 사용자 아이템 수량 업데이트 -->
+	<update id="updateUserItemCount" parameterType="com.example.demo.vo.UserItemVO">
+		UPDATE "user_items"
+		SET "count" = "count" + #{count}
+		WHERE "email" = #{email}
+		AND "item_idx" = #{itemIdx}
+	</update>
+	
+	<!-- 사용자 아이템 수량 감소 -->
+	<update id="decreaseItemCount" parameterType="com.example.demo.vo.UserItemVO">
+		UPDATE "user_items"
+		SET "count" = "count" - 1
+		WHERE "email" = #{email}
+		AND "item_idx" = #{itemIdx}
+		AND "count" > 0
+	</update>
+	
+	<!-- 포인트 아이템 목록 조회 -->
+	<select id="getPointItems" resultType="com.example.demo.vo.GameItemVO">
+		SELECT 
+			"item_idx" as itemIdx,
+			"game_idx" as gameIdx,
+			"item_name" as itemName,
+			"item_desc" as itemDesc,
+			"item_img" as itemImg,
+			"item_price" as itemPrice,
+			TRIM("price_type") as priceType,
+			"created_at" as createdAt
+		FROM "game_items"
+		WHERE TRIM("price_type") = 'P'
+		ORDER BY "item_idx"
+	</select>
+
+	<!-- 캐시 아이템 목록 조회 -->
+	<select id="getCashItems" resultType="com.example.demo.vo.GameItemVO">
+		SELECT 
+			"item_idx" as itemIdx,
+			"game_idx" as gameIdx,
+			"item_name" as itemName,
+			"item_desc" as itemDesc,
+			"item_img" as itemImg,
+			"item_price" as itemPrice,
+			TRIM("price_type") as priceType,
+			"created_at" as createdAt
+		FROM "game_items"
+		WHERE TRIM("price_type") = 'C'
+		ORDER BY "item_idx"
+	</select>
+
+</mapper> 

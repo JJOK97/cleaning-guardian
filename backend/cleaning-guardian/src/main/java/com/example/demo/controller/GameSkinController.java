@@ -29,11 +29,6 @@ public class GameSkinController {
 		return skinService.getUserSkin(email, skinIdx);
 	}
 
-	@GetMapping("/equipped")
-	public UserSkinVO getEquippedSkin(@RequestParam String email) {
-		return skinService.getEquippedSkin(email);
-	}
-
 	// 슬라이스 스킨 조회
 	@GetMapping("/slice")
 	public List<GameSkinVO> getAllSliceSkins() {
