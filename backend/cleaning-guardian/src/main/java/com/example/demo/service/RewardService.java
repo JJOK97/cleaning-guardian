@@ -6,4 +6,6 @@ public interface RewardService {
 
 	RewardDTO postPointReward(int value, String email);
 
+	RewardDTO postCashReward(int value, String email);
+
 }

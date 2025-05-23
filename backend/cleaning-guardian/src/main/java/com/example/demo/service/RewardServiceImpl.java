@@ -21,4 +21,14 @@ public class RewardServiceImpl implements RewardService {
 		}
 		return RewardDTO.builder().point(value).success(true).message(value + "Point 획득에 성공했습니다.").build();
 	}
+
+	@Override
+	public RewardDTO postCashReward(int value, String email) {
+		int result = rewardMapper.postCashReward(value, email);
+
+		if (result == 0) {
+			return RewardDTO.builder().success(false).message("보상 획득에 실패했습니다.").build();
+		}
+		return RewardDTO.builder().cash(value).success(true).message(value + "cash 획득에 성공했습니다.").build();
+	}
 }

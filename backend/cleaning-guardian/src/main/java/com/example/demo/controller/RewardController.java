@@ -10,18 +10,26 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.RewardDTO;
 import com.example.demo.service.RewardService;
+
 @RestController
 @RequestMapping("/api/v1")
 public class RewardController {
-	
+
 	@Autowired
 	RewardService rewardService;
 
-	
 	// 보상 수령 (포인트) PATCH
-		@PatchMapping("/reward/point")
-		public ResponseEntity<RewardDTO> postPointReward(@RequestParam int value, @RequestParam String email) {
-			RewardDTO reward = rewardService.postPointReward(value, email);
-			return new ResponseEntity<>(reward, HttpStatus.OK);
-		}
+	@PatchMapping("/reward/point")
+	public ResponseEntity<RewardDTO> postPointReward(@RequestParam int value, @RequestParam String email) {
+		RewardDTO reward = rewardService.postPointReward(value, email);
+		return new ResponseEntity<>(reward, HttpStatus.OK);
+	}
+	
+	// 보상 수령 (캐쉬) PATCH
+	@PatchMapping("/reward/cash")
+	public ResponseEntity<RewardDTO> postCashReward(@RequestParam int value, @RequestParam String email) {
+		RewardDTO reward = rewardService.postCashReward(value, email);
+		return new ResponseEntity<>(reward, HttpStatus.OK);
+	}
+
 }
