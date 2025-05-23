@@ -19,19 +19,19 @@ import com.example.demo.service.GameServiceImpl;
 public class GameController {
 
 	@Autowired
-	GameServiceImpl gameservice;
+	GameServiceImpl gameService;
 
 	// 게임 입장
 	@PostMapping("/user-plays")
 	public ResponseEntity<UserPlayDTO> gameStart(@RequestParam String email, @RequestParam long stageIdx) {
-		UserPlayDTO gamestart = gameservice.gameStart(email, stageIdx);
+		UserPlayDTO gamestart = gameService.gameStart(email, stageIdx);
 		return new ResponseEntity<>(gamestart, HttpStatus.OK);
 	}
 
 	// 게임 입장시 스테이지 오염물 가져오기
 	@GetMapping("/user-plays/{stageIdx}")
 	public ResponseEntity<StagePollutionsDTO> getStagePollutions(@PathVariable("stageIdx") long stageIdx) {
-		StagePollutionsDTO pollutions = gameservice.getStagePollutions(stageIdx);
+		StagePollutionsDTO pollutions = gameService.getStagePollutions(stageIdx);
 		return new ResponseEntity<>(pollutions, HttpStatus.OK);
 	}
 

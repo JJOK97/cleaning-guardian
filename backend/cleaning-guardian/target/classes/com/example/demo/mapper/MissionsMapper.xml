@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.MissionsMapper">
+
+<!-- 모든 maps 불러오기 -->
+<select id="getAllMissions" resultType="com.example.demo.vo.MissionsVO">
+SELECT "mission_idx", "mission_name", DBMS_LOB.SUBSTR("mission_desc", 4000, 1) AS "mission_desc", "reward_skin", "reward_item", "created_at"
+FROM "missions"
+</select>
+
+<insert id="MissionClear">
+	INSERT INTO "mission_clear" (
+		"email",
+		"mission_idx",
+	) VALUES (
+		#{email},
+		#{missionIdx},
+	)
+</insert>
+
+</mapper>
