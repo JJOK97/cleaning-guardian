@@ -9,4 +9,11 @@
 	WHERE "email" = #{email}
 </update>
 
+<!-- 보상 수령 (cash) -->
+<update id="postCashReward">
+	UPDATE "balance" 
+	SET   "cash" = "cash" + #{value}
+	WHERE "email" = #{email}
+</update>
+
 </mapper>

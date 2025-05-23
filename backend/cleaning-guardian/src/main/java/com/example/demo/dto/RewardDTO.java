@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class RewardDTO {
 
 	private long point;
+	private long cash;
 	private boolean success;
 	private String message;
 
