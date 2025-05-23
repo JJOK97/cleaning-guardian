@@ -1,35 +1,136 @@
 package com.example.demo.controller;
 
+import java.util.List;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.demo.dto.GameSkinsDTO;
 import com.example.demo.service.GameSkinService;
+import com.example.demo.vo.GameSkinVO;
+import com.example.demo.vo.UserSkinVO;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/skins")
 public class GameSkinController {
 
 	@Autowired
 	private GameSkinService skinService;
 
-	// 전체 스킨 조회
-	@GetMapping("/skins")
-	public ResponseEntity<GameSkinsDTO> getAllSkins() {
-		GameSkinsDTO skins = skinService.getAllSkins();
-		return new ResponseEntity<>(skins, HttpStatus.OK);
+	@GetMapping("/{skinIdx}")
+	public GameSkinVO getSkin(@PathVariable long skinIdx) {
+		return skinService.getSkin(skinIdx);
 	}
 
-	// 단일 스킨 상세 내용 조회
-	@GetMapping("/skins/{skinsIdx}")
-	public ResponseEntity<GameSkinsDTO> getSkin(@PathVariable("skinsIdx") Long skinIdx) {
-		GameSkinsDTO skins = skinService.getSkin(skinIdx);
-		return new ResponseEntity<>(skins, HttpStatus.OK);
+	@GetMapping("/user")
+	public List<UserSkinVO> getUserSkins(@RequestParam String email) {
+		return skinService.getUserSkins(email);
 	}
 
+	@GetMapping("/user/{skinIdx}")
+	public UserSkinVO getUserSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.getUserSkin(email, skinIdx);
+	}
+
+	@GetMapping("/equipped")
+	public UserSkinVO getEquippedSkin(@RequestParam String email) {
+		return skinService.getEquippedSkin(email);
+	}
+
+	// 슬라이스 스킨 조회
+	@GetMapping("/slice")
+	public List<GameSkinVO> getAllSliceSkins() {
+		return skinService.getAllSliceSkins();
+	}
+
+	@GetMapping("/slice/{skinIdx}")
+	public GameSkinVO getSliceSkin(@PathVariable long skinIdx) {
+		return skinService.getSliceSkin(skinIdx);
+	}
+
+	@GetMapping("/slice/user")
+	public List<UserSkinVO> getUserSliceSkins(@RequestParam String email) {
+		return skinService.getUserSliceSkins(email);
+	}
+
+	@GetMapping("/slice/user/{skinIdx}")
+	public UserSkinVO getUserSliceSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.getUserSliceSkin(email, skinIdx);
+	}
+
+	@GetMapping("/slice/equipped")
+	public UserSkinVO getEquippedSliceSkin(@RequestParam String email) {
+		return skinService.getEquippedSliceSkin(email);
+	}
+
+	// 탭 스킨 조회
+	@GetMapping("/tap")
+	public List<GameSkinVO> getAllTapSkins() {
+		return skinService.getAllTapSkins();
+	}
+
+	@GetMapping("/tap/{skinIdx}")
+	public GameSkinVO getTapSkin(@PathVariable long skinIdx) {
+		return skinService.getTapSkin(skinIdx);
+	}
+
+	@GetMapping("/tap/user")
+	public List<UserSkinVO> getUserTapSkins(@RequestParam String email) {
+		return skinService.getUserTapSkins(email);
+	}
+
+	@GetMapping("/tap/user/{skinIdx}")
+	public UserSkinVO getUserTapSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.getUserTapSkin(email, skinIdx);
+	}
+
+	@GetMapping("/tap/equipped")
+	public UserSkinVO getEquippedTapSkin(@RequestParam String email) {
+		return skinService.getEquippedTapSkin(email);
+	}
+
+	// 캐시/포인트 스킨 조회
+	@GetMapping("/cash")
+	public List<GameSkinVO> getCashSkins() {
+		return skinService.getCashSkins();
+	}
+
+	@GetMapping("/point")
+	public List<GameSkinVO> getPointSkins() {
+		return skinService.getPointSkins();
+	}
+
+	@GetMapping("/cash/slice")
+	public List<GameSkinVO> getCashSliceSkins() {
+		return skinService.getCashSliceSkins();
+	}
+
+	@GetMapping("/cash/tap")
+	public List<GameSkinVO> getCashTapSkins() {
+		return skinService.getCashTapSkins();
+	}
+
+	@GetMapping("/point/slice")
+	public List<GameSkinVO> getPointSliceSkins() {
+		return skinService.getPointSliceSkins();
+	}
+
+	@GetMapping("/point/tap")
+	public List<GameSkinVO> getPointTapSkins() {
+		return skinService.getPointTapSkins();
+	}
+
+	// 스킨 장착/해제
+	@PostMapping("/equip/{skinIdx}")
+	public String equipSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.equipSkin(email, skinIdx);
+	}
+
+	@PostMapping("/unequip/{skinIdx}")
+	public String unequipSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.unequipSkin(email, skinIdx);
+	}
+
+	// 스킨 구매
+	@PostMapping("/purchase/{skinIdx}")
+	public String purchaseSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.purchaseSkin(email, skinIdx);
+	}
 }

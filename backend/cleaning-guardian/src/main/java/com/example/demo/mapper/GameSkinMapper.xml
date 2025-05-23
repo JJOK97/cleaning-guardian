@@ -4,15 +4,321 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.GameSkinMapper">
 
-	<select id="getAllSkins" resultType="com.example.demo.vo.GameSkinsVO">
-		SELECT *
-		FROM "game_skins"
-	</select>
-	
-	<select id="getSkin" resultType="com.example.demo.vo.GameSkinsVO">
-		 SELECT * 
-		 FROM "game_skins"
-   		 WHERE "skin_idx" = #{skinIdx}
-	</select>
+    <resultMap id="skinResultMap" type="com.example.demo.vo.GameSkinVO">
+        <id property="skinIdx" column="skin_idx"/>
+        <result property="gameIdx" column="game_idx"/>
+        <result property="skinName" column="skin_name"/>
+        <result property="skinDesc" column="skin_desc"/>
+        <result property="skinImg" column="skin_img"/>
+        <result property="skinPrice" column="skin_price"/>
+        <result property="actionType" column="action_type"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
 
-</mapper>
+    <resultMap id="userSkinResultMap" type="com.example.demo.vo.UserSkinVO">
+        <id property="uskinIdx" column="uskin_idx"/>
+        <result property="email" column="email"/>
+        <result property="skinIdx" column="skin_idx"/>
+        <result property="getType" column="get_type"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="isEquipped" column="is_equipped"/>
+        <association property="skin" resultMap="skinResultMap"/>
+    </resultMap>
+
+    <!-- 슬라이스 스킨 관련 쿼리 -->
+    <select id="getAllSliceSkins" resultMap="skinResultMap">
+        SELECT * FROM "game_skins" 
+        WHERE "action_type" = 'S' 
+        AND "skin_name" NOT IN ('기본 슬라이스')
+    </select>
+
+    <select id="getSliceSkin" resultMap="skinResultMap">
+        SELECT * FROM "game_skins"
+        WHERE "skin_idx" = #{skinIdx} AND "action_type" = 'S'
+    </select>
+
+    <select id="getUserSliceSkins" resultMap="userSkinResultMap">
+        SELECT 
+            us."uskin_idx",
+            us."email",
+            us."skin_idx",
+            us."get_type",
+            us."created_at",
+            us."is_equipped",
+            gs."skin_idx" as "skin_skin_idx",
+            gs."game_idx" as "skin_game_idx",
+            gs."skin_name" as "skin_skin_name",
+            gs."skin_desc" as "skin_skin_desc",
+            gs."skin_img" as "skin_skin_img",
+            gs."skin_price" as "skin_skin_price",
+            gs."action_type" as "skin_action_type",
+            gs."created_at" as "skin_created_at"
+        FROM "user_skins" us
+        JOIN "game_skins" gs ON us."skin_idx" = gs."skin_idx"
+        WHERE us."email" = #{email} AND gs."action_type" = 'S'
+    </select>
+
+    <select id="getUserSliceSkin" resultMap="userSkinResultMap">
+        SELECT 
+            us."uskin_idx",
+            us."email",
+            us."skin_idx",
+            us."get_type",
+            us."created_at",
+            us."is_equipped",
+            gs."skin_idx" as "skin_skin_idx",
+            gs."game_idx" as "skin_game_idx",
+            gs."skin_name" as "skin_skin_name",
+            gs."skin_desc" as "skin_skin_desc",
+            gs."skin_img" as "skin_skin_img",
+            gs."skin_price" as "skin_skin_price",
+            gs."action_type" as "skin_action_type",
+            gs."created_at" as "skin_created_at"
+        FROM "user_skins" us
+        JOIN "game_skins" gs ON us."skin_idx" = gs."skin_idx"
+        WHERE us."email" = #{email} AND us."skin_idx" = #{skinIdx} AND gs."action_type" = 'S'
+    </select>
+
+    <select id="getEquippedSliceSkin" resultMap="userSkinResultMap">
+        SELECT 
+            us."uskin_idx",
+            us."email",
+            us."skin_idx",
+            us."get_type",
+            us."created_at",
+            us."is_equipped",
+            gs."skin_idx" as "skin_skin_idx",
+            gs."game_idx" as "skin_game_idx",
+            gs."skin_name" as "skin_skin_name",
+            gs."skin_desc" as "skin_skin_desc",
+            gs."skin_img" as "skin_skin_img",
+            gs."skin_price" as "skin_skin_price",
+            gs."action_type" as "skin_action_type",
+            gs."created_at" as "skin_created_at"
+        FROM "user_skins" us
+        JOIN "game_skins" gs ON us."skin_idx" = gs."skin_idx"
+        WHERE us."email" = #{email} AND us."is_equipped" = 'Y' AND gs."action_type" = 'S'
+    </select>
+
+    <!-- 탭 스킨 관련 쿼리 -->
+    <select id="getAllTapSkins" resultMap="skinResultMap">
+        SELECT * FROM "game_skins" 
+        WHERE "action_type" = 'T' 
+        AND "skin_name" NOT IN ('기본 탭')
+    </select>
+
+    <select id="getTapSkin" resultMap="skinResultMap">
+        SELECT * FROM "game_skins"
+        WHERE "skin_idx" = #{skinIdx} AND "action_type" = 'T'
+    </select>
+
+    <select id="getUserTapSkins" resultMap="userSkinResultMap">
+        SELECT 
+            us."uskin_idx",
+            us."email",
+            us."skin_idx",
+            us."get_type",
+            us."created_at",
+            us."is_equipped",
+            gs."skin_idx" as "skin_skin_idx",
+            gs."game_idx" as "skin_game_idx",
+            gs."skin_name" as "skin_skin_name",
+            gs."skin_desc" as "skin_skin_desc",
+            gs."skin_img" as "skin_skin_img",
+            gs."skin_price" as "skin_skin_price",
+            gs."action_type" as "skin_action_type",
+            gs."created_at" as "skin_created_at"
+        FROM "user_skins" us
+        JOIN "game_skins" gs ON us."skin_idx" = gs."skin_idx"
+        WHERE us."email" = #{email} AND gs."action_type" = 'T'
+    </select>
+
+    <select id="getUserTapSkin" resultMap="userSkinResultMap">
+        SELECT 
+            us."uskin_idx",
+            us."email",
+            us."skin_idx",
+            us."get_type",
+            us."created_at",
+            us."is_equipped",
+            gs."skin_idx" as "skin_skin_idx",
+            gs."game_idx" as "skin_game_idx",
+            gs."skin_name" as "skin_skin_name",
+            gs."skin_desc" as "skin_skin_desc",
+            gs."skin_img" as "skin_skin_img",
+            gs."skin_price" as "skin_skin_price",
+            gs."action_type" as "skin_action_type",
+            gs."created_at" as "skin_created_at"
+        FROM "user_skins" us
+        JOIN "game_skins" gs ON us."skin_idx" = gs."skin_idx"
+        WHERE us."email" = #{email} AND us."skin_idx" = #{skinIdx} AND gs."action_type" = 'T'
+    </select>
+
+    <select id="getEquippedTapSkin" resultMap="userSkinResultMap">
+        SELECT 
+            us."uskin_idx",
+            us."email",
+            us."skin_idx",
+            us."get_type",
+            us."created_at",
+            us."is_equipped",
+            gs."skin_idx" as "skin_skin_idx",
+            gs."game_idx" as "skin_game_idx",
+            gs."skin_name" as "skin_skin_name",
+            gs."skin_desc" as "skin_skin_desc",
+            gs."skin_img" as "skin_skin_img",
+            gs."skin_price" as "skin_skin_price",
+            gs."action_type" as "skin_action_type",
+            gs."created_at" as "skin_created_at"
+        FROM "user_skins" us
+        JOIN "game_skins" gs ON us."skin_idx" = gs."skin_idx"
+        WHERE us."email" = #{email} AND us."is_equipped" = 'Y' AND gs."action_type" = 'T'
+    </select>
+
+    <!-- 공통 업데이트 쿼리 -->
+    <update id="equipSkin">
+        UPDATE "user_skins" 
+        SET "is_equipped" = 'Y'
+        WHERE "email" = #{email} AND "skin_idx" = #{skinIdx}
+    </update>
+
+    <update id="unequipSameTypeSkins">
+        UPDATE "user_skins" us
+        SET "is_equipped" = 'N'
+        WHERE us."email" = #{email} 
+        AND us."skin_idx" != #{skinIdx}
+        AND EXISTS (
+            SELECT 1 FROM "game_skins" gs1, "game_skins" gs2
+            WHERE gs1."skin_idx" = #{skinIdx}
+            AND gs2."skin_idx" = us."skin_idx"
+            AND gs1."action_type" = gs2."action_type"
+        )
+    </update>
+
+    <update id="unequipSkin">
+        UPDATE "user_skins" 
+        SET "is_equipped" = 'N'
+        WHERE "email" = #{email} AND "skin_idx" = #{skinIdx}
+    </update>
+
+    <!-- 캐시 스킨 목록 조회 -->
+    <select id="getCashSkins" resultMap="skinResultMap">
+        SELECT * FROM "game_skins" 
+        WHERE "price_type" = 'C'
+        ORDER BY "skin_idx"
+    </select>
+
+    <!-- 포인트 스킨 목록 조회 -->
+    <select id="getPointSkins" resultMap="skinResultMap">
+        SELECT * FROM "game_skins" 
+        WHERE "price_type" = 'P'
+        ORDER BY "skin_idx"
+    </select>
+
+    <!-- 캐시 슬라이스 스킨 목록 조회 -->
+    <select id="getCashSliceSkins" resultMap="skinResultMap">
+        SELECT * FROM "game_skins" 
+        WHERE "price_type" = 'C' AND "action_type" = 'S'
+        ORDER BY "skin_idx"
+    </select>
+
+    <!-- 캐시 탭 스킨 목록 조회 -->
+    <select id="getCashTapSkins" resultMap="skinResultMap">
+        SELECT * FROM "game_skins" 
+        WHERE "price_type" = 'C' AND "action_type" = 'T'
+        ORDER BY "skin_idx"
+    </select>
+
+    <!-- 포인트 슬라이스 스킨 목록 조회 -->
+    <select id="getPointSliceSkins" resultMap="skinResultMap">
+        SELECT * FROM "game_skins" 
+        WHERE "price_type" = 'P' AND "action_type" = 'S'
+        ORDER BY "skin_idx"
+    </select>
+
+    <!-- 포인트 탭 스킨 목록 조회 -->
+    <select id="getPointTapSkins" resultMap="skinResultMap">
+        SELECT * FROM "game_skins" 
+        WHERE "price_type" = 'P' AND "action_type" = 'T'
+        ORDER BY "skin_idx"
+    </select>
+
+    <!-- 스킨 구매 -->
+    <insert id="purchaseSkin">
+        INSERT INTO "user_skins" (
+            "email",
+            "skin_idx",
+            "get_type",
+            "is_equipped",
+            "created_at"
+        ) VALUES (
+            #{email},
+            #{skinIdx},
+            #{getType},
+            'N',
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 스킨 가격 조회 -->
+    <select id="getSkinPrice" resultType="int">
+        SELECT "skin_price"
+        FROM "game_skins"
+        WHERE "skin_idx" = #{skinIdx}
+    </select>
+
+    <!-- 스킨 가격 타입 조회 -->
+    <select id="getSkinPriceType" resultType="string">
+        SELECT "price_type"
+        FROM "game_skins"
+        WHERE "skin_idx" = #{skinIdx}
+    </select>
+
+    <!-- 기본 스킨 조회 -->
+    <select id="getSkin" resultMap="skinResultMap">
+        SELECT * FROM "game_skins"
+        WHERE "skin_idx" = #{skinIdx}
+    </select>
+
+    <select id="getUserSkins" resultMap="userSkinResultMap">
+        SELECT 
+            us."uskin_idx",
+            us."email",
+            us."skin_idx",
+            us."get_type",
+            us."created_at",
+            us."is_equipped",
+            gs."skin_idx" as "skin_skin_idx",
+            gs."game_idx" as "skin_game_idx",
+            gs."skin_name" as "skin_skin_name",
+            gs."skin_desc" as "skin_skin_desc",
+            gs."skin_img" as "skin_skin_img",
+            gs."skin_price" as "skin_skin_price",
+            gs."action_type" as "skin_action_type",
+            gs."created_at" as "skin_created_at"
+        FROM "user_skins" us
+        JOIN "game_skins" gs ON us."skin_idx" = gs."skin_idx"
+        WHERE us."email" = #{email}
+    </select>
+
+    <select id="getUserSkin" resultMap="userSkinResultMap">
+        SELECT 
+            us."uskin_idx",
+            us."email",
+            us."skin_idx",
+            us."get_type",
+            us."created_at",
+            us."is_equipped",
+            gs."skin_idx" as "skin_skin_idx",
+            gs."game_idx" as "skin_game_idx",
+            gs."skin_name" as "skin_skin_name",
+            gs."skin_desc" as "skin_skin_desc",
+            gs."skin_img" as "skin_skin_img",
+            gs."skin_price" as "skin_skin_price",
+            gs."action_type" as "skin_action_type",
+            gs."created_at" as "skin_created_at"
+        FROM "user_skins" us
+        JOIN "game_skins" gs ON us."skin_idx" = gs."skin_idx"
+        WHERE us."email" = #{email} AND us."skin_idx" = #{skinIdx}
+    </select>
+</mapper> 
