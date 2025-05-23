@@ -11,10 +11,10 @@ FROM "missions"
 <insert id="MissionClear">
 	INSERT INTO "mission_clear" (
 		"email",
-		"mission_idx",
+		"mission_idx"
 	) VALUES (
 		#{email},
-		#{missionIdx},
+		#{missionIdx}
 	)
 </insert>
 

@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MissionClearDTO {
 
-	private List<MissionsVO> missionsList;
-	private MissionsVO mission;
 	private boolean success;
 	private String message;
 }
