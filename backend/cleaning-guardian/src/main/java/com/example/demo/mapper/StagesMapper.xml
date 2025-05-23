@@ -30,11 +30,4 @@ WHERE "stages"."map_idx" = #{mapIdx}
   WHERE "stage_idx" = #{stageIdx}
     </select>
     
-    <!-- 해당 스테이지 오염물 조회 -->
-    <select id="getAllPollutions" resultType="com.example.demo.vo.StagePolutionsVO">
-    SELECT *
-    FROM "stage_pollutions"
-    WHERE "stage_idx" = #{stageIdx}
-    </select>
-    
 </mapper>

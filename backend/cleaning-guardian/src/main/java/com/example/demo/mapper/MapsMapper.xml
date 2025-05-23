@@ -10,19 +10,17 @@ FROM "maps"
 
 <!-- 클리어한 모든 maps 불러오기-->
 <select id="getClearedMaps" resultType="com.example.demo.vo.MapsVO">
-SELECT "map_idx", "game_idx", "map_title", DBMS_LOB.SUBSTR("map_desc", 4000, 1) AS "map_desc", "map_theme", "created_at" 
-FROM "maps" 
+SELECT "map_idx", "game_idx", "map_title", DBMS_LOB.SUBSTR("map_desc", 4000, 1) AS "map_desc",
+		"map_theme", "created_at"
+FROM "maps"
 WHERE NOT EXISTS (
-  SELECT 1 FROM "stages", "game_clear"
-  WHERE "stages"."stage_idx" = "game_clear"."stage_idx"
-    AND "stages"."map_idx" = "maps"."map_idx"
-    AND "game_clear"."email" = #{email}
-    AND NOT EXISTS (
-      SELECT 1 FROM "game_clear"
-      WHERE "game_clear"."stage_idx" = "stages"."stage_idx"
-        AND "game_clear"."email" = #{email}
-        AND "game_clear"."success_yn" = 'Y'
-    )
+  SELECT 1
+  FROM "stages"
+  LEFT JOIN "game_clear"
+    ON "stages"."stage_idx" = "game_clear"."stage_idx"
+    AND "email" = #{email}
+  WHERE "maps"."map_idx" = "stages"."map_idx"
+    AND ("game_clear"."stage_idx" IS NULL OR "game_clear"."success_yn" != 'Y')
 )
 </select>
 

@@ -1,5 +1,9 @@
 package com.example.demo.dto;
 
+import java.util.List;
+
+import com.example.demo.vo.MissionsVO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RewardDTO {
+public class MissionsDTO {
 
-	private long point;
-	private long cash;
+	private List<MissionsVO> missionsList;
+	private MissionsVO mission;
 	private boolean success;
 	private String message;
-
 }

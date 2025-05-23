@@ -9,11 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RewardDTO {
+public class MissionClearDTO {
 
-	private long point;
-	private long cash;
 	private boolean success;
 	private String message;
-
 }

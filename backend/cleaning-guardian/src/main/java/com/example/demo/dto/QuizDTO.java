@@ -1,5 +1,7 @@
 package com.example.demo.dto;
 
+import com.example.demo.vo.QuizVO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RewardDTO {
+public class QuizDTO {
 
-	private long point;
-	private long cash;
-	private boolean success;
+	private QuizVO quiz;
 	private String message;
+	private boolean success;
 
 }

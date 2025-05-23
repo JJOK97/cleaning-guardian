@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.StagePollutionsDTO;
+import com.example.demo.dto.PollutionsDTO;
 import com.example.demo.dto.UserPlayDTO;
 import com.example.demo.service.GameServiceImpl;
 
@@ -19,19 +19,26 @@ import com.example.demo.service.GameServiceImpl;
 public class GameController {
 
 	@Autowired
-	GameServiceImpl gameservice;
+	GameServiceImpl gameService;
 
 	// 게임 입장
 	@PostMapping("/user-plays")
 	public ResponseEntity<UserPlayDTO> gameStart(@RequestParam String email, @RequestParam long stageIdx) {
-		UserPlayDTO gamestart = gameservice.gameStart(email, stageIdx);
+		UserPlayDTO gamestart = gameService.gameStart(email, stageIdx);
 		return new ResponseEntity<>(gamestart, HttpStatus.OK);
 	}
 
 	// 게임 입장시 스테이지 오염물 가져오기
-	@GetMapping("/user-plays/{stageIdx}")
-	public ResponseEntity<StagePollutionsDTO> getStagePollutions(@PathVariable("stageIdx") long stageIdx) {
-		StagePollutionsDTO pollutions = gameservice.getStagePollutions(stageIdx);
+	@GetMapping("/user-plays/{stageIdx}/pollutions")
+	public ResponseEntity<PollutionsDTO> getStagePollutions(@PathVariable("stageIdx") long stageIdx) {
+		PollutionsDTO pollutions = gameService.getStagePollutions(stageIdx);
+		return new ResponseEntity<>(pollutions, HttpStatus.OK);
+	}
+
+	// 전체 스테이지 오염물 조회	
+	@GetMapping("/pollutions")
+	public ResponseEntity<PollutionsDTO> getAllPollutions() {
+		PollutionsDTO pollutions = gameService.getAllPollutions();
 		return new ResponseEntity<>(pollutions, HttpStatus.OK);
 	}
 

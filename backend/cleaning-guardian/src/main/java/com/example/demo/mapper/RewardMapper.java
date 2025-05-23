@@ -7,4 +7,6 @@ public interface RewardMapper {
 
 	int postPointReward(int value, String email);
 
+	int postCashReward(int value, String email);
+
 }

@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.example.demo.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RewardDTO {
+public class MissionClearVO {
 
-	private long point;
-	private long cash;
-	private boolean success;
-	private String message;
-
+	private long clearIdx;
+	private String email;
+	private long missionIdx;
 }
