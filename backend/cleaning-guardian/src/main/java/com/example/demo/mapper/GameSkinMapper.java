@@ -14,7 +14,6 @@ public interface GameSkinMapper {
 	GameSkinVO getSkin(long skinIdx);
 	List<UserSkinVO> getUserSkins(String email);
 	UserSkinVO getUserSkin(String email, long skinIdx);
-	UserSkinVO getEquippedSkin(String email);
 
 	// 슬라이스 스킨 관련 메서드
 	List<GameSkinVO> getAllSliceSkins();

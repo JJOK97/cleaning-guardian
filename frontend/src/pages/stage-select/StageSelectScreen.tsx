@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getMapStages, getClearedStages } from '@/api/maps';
+import { getStagePollutions, PollutionData } from '@/api/stages';
+import { getEquippedSliceSkin, getEquippedTapSkin, UserSkinData } from '@/api/skins';
+import StageInfoModal from '@/components/modal/StageInfoModal';
 
 // 배경 이미지 import
 import trashIsland from '@/assets/img/stage/trash-island.png';
@@ -194,8 +197,19 @@ const LockedOverlay = styled.div`
 
 const StageSelectScreen: React.FC = () => {
     const { mapId } = useParams();
+    const navigate = useNavigate();
     const [stages, setStages] = useState<ProcessedStageInfo[]>([]);
     const [clearedStages, setClearedStages] = useState<number[]>([]);
+    const [selectedStage, setSelectedStage] = useState<ProcessedStageInfo | null>(null);
+    const [pollutions, setPollutions] = useState<PollutionData[]>([]);
+    const [equippedSkins, setEquippedSkins] = useState<{
+        slice: UserSkinData | null;
+        tap: UserSkinData | null;
+    }>({
+        slice: null,
+        tap: null,
+    });
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchStages = async () => {
@@ -248,11 +262,54 @@ const StageSelectScreen: React.FC = () => {
         };
 
         fetchStages();
+        fetchEquippedSkins();
     }, [mapId]);
 
-    const handleStageSelect = (stageIdx: number) => {
-        console.log('Selected stage:', stageIdx);
-        // Implement the logic to navigate to the game page
+    const fetchEquippedSkins = async () => {
+        try {
+            const [sliceResponse, tapResponse] = await Promise.all([getEquippedSliceSkin(), getEquippedTapSkin()]);
+
+            setEquippedSkins({
+                slice: sliceResponse.uskin?.skinType === 'S' ? sliceResponse.uskin : null,
+                tap: tapResponse.uskin?.skinType === 'T' ? tapResponse.uskin : null,
+            });
+        } catch (error) {
+            console.error('장착된 스킨 조회 실패:', error);
+        }
+    };
+
+    const handleStageSelect = async (stageIdx: number) => {
+        const stage = stages.find((s) => s.stageIdx === stageIdx);
+        if (!stage) return;
+
+        console.log('선택된 스테이지:', stage);
+        setSelectedStage(stage);
+        try {
+            const response = await getStagePollutions(stage.stageIdx);
+            console.log('오염물 응답:', response);
+            if (response.success && response.pollutions) {
+                setPollutions(response.pollutions);
+                setIsModalOpen(true);
+                console.log('모달 열기');
+            }
+        } catch (error) {
+            console.error('스테이지 오염물 조회 실패:', error);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedStage(null);
+    };
+
+    const handleChangeSkin = () => {
+        navigate('/inventory');
+    };
+
+    const handleStartGame = () => {
+        if (selectedStage) {
+            navigate(`/game/${selectedStage.stageIdx}`);
+        }
     };
 
     const getDifficultyText = (step: number) => {

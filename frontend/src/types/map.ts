@@ -29,3 +29,15 @@ export interface MapResponse {
     maplist: MapData[];
     email: string;
 }
+
+export interface StageMission {
+    mission: string;
+}
+
+export interface ProcessedStageInfo {
+    stageIdx: number;
+    stageName: string;
+    stageMission: StageMission;
+    isFinalStage: 'Y' | 'N';
+    unlocked: boolean;
+}

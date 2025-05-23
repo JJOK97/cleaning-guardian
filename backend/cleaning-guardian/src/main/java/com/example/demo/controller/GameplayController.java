@@ -21,14 +21,6 @@ public class GameplayController {
 	@Autowired
 	GamePlayServiceImpl gamePlayService;
 
-	// 스킨 설정 PATCH
-	@PatchMapping("/users/me/{skinIdx}")
-	public ResponseEntity<UserSkinDTO> patchSkin(@PathVariable("skinIdx") long skinIdx,
-			@RequestParam("email") String email) {
-		UserSkinDTO userSkin = gamePlayService.patchSkin(skinIdx, email);
-		return new ResponseEntity<>(userSkin, HttpStatus.OK);
-	}
-
 	// 스테이지 완료 처리 POST
 	@PostMapping("/stages/{stageIdx}/complete")
 	public ResponseEntity<GameClearDTO> stageClear(@PathVariable("stageIdx") long stageIdx,

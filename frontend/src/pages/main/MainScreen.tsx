@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getClearedMaps, getMapDetail } from '@/api/maps';
+import { getClearedMaps, getMapDetail, getMaps } from '@/api/maps';
 import { getUserInfo } from '@/api/user';
 import MapInfoModal from '@/components/modal/MapInfoModal';
 import { ProcessedMap } from '@/types/map';
@@ -39,35 +39,28 @@ const MainScreen: React.FC = () => {
                     return;
                 }
 
+                // 전체 맵 리스트 가져오기
+                const allMapsResponse = await getMaps();
+                console.log('전체 맵 응답:', allMapsResponse);
+
+                if (!allMapsResponse.success || !allMapsResponse.maplist) {
+                    console.error('맵 데이터가 없습니다');
+                    return;
+                }
+
+                // 클리어한 맵 리스트 가져오기
                 const clearedResponse = await getClearedMaps(userInfo.email);
-                console.log('클리어한 맵 응답 전체:', clearedResponse);
-                console.log('클리어한 맵 목록 원본:', clearedResponse.maplist);
+                console.log('클리어한 맵 응답:', clearedResponse);
 
-                if (!clearedResponse.success) {
-                    console.error('API 요청 실패');
-                    return;
-                }
+                const mapList = allMapsResponse.maplist;
+                const clearedMaps = clearedResponse.maplist || [];
 
-                const mapList = clearedResponse.maplist;
-                const clearedMaps = clearedResponse.maplist;
-
-                if (!Array.isArray(mapList)) {
-                    console.error('맵 데이터가 배열이 아님');
-                    return;
-                }
-
-                console.log('원본 맵 목록:', mapList);
                 const processedMaps = mapList.map((map) => {
-                    console.log('맵 처리 중:', {
-                        mapIdx: map.mapIdx,
-                        mapTheme: map.mapTheme,
-                        mapTitle: map.mapTitle,
-                    });
                     const parsedDesc = JSON.parse(map.mapDesc);
                     const isUnlocked =
                         map.mapIdx === 1 || clearedMaps.some((clearedMap) => clearedMap.mapIdx === map.mapIdx);
 
-                    const processed = {
+                    return {
                         mapIdx: map.mapIdx,
                         gameIdx: map.gameIdx,
                         mapTitle: map.mapTitle,
@@ -77,8 +70,6 @@ const MainScreen: React.FC = () => {
                         mapDesc: parsedDesc,
                         unlocked: isUnlocked,
                     } as ProcessedMap;
-                    console.log('처리된 맵:', processed);
-                    return processed;
                 });
 
                 console.log('최종 처리된 맵 목록:', processedMaps);
