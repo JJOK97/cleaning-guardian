@@ -51,7 +51,6 @@ export const startGame = async (email: string, stageIdx: number): Promise<UserPl
         });
         return response.data;
     } catch (error) {
-        console.error('게임 시작 실패:', error);
         throw error;
     }
 };
@@ -64,7 +63,6 @@ export const completeGame = async (stageIdx: number, email: string, successYn: s
         });
         return response.data;
     } catch (error) {
-        console.error('게임 클리어 실패:', error);
         throw error;
     }
 };
@@ -75,7 +73,6 @@ export const getStagePollutions = async (stageIdx: number) => {
         const response = await api.get(`/user-plays/${stageIdx}/pollutions`);
         return response.data;
     } catch (error) {
-        console.error('스테이지 오염물질 정보 조회 실패:', error);
         throw error;
     }
 };
@@ -84,11 +81,10 @@ export const getStagePollutions = async (stageIdx: number) => {
 export const getUserItems = async (email: string): Promise<GameItemsResponse> => {
     try {
         const response = await api.get('/items/user', {
-            params: { email },
+            headers: { email },
         });
         return response.data;
     } catch (error) {
-        console.error('사용자 아이템 조회 실패:', error);
         throw error;
     }
 };
@@ -97,11 +93,10 @@ export const getUserItems = async (email: string): Promise<GameItemsResponse> =>
 export const useItem = async (email: string, itemIdx: number): Promise<GameItemsResponse> => {
     try {
         const response = await api.post(`/items/use/${itemIdx}`, null, {
-            params: { email },
+            headers: { email },
         });
         return response.data;
     } catch (error) {
-        console.error('아이템 사용 실패:', error);
         throw error;
     }
 };

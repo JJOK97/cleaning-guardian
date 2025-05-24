@@ -1,11 +1,21 @@
 import api from './index';
 
 export const getUserInfo = async () => {
-    const res = await api.get('/users/me');
+    const token = localStorage.getItem('accessToken');
+    const res = await api.get('/users/me', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     return res.data;
 };
 
 export const getUserBalance = async () => {
-    const res = await api.get('/users/me/balance');
+    const token = localStorage.getItem('accessToken');
+    const res = await api.get('/users/me/balance', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     return res.data;
 };
