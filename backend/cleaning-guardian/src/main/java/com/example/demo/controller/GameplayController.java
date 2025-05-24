@@ -14,6 +14,9 @@ import com.example.demo.dto.GameClearDTO;
 import com.example.demo.dto.UserSkinDTO;
 import com.example.demo.service.GamePlayServiceImpl;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 public class GameplayController {
@@ -26,7 +29,11 @@ public class GameplayController {
 	public ResponseEntity<GameClearDTO> stageClear(@PathVariable("stageIdx") long stageIdx,
 			@RequestParam("email") String email,
 			@RequestParam("successYn") String successYn) {
+		log.info("Stage Clear Request - stageIdx: {}, email: {}, successYn: {}", stageIdx, email, successYn);
+		
 		GameClearDTO stage = gamePlayService.stageClear(stageIdx, email, successYn);
+		log.info("Stage Clear Response - {}", stage);
+		
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}
 

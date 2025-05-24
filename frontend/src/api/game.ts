@@ -1,4 +1,5 @@
 import api from './index';
+import { Reward } from '@/types/reward';
 
 export interface UserPlayResponse {
     success: boolean;
@@ -171,4 +172,9 @@ export const postCashReward = async (email: string, value: number): Promise<Rewa
     } catch (error) {
         throw error;
     }
+};
+
+export const postReward = async (email: string, rewards: Reward[]) => {
+    // rewards: [{ type: 'POINT' | 'CASH' | 'ITEM', value, ... }]
+    return api.post('/reward', { email, rewards });
 };
