@@ -24,8 +24,8 @@ public class GameplayController {
 	// 스테이지 완료 처리 POST
 	@PostMapping("/stages/{stageIdx}/complete")
 	public ResponseEntity<GameClearDTO> stageClear(@PathVariable("stageIdx") long stageIdx,
-			@RequestParam("email") String email) {
-		String successYn = "N";
+			@RequestParam("email") String email,
+			@RequestParam("successYn") String successYn) {
 		GameClearDTO stage = gamePlayService.stageClear(stageIdx, email, successYn);
 		return new ResponseEntity<>(stage, HttpStatus.OK);
 	}

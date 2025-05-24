@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { ProcessedStageInfo } from '@/types/map';
 import { PollutionData } from '@/api/stages';
 import { UserSkinData } from '@/api/skins';
+import { GameItem, UserItem, getUserItems, useItem } from '@/api/game';
 import { pollutionNameToFile, skinNameToFile } from '@/utils/assetMapping';
+import { useAuth } from '@/hooks/useAuth';
 
 interface StageInfoModalProps {
     isOpen: boolean;
@@ -46,38 +48,37 @@ const ModalOverlay = styled.div<{ $isClosing: boolean }>`
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(3px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     padding: 1rem;
-    animation: ${({ $isClosing }) => ($isClosing ? fadeOut : fadeIn)} 0.25s ease-out forwards;
+    animation: ${({ $isClosing }) => ($isClosing ? fadeOut : fadeIn)} 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 `;
 
 const ModalContent = styled.div<{ $isClosing: boolean }>`
-    background: linear-gradient(135deg, rgba(40, 60, 40, 0.95) 0%, rgba(80, 120, 80, 0.9) 100%);
-    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(30, 45, 30, 0.95) 0%, rgba(60, 90, 60, 0.9) 100%);
+    border-radius: 28px;
     width: clamp(320px, 95vw, 70vw);
     height: clamp(480px, 85vh, 90vh);
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    animation: ${({ $isClosing }) => ($isClosing ? fadeOut : fadeIn)} 0.25s ease-out forwards;
-    border: 2px solid rgba(120, 255, 120, 0.2);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(120, 255, 120, 0.1), 0 0 32px rgba(120, 255, 120, 0.1);
+    animation: ${({ $isClosing }) => ($isClosing ? fadeOut : fadeIn)} 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 `;
 
 const CloseButton = styled.button`
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(255, 255, 255, 0.2);
+    top: 1.2rem;
+    right: 1.2rem;
+    background: rgba(255, 255, 255, 0.15);
     border: none;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     color: #fff;
     font-size: 1.5rem;
@@ -87,150 +88,249 @@ const CloseButton = styled.button`
     justify-content: center;
     transition: all 0.2s ease;
     z-index: 2;
+    backdrop-filter: blur(4px);
 
     &:hover {
         transform: scale(1.1);
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.25);
     }
 `;
 
 const ContentSection = styled.div`
-    padding: clamp(0.8rem, 2vw, 1.2rem) clamp(0.6rem, 1.5vw, 0.8rem);
+    padding: clamp(1rem, 2.5vw, 1.5rem) clamp(0.8rem, 2vw, 1rem);
     flex: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: clamp(0.8rem, 2vw, 1rem);
+    gap: clamp(1rem, 2.5vw, 1.2rem);
 
     &::-webkit-scrollbar {
-        width: 6px;
+        width: 8px;
     }
 
     &::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 4px;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: rgba(120, 255, 120, 0.3);
+        background: rgba(120, 255, 120, 0.2);
         border-radius: 4px;
 
         &:hover {
-            background: rgba(120, 255, 120, 0.4);
+            background: rgba(120, 255, 120, 0.3);
         }
     }
 `;
 
 const Title = styled.h2`
-    font-size: clamp(1.2rem, 3vw, 1.4rem);
+    font-size: clamp(1.4rem, 3.5vw, 1.6rem);
     color: #fff;
-    margin: 0 0 0.6rem 0;
+    margin: 0 0 1rem 0;
     font-weight: bold;
     text-align: center;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
 `;
 
 const Section = styled.div`
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: clamp(0.8rem, 2vw, 1rem);
-    border: 1px solid rgba(120, 255, 120, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: clamp(1rem, 2.5vw, 1.2rem);
+    border: 1px solid rgba(120, 255, 120, 0.15);
+    backdrop-filter: blur(4px);
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
 `;
 
 const SectionTitle = styled.h3`
-    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    font-size: clamp(1rem, 2.8vw, 1.1rem);
     color: #8bc34a;
-    margin: 0 0 0.8rem 0;
+    margin: 0 0 1rem 0;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 `;
 
 const PollutionList = styled.div`
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(0.6rem, 1.5vw, 0.8rem);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: clamp(0.8rem, 2vw, 1rem);
 `;
 
 const PollutionItem = styled.div`
-    border-radius: 12px;
-    padding: clamp(0.6rem, 1.5vw, 0.8rem);
+    border-radius: 16px;
+    padding: clamp(0.8rem, 2vw, 1rem);
     text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
 `;
 
 const PollutionImage = styled.img`
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: contain;
-    background: #222;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    margin-bottom: 0.8rem;
+    padding: 0.5rem;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: scale(1.05);
+    }
 `;
 
 const PollutionName = styled.p`
     color: #fff;
-    font-size: clamp(0.7rem, 2vw, 0.8rem);
+    font-size: clamp(0.8rem, 2.2vw, 0.9rem);
     margin: 0;
+    font-weight: 500;
 `;
 
 const SkinSection = styled.div`
     display: flex;
     flex-direction: column;
-    gap: clamp(0.6rem, 1.5vw, 0.8rem);
+    gap: clamp(0.8rem, 2vw, 1rem);
 `;
 
 const SkinItem = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    padding: clamp(0.6rem, 1.5vw, 0.8rem);
-    border: 1px solid rgba(120, 255, 120, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: clamp(0.8rem, 2vw, 1rem);
+    border: 1px solid rgba(120, 255, 120, 0.15);
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.15);
+    }
 `;
 
 const SkinInfo = styled.div`
     display: flex;
     align-items: center;
-    gap: clamp(0.6rem, 1.5vw, 0.8rem);
+    gap: clamp(0.8rem, 2vw, 1rem);
 `;
 
 const SkinImage = styled.img`
-    width: clamp(32px, 8vw, 40px);
-    height: clamp(32px, 8vw, 40px);
+    width: clamp(40px, 10vw, 48px);
+    height: clamp(40px, 10vw, 48px);
     aspect-ratio: 1 / 1;
     object-fit: contain;
-    background: #222;
-    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 0.4rem;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: scale(1.1);
+    }
 `;
 
 const SkinName = styled.span`
     color: #fff;
-    font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+    font-size: clamp(0.9rem, 2.4vw, 1rem);
+    font-weight: 500;
 `;
 
 const ButtonGroup = styled.div`
-    padding: clamp(0.8rem, 2vw, 1rem);
+    padding: clamp(1rem, 2.5vw, 1.2rem);
     display: flex;
-    gap: clamp(0.6rem, 1.5vw, 0.8rem);
-    background: rgba(0, 0, 0, 0.2);
+    gap: clamp(0.8rem, 2vw, 1rem);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
 `;
 
 const Button = styled.button<{ $primary?: boolean }>`
     flex: 1;
-    padding: clamp(0.6rem, 1.5vw, 0.8rem);
+    padding: clamp(0.8rem, 2vw, 1rem);
     border: none;
-    border-radius: 12px;
-    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    border-radius: 16px;
+    font-size: clamp(1rem, 2.8vw, 1.1rem);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: ${(props) => (props.$primary ? '#4CAF50' : 'rgba(255, 255, 255, 0.2)')};
+    background: ${(props) => (props.$primary ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' : 'rgba(255, 255, 255, 0.15)')};
     color: #fff;
+    letter-spacing: 0.5px;
+
+    &:hover {
+        transform: translateY(-2px);
+        background: ${(props) => (props.$primary ? 'linear-gradient(135deg, #45a049 0%, #3d8b40 100%)' : 'rgba(255, 255, 255, 0.2)')};
+    }
 
     &:active {
         transform: scale(0.98);
     }
+`;
+
+const ItemSection = styled(Section)`
+    margin-top: 1rem;
+`;
+
+const ItemList = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+`;
+
+const ItemCard = styled.div`
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.15);
+    }
+`;
+
+const ItemImage = styled.img`
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 0.4rem;
+`;
+
+const ItemName = styled.span`
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+`;
+
+const ItemDesc = styled.p`
+    color: #ccc;
+    font-size: 0.8rem;
+    text-align: center;
+    margin: 0;
+`;
+
+const ItemCount = styled.span`
+    color: #4caf50;
+    font-size: 0.9rem;
+    font-weight: 600;
 `;
 
 const StageInfoModal: React.FC<StageInfoModalProps> = ({
@@ -243,6 +343,42 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
     onStartGame,
 }) => {
     const [isClosing, setIsClosing] = useState(false);
+    const [userItems, setUserItems] = useState<UserItem[]>([]);
+    const { user } = useAuth();
+
+    useEffect(() => {
+        const fetchUserItems = async () => {
+            if (!user?.email) return;
+            try {
+                const response = await getUserItems(user.email);
+                if (response.success && response.uitemlist) {
+                    setUserItems(response.uitemlist);
+                }
+            } catch (error) {
+                console.error('아이템 조회 실패:', error);
+            }
+        };
+
+        if (isOpen) {
+            fetchUserItems();
+        }
+    }, [isOpen, user?.email]);
+
+    const handleItemUse = async (itemIdx: number) => {
+        if (!user?.email) return;
+        try {
+            const response = await useItem(user.email, itemIdx);
+            if (response.success) {
+                // 아이템 사용 후 목록 새로고침
+                const updatedItems = await getUserItems(user.email);
+                if (updatedItems.success && updatedItems.uitemlist) {
+                    setUserItems(updatedItems.uitemlist);
+                }
+            }
+        } catch (error) {
+            console.error('아이템 사용 실패:', error);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -255,14 +391,8 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
     };
 
     return (
-        <ModalOverlay
-            onClick={handleClose}
-            $isClosing={isClosing}
-        >
-            <ModalContent
-                onClick={(e) => e.stopPropagation()}
-                $isClosing={isClosing}
-            >
+        <ModalOverlay onClick={handleClose} $isClosing={isClosing}>
+            <ModalContent onClick={(e) => e.stopPropagation()} $isClosing={isClosing}>
                 <CloseButton onClick={handleClose}>×</CloseButton>
                 <ContentSection>
                     <Title>{stageInfo.stageName}</Title>
@@ -277,60 +407,59 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                         <PollutionList>
                             {pollutions.map((pollution) => (
                                 <PollutionItem key={pollution.polIdx}>
-                                    <PollutionImage
-                                        src={pollutionNameToFile[pollution.polName]}
-                                        alt={pollution.polName}
-                                    />
+                                    <PollutionImage src={pollutionNameToFile[pollution.polName]} alt={pollution.polName} />
                                     <PollutionName>{pollution.polName}</PollutionName>
                                 </PollutionItem>
                             ))}
                         </PollutionList>
                     </Section>
 
+                    <ItemSection>
+                        <SectionTitle>보유 아이템</SectionTitle>
+                        <ItemList>
+                            {userItems.map((userItem) => (
+                                <ItemCard key={userItem.uitemIdx} onClick={() => handleItemUse(userItem.item.itemIdx)}>
+                                    <ItemImage src={userItem.item.itemImg} alt={userItem.item.itemName} />
+                                    <ItemName>{userItem.item.itemName}</ItemName>
+                                    <ItemDesc>{userItem.item.itemDesc}</ItemDesc>
+                                </ItemCard>
+                            ))}
+                        </ItemList>
+                    </ItemSection>
+
                     <Section>
                         <SectionTitle>장착된 스킨</SectionTitle>
                         <SkinSection>
-                            {equippedSkins.slice &&
-                                equippedSkins.slice.skinType === 'S' &&
-                                equippedSkins.slice.skin && (
-                                    <SkinItem>
-                                        <SkinInfo>
-                                            <SkinImage
-                                                src={skinNameToFile[equippedSkins.slice.skin.skinName]}
-                                                alt={equippedSkins.slice.skin.skinName || '슬라이스 스킨'}
-                                            />
-                                            <SkinName>
-                                                {equippedSkins.slice.skin.skinName || '기본 슬라이스 스킨'}
-                                            </SkinName>
-                                        </SkinInfo>
-                                        <Button onClick={onChangeSkin}>변경</Button>
-                                    </SkinItem>
-                                )}
-                            {stageInfo.isFinalStage === 'Y' &&
-                                equippedSkins.tap &&
-                                equippedSkins.tap.skinType === 'T' &&
-                                equippedSkins.tap.skin && (
-                                    <SkinItem>
-                                        <SkinInfo>
-                                            <SkinImage
-                                                src={skinNameToFile[equippedSkins.tap.skin.skinName]}
-                                                alt={equippedSkins.tap.skin.skinName || '탭 스킨'}
-                                            />
-                                            <SkinName>{equippedSkins.tap.skin.skinName || '기본 탭 스킨'}</SkinName>
-                                        </SkinInfo>
-                                        <Button onClick={onChangeSkin}>변경</Button>
-                                    </SkinItem>
-                                )}
+                            {equippedSkins.slice && equippedSkins.slice.skin.actionType === 'S' && (
+                                <SkinItem>
+                                    <SkinInfo>
+                                        <SkinImage
+                                            src={skinNameToFile[equippedSkins.slice.skin.skinName]}
+                                            alt={equippedSkins.slice.skin.skinName || '슬라이스 스킨'}
+                                        />
+                                        <SkinName>{equippedSkins.slice.skin.skinName || '기본 슬라이스 스킨'}</SkinName>
+                                    </SkinInfo>
+                                    <Button onClick={onChangeSkin}>변경</Button>
+                                </SkinItem>
+                            )}
+                            {stageInfo.isFinalStage === 'Y' && equippedSkins.tap && equippedSkins.tap.skin.actionType === 'T' && (
+                                <SkinItem>
+                                    <SkinInfo>
+                                        <SkinImage
+                                            src={skinNameToFile[equippedSkins.tap.skin.skinName]}
+                                            alt={equippedSkins.tap.skin.skinName || '탭 스킨'}
+                                        />
+                                        <SkinName>{equippedSkins.tap.skin.skinName || '기본 탭 스킨'}</SkinName>
+                                    </SkinInfo>
+                                    <Button onClick={onChangeSkin}>변경</Button>
+                                </SkinItem>
+                            )}
                         </SkinSection>
                     </Section>
                 </ContentSection>
 
                 <ButtonGroup>
-                    <Button onClick={handleClose}>닫기</Button>
-                    <Button
-                        $primary
-                        onClick={onStartGame}
-                    >
+                    <Button $primary onClick={onStartGame}>
                         게임 시작
                     </Button>
                 </ButtonGroup>

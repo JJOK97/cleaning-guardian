@@ -17,10 +17,17 @@ export interface UserSkinData {
     skinIdx: number;
     getType: string;
     createdAt: string;
-    skinName: string;
-    skinImg: string;
-    skinType: 'S' | 'T';
-    isEquipped: boolean;
+    isEquipped: string;
+    skin: {
+        skinIdx: number;
+        gameIdx: number;
+        skinName: string;
+        skinDesc: string;
+        skinImg: string;
+        skinPrice: number;
+        actionType: string;
+        createdAt: string;
+    };
 }
 
 export interface SkinsResponse {

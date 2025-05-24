@@ -3,7 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.GameItemsDTO;
 import com.example.demo.dto.UserItemDTO;
 import com.example.demo.service.GameItemService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/v1/items")
-@RequiredArgsConstructor
 public class GameItemController {
 
-	private final GameItemService gameItemService;
+	@Autowired
+	private GameItemService gameItemService;
 
 	/**
 	 * 모든 게임 아이템 목록을 조회합니다.

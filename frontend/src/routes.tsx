@@ -19,61 +19,22 @@ const AppRoutes: React.FC = () => {
     return (
         <Routes>
             {/* 헤더/푸터 없는 화면 */}
-            <Route
-                path='/'
-                element={<SplashScreen />}
-            />
-            <Route
-                path='/login'
-                element={<LoginScreen />}
-            />
-            <Route
-                path='/auth/login'
-                element={<LoginScreen />}
-            />
-            <Route
-                path='/auth/signup/terms'
-                element={<SignupTermsScreen />}
-            />
-            <Route
-                path='/auth/signup'
-                element={<SignupScreen />}
-            />
+            <Route path='/' element={<SplashScreen />} />
+            <Route path='/login' element={<LoginScreen />} />
+            <Route path='/auth/login' element={<LoginScreen />} />
+            <Route path='/auth/signup/terms' element={<SignupTermsScreen />} />
+            <Route path='/auth/signup' element={<SignupScreen />} />
+            <Route path='/game/:stageId' element={<InGameScreen />} />
 
             {/* 헤더/푸터 있는 화면 */}
             <Route element={<MainLayout />}>
-                <Route
-                    path='/main'
-                    element={<MainScreen />}
-                />
-                <Route
-                    path='/stage-select/:mapId'
-                    element={<StageSelectScreen />}
-                />
-                <Route
-                    path='/game/:stageId'
-                    element={<InGameScreen />}
-                />
-                <Route
-                    path='/result'
-                    element={<ResultScreen />}
-                />
-                <Route
-                    path='/collection'
-                    element={<CollectionScreen />}
-                />
-                <Route
-                    path='/inventory'
-                    element={<InventoryScreen />}
-                />
-                <Route
-                    path='/shop'
-                    element={<ShopScreen />}
-                />
-                <Route
-                    path='/settings'
-                    element={<SettingsScreen />}
-                />
+                <Route path='/main' element={<MainScreen />} />
+                <Route path='/stage-select/:mapId' element={<StageSelectScreen />} />
+                <Route path='/result' element={<ResultScreen />} />
+                <Route path='/collection' element={<CollectionScreen />} />
+                <Route path='/inventory' element={<InventoryScreen />} />
+                <Route path='/shop' element={<ShopScreen />} />
+                <Route path='/settings' element={<SettingsScreen />} />
             </Route>
         </Routes>
     );
