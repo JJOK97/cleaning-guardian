@@ -27,8 +27,8 @@ Thumbs.db
 # Java / Spring Boot 관련
 #############################
 # 빌드 결과물
-/target/
-/build/
+**/target/
+**/build/
 
 # IDE 설정
 *.iml
@@ -50,7 +50,6 @@ build/
 *.log
 *.env
 .env.*
-
 
 #############################
 # OS 별 임시파일
@@ -77,4 +76,3 @@ Desktop.ini
 *.lock
 *.tmp
 .metadata
-.gitignore"backend/cleaning-guardian/target/" 

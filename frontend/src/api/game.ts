@@ -175,6 +175,15 @@ export const postCashReward = async (email: string, value: number): Promise<Rewa
 };
 
 export const postReward = async (email: string, rewards: Reward[]) => {
-    // rewards: [{ type: 'POINT' | 'CASH' | 'ITEM', value, ... }]
-    return api.post('/reward', { email, rewards });
+    console.log('Posting reward:', { email, rewards });
+    try {
+        const response = await api.post('/reward', rewards, {
+            params: { email },
+        });
+        console.log('Reward response:', response.data);
+        return response;
+    } catch (error) {
+        console.error('Reward error:', error);
+        throw error;
+    }
 };

@@ -9,4 +9,10 @@ public interface RewardMapper {
 
 	int postCashReward(int value, String email);
 
+	int checkItemExists(String email, Long itemIdx);
+
+	int insertItemReward(int value, Long itemIdx, String email);
+
+	int updateItemReward(int value, Long itemIdx, String email);
+
 }

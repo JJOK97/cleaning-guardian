@@ -25,12 +25,12 @@ const AppRoutes: React.FC = () => {
             <Route path='/auth/signup/terms' element={<SignupTermsScreen />} />
             <Route path='/auth/signup' element={<SignupScreen />} />
             <Route path='/game/:stageId' element={<InGameScreen />} />
+            <Route path='/result' element={<ResultScreen />} />
 
             {/* 헤더/푸터 있는 화면 */}
             <Route element={<MainLayout />}>
                 <Route path='/main' element={<MainScreen />} />
                 <Route path='/stage-select/:mapId' element={<StageSelectScreen />} />
-                <Route path='/result' element={<ResultScreen />} />
                 <Route path='/collection' element={<CollectionScreen />} />
                 <Route path='/inventory' element={<InventoryScreen />} />
                 <Route path='/shop' element={<ShopScreen />} />

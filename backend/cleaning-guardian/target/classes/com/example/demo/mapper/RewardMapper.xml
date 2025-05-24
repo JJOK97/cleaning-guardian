@@ -16,4 +16,43 @@
 	WHERE "email" = #{email}
 </update>
 
+<!-- 아이템 존재 여부 확인 -->
+<select id="checkItemExists" resultType="int">
+    SELECT COUNT(*)
+    FROM "user_items"
+    WHERE "email" = #{email}
+    AND "item_idx" = #{itemIdx}
+</select>
+
+<!-- 보상 수령 (아이템) - 새로 추가 -->
+<insert id="insertItemReward">
+    INSERT INTO "user_items" (
+        "email", 
+        "item_idx", 
+        "item_type",
+        "is_used",
+        "created_at",
+        "count",
+        "is_equipped"
+    )
+    VALUES (
+        #{email}, 
+        #{itemIdx}, 
+        'REWARD',
+        'N',
+        SYSTIMESTAMP,
+        #{value},
+        'N'
+    )
+</insert>
+
+<!-- 보상 수령 (아이템) - 수량 증가 -->
+<update id="updateItemReward">
+    UPDATE "user_items"
+    SET "count" = "count" + #{value},
+        "updated_at" = SYSTIMESTAMP
+    WHERE "email" = #{email}
+    AND "item_idx" = #{itemIdx}
+</update>
+
 </mapper>

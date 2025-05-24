@@ -66,10 +66,12 @@ const ResultScreen: React.FC = () => {
 
     useEffect(() => {
         const result = location.state as GameResult;
+        console.log('ResultScreen result:', result);
         if (result) {
             setGameResult(result);
             if (result.success && result.successYn === 'Y') {
                 const stageRewardList = stageRewards[result.stageIdx] || [];
+                console.log('stageIdx:', result.stageIdx, 'stageRewardList:', stageRewardList);
                 setRewards(stageRewardList);
                 giveRewards(result.email, stageRewardList);
             }
@@ -95,6 +97,12 @@ const ResultScreen: React.FC = () => {
         }
     };
 
+    const handleRetry = () => {
+        if (gameResult) {
+            navigate(`/game/${gameResult.stageIdx}`);
+        }
+    };
+
     const handleStageSelect = () => {
         navigate('/stage-select/1'); // 맵 ID는 1로 가정
     };
@@ -108,14 +116,63 @@ const ResultScreen: React.FC = () => {
             <ResultTitle>{gameResult.success && gameResult.successYn === 'Y' ? '스테이지 클리어!' : '스테이지 실패'}</ResultTitle>
             <ResultMessage>스테이지 {gameResult.stageIdx}</ResultMessage>
 
-            {rewards.length > 0 && !isRewardComplete && <RewardAnimation rewards={rewards} onComplete={handleRewardComplete} />}
-
-            {isRewardComplete && (
-                <ButtonContainer>
-                    {gameResult.success && gameResult.successYn === 'Y' && <Button onClick={handleNextStage}>다음 스테이지</Button>}
-                    <Button onClick={handleStageSelect}>스테이지 선택</Button>
-                </ButtonContainer>
+            {rewards.length > 0 && (
+                <div
+                    style={{
+                        width: '100%',
+                        maxWidth: 900,
+                        margin: '40px auto',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '24px',
+                    }}
+                >
+                    {rewards.map((reward, idx) => (
+                        <div
+                            key={idx}
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                fontSize: 'clamp(1.1rem, 2vw, 2rem)',
+                                background: '#fff',
+                                borderRadius: '16px',
+                                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                                padding: '16px 18px',
+                                minWidth: 90,
+                                maxWidth: 140,
+                                width: '22vw',
+                                boxSizing: 'border-box',
+                            }}
+                        >
+                            <img
+                                src={`/assets/rewards/${reward.itemImg || reward.type.toLowerCase()}.png`}
+                                alt={reward.itemName || reward.type}
+                                style={{
+                                    width: 'clamp(40px, 8vw, 64px)',
+                                    height: 'clamp(40px, 8vw, 64px)',
+                                    marginBottom: 10,
+                                    objectFit: 'contain',
+                                }}
+                            />
+                            <div style={{ fontWeight: 'bold', marginBottom: 6, textAlign: 'center' }}>
+                                {reward.itemName || (reward.type === 'POINT' ? '포인트' : reward.type === 'CASH' ? '캐시' : '아이템')}
+                            </div>
+                            <div style={{ color: '#4caf50' }}>+{reward.value}</div>
+                        </div>
+                    ))}
+                </div>
             )}
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+                {gameResult?.success && gameResult?.successYn === 'Y' ? (
+                    <Button onClick={handleNextStage}>다음 스테이지</Button>
+                ) : (
+                    <Button onClick={handleRetry}>다시하기</Button>
+                )}
+                <Button onClick={handleStageSelect}>스테이지 선택</Button>
+            </div>
         </ResultContainer>
     );
 };

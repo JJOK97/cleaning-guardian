@@ -44,7 +44,21 @@ public class RewardServiceImpl implements RewardService {
 						break;
 					case ITEM:
 						if (reward.getItemIdx() != null) {
-							gameItemService.giveItem(email, reward.getItemIdx());
+							// 아이템 존재 여부 확인
+							int exists = rewardMapper.checkItemExists(email, reward.getItemIdx());
+							int itemResult;
+							
+							if (exists > 0) {
+								// 아이템이 있으면 수량 증가
+								itemResult = rewardMapper.updateItemReward(reward.getValue(), reward.getItemIdx(), email);
+							} else {
+								// 아이템이 없으면 새로 추가
+								itemResult = rewardMapper.insertItemReward(reward.getValue(), reward.getItemIdx(), email);
+							}
+							
+							if (itemResult == 0) {
+								throw new RuntimeException("아이템 보상 지급 실패");
+							}
 						}
 						break;
 				}

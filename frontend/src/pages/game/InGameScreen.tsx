@@ -241,7 +241,9 @@ const InGameScreen: React.FC = () => {
                 setLives((prev) => {
                     const newLives = Math.max(prev - 1, 0);
                     if (newLives === 0) {
-                        endGame();
+                        setTimeout(() => {
+                            endGame();
+                        }, 100);
                     }
                     return newLives;
                 });
@@ -278,21 +280,25 @@ const InGameScreen: React.FC = () => {
     // 게임 종료 함수
     const endGame = useCallback(async () => {
         if (!user?.email || !gameData.stageIdx) return;
-
         setGameEnded(true);
-        const successYn = lives > 0 ? 'Y' : 'N';
+
+        // 게임 종료 조건에 따른 성공/실패 판정
+        const isSuccess = lives > 0 && time > 0 && currentIndex >= pollutantQueue.length;
+        const successYn = isSuccess ? 'Y' : 'N';
 
         try {
             const clearResponse = await completeGame(gameData.stageIdx, user.email, successYn);
 
             const result = {
                 score,
-                stageId: gameData.stageIdx,
+                stageIdx: gameData.stageIdx,
                 timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
                 pollutantsRemoved: currentIndex,
                 maxCombo,
                 success: clearResponse.success,
                 message: clearResponse.message,
+                successYn: clearResponse.successYn,
+                email: user.email,
             };
 
             setTimeout(() => {
@@ -301,7 +307,7 @@ const InGameScreen: React.FC = () => {
         } catch (error) {
             // 에러 처리
         }
-    }, [gameData.stageIdx, lives, score, currentIndex, maxCombo, navigate, user?.email]);
+    }, [gameData.stageIdx, lives, time, score, currentIndex, maxCombo, navigate, user?.email, pollutantQueue.length]);
 
     // 오염물질 자르기(슬라이스) 처리 - 직접 클릭/탭 했을 때의 로직
     const handlePollutantSlice = useCallback(() => {
@@ -333,7 +339,7 @@ const InGameScreen: React.FC = () => {
         if (!showPreparation && !gameEnded) {
             timer = setInterval(() => {
                 setTime((prev) => {
-                    if (prev <= 1) {
+                    if (prev <= 0) {
                         clearInterval(timer);
                         endGame();
                         return 0;
@@ -344,6 +350,13 @@ const InGameScreen: React.FC = () => {
         }
         return () => clearInterval(timer);
     }, [showPreparation, gameEnded, endGame]);
+
+    // 게임 종료 조건 추가
+    useEffect(() => {
+        if (lives === 0 || time === 0) {
+            endGame();
+        }
+    }, [lives, time]);
 
     // 로딩 화면 처리
     useEffect(() => {
