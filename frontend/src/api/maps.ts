@@ -65,8 +65,28 @@ export interface Map {
     unlocked?: boolean;
 }
 
+export interface MapsResponse {
+    success: boolean;
+    message: string;
+    map?: MapData;
+    maplist?: MapData[];
+}
+
+export interface MapClearInfo {
+    mapIdx: number;
+    clearedStagesCount: number;
+    totalStagesCount: number;
+    nextMapIdx: number | null;
+}
+
+export interface MapClearResponse {
+    success: boolean;
+    message: string;
+    clearInfo?: MapClearInfo;
+}
+
 // 맵 목록 조회
-export const getMaps = async (): Promise<MapResponse> => {
+export const getMaps = async (): Promise<MapsResponse> => {
     try {
         const response = await api.get('/maps');
         return response.data;
@@ -77,9 +97,9 @@ export const getMaps = async (): Promise<MapResponse> => {
 };
 
 // 클리어한 맵 목록 조회
-export const getClearedMaps = async (email: string): Promise<MapResponse> => {
+export const getClearedMaps = async (email: string): Promise<MapsResponse> => {
     try {
-        const response = await api.get('/maps/clear', {
+        const response = await api.get('/maps/cleared', {
             params: { email },
         });
         return response.data;
@@ -90,7 +110,7 @@ export const getClearedMaps = async (email: string): Promise<MapResponse> => {
 };
 
 // 맵 상세 조회
-export const getMapDetail = async (mapIdx: number): Promise<MapResponse> => {
+export const getMapDetail = async (mapIdx: number): Promise<MapsResponse> => {
     try {
         const response = await api.get(`/maps/${mapIdx}`);
         return response.data;
@@ -129,4 +149,17 @@ export const mapThemeImages: Record<string, string> = {
     ocean: '/src/assets/img/map/trash-island.png',
     metal: '/src/assets/img/map/metal-land.png',
     city: '/src/assets/img/map/smoge-factory.png',
+};
+
+// 맵 클리어 정보 조회
+export const checkMapClear = async (mapIdx: number, email: string): Promise<MapClearResponse> => {
+    try {
+        const response = await api.get(`/maps/${mapIdx}/clear-check`, {
+            params: { email },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('맵 클리어 정보 조회 실패:', error);
+        throw error;
+    }
 };

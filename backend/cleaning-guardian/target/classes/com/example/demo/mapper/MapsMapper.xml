@@ -30,5 +30,31 @@ WHERE NOT EXISTS (
 		  FROM "maps"
 		  WHERE "map_idx" = #{map_idx}
     </select>
+
+<!-- 맵 클리어 체크 -->
+<select id="checkMapClear" resultType="map">
+    SELECT 
+        "maps"."map_idx",
+        (
+            SELECT COUNT(*) 
+            FROM "stages" "s"
+            LEFT JOIN "game_clear" "gc" ON "s"."stage_idx" = "gc"."stage_idx" 
+                AND "gc"."email" = #{param2} 
+                AND "gc"."success_yn" = 'Y'
+            WHERE "s"."map_idx" = "maps"."map_idx"
+        ) as "cleared_stages_count",
+        (
+            SELECT COUNT(*) 
+            FROM "stages" "s2"
+            WHERE "s2"."map_idx" = "maps"."map_idx"
+        ) as "total_stages_count",
+        (
+            SELECT "map_idx"
+            FROM "maps"
+            WHERE "map_idx" = #{param1} + 1
+        ) as "next_map_idx"
+    FROM "maps"
+    WHERE "maps"."map_idx" = #{param1}
+</select>
     
 </mapper>

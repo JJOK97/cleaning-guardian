@@ -57,8 +57,7 @@ const MainScreen: React.FC = () => {
 
                 const processedMaps = mapList.map((map) => {
                     const parsedDesc = JSON.parse(map.mapDesc);
-                    const isUnlocked =
-                        map.mapIdx === 1 || clearedMaps.some((clearedMap) => clearedMap.mapIdx === map.mapIdx);
+                    const isUnlocked = map.mapIdx === 1 || clearedMaps.some((clearedMap) => clearedMap.mapIdx === map.mapIdx);
 
                     return {
                         mapIdx: map.mapIdx,
@@ -140,18 +139,11 @@ const MainScreen: React.FC = () => {
     return (
         <Container>
             <BackgroundWave />
-            <ScrollContainer
-                ref={scrollContainerRef}
-                onScroll={handleScroll}
-            >
+            <ScrollContainer ref={scrollContainerRef} onScroll={handleScroll}>
                 <ContentWrapper>
                     <MapGrid>
                         {maps.map((map, index) => (
-                            <MapContainer
-                                key={`map-${map.mapIdx}`}
-                                $index={index}
-                                onClick={() => setVisibleMap(map)}
-                            >
+                            <MapContainer key={`map-${map.mapIdx}`} $index={index} onClick={() => setVisibleMap(map)}>
                                 <MapContentWrapper>
                                     <InfoIcon onClick={(e) => handleInfoClick(e, map)}>!</InfoIcon>
                                     {map.mapIdx === 3 ? (
@@ -177,11 +169,7 @@ const MainScreen: React.FC = () => {
                 </ContentWrapper>
             </ScrollContainer>
             <StartButtonContainer>
-                <StartButton
-                    $unlocked={visibleMap?.unlocked || false}
-                    onClick={handleStartClick}
-                    disabled={!visibleMap?.unlocked}
-                >
+                <StartButton $unlocked={visibleMap?.unlocked || false} onClick={handleStartClick} disabled={!visibleMap?.unlocked}>
                     {visibleMap?.unlocked ? '정화하기' : '잠긴 스테이지'}
                 </StartButton>
             </StartButtonContainer>

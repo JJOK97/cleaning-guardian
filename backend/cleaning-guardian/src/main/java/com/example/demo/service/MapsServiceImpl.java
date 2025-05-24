@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,9 @@ import com.example.demo.dto.MapsDTO;
 import com.example.demo.mapper.MapsMapper;
 import com.example.demo.vo.MapsVO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class MapsServiceImpl implements MapsService {
 
@@ -51,4 +55,20 @@ public class MapsServiceImpl implements MapsService {
 		return MapsDTO.builder().map(map).success(true).message("맵을 불러옵니다.").build();
 	}
 
+	// 맵 클리어 체크 및 다음 맵 오픈 처리
+	public Map<String, Object> checkMapClear(long mapIdx, String email) {
+		log.info("Checking map clear status - mapIdx: {}, email: {}", mapIdx, email);
+		
+		Map<String, Object> clearInfo = mapsMapper.checkMapClear(mapIdx, email);
+		log.info("Map clear info: {}", clearInfo);
+
+		int clearedStages = ((Number) clearInfo.get("cleared_stages_count")).intValue();
+		int totalStages = ((Number) clearInfo.get("total_stages_count")).intValue();
+		Long nextMapIdx = (Long) clearInfo.get("next_map_idx");
+
+		log.info("Map clear status - clearedStages: {}, totalStages: {}, nextMapIdx: {}", 
+			clearedStages, totalStages, nextMapIdx);
+
+		return clearInfo;
+	}
 }

@@ -6,6 +6,10 @@ import { postReward } from '@/api/game';
 import { stageRewards } from '@/constants/stageRewards';
 import { Reward } from '@/types/reward';
 
+// 이미지 import
+import pointImg from '@/assets/img/rewards/point.png';
+import cashImg from '@/assets/img/rewards/cash.png';
+
 interface GameResult {
     success: boolean;
     message: string;
@@ -148,7 +152,15 @@ const ResultScreen: React.FC = () => {
                             }}
                         >
                             <img
-                                src={`/assets/rewards/${reward.itemImg || reward.type.toLowerCase()}.png`}
+                                src={
+                                    reward.type === 'POINT'
+                                        ? pointImg
+                                        : reward.type === 'CASH'
+                                        ? cashImg
+                                        : reward.itemImg
+                                        ? reward.itemImg
+                                        : ''
+                                }
                                 alt={reward.itemName || reward.type}
                                 style={{
                                     width: 'clamp(40px, 8vw, 64px)',

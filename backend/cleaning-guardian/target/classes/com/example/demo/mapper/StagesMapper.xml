@@ -29,5 +29,27 @@ WHERE "stages"."map_idx" = #{mapIdx}
   FROM "stages"
   WHERE "stage_idx" = #{stageIdx}
     </select>
+
+<!-- 스테이지 클리어 시 다음 스테이지/맵 오픈 처리 -->
+<select id="checkStageClear" resultType="map">
+    SELECT 
+        "stages"."is_final_stage",
+        "stages"."map_idx",
+        (
+            SELECT COUNT(*) 
+            FROM "stages" "s2"
+            LEFT JOIN "game_clear" "gc" ON "s2"."stage_idx" = "gc"."stage_idx" 
+                AND "gc"."email" = #{param2} 
+                AND "gc"."success_yn" = 'Y'
+            WHERE "s2"."map_idx" = "stages"."map_idx"
+        ) as "cleared_stages_count",
+        (
+            SELECT COUNT(*) 
+            FROM "stages" "s3"
+            WHERE "s3"."map_idx" = "stages"."map_idx"
+        ) as "total_stages_count"
+    FROM "stages"
+    WHERE "stages"."stage_idx" = #{param1}
+</select>
     
 </mapper>
