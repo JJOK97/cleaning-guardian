@@ -5,6 +5,8 @@ import { getMapStages, getClearedStages } from '@/api/maps';
 import { getStagePollutions, PollutionData } from '@/api/stages';
 import { getEquippedSliceSkin, getEquippedTapSkin, UserSkinData } from '@/api/skins';
 import StageInfoModal from '@/components/modal/StageInfoModal';
+import { startGame } from '@/api/game';
+import { useAuth } from '@/hooks/useAuth';
 
 // 배경 이미지 import
 import trashIsland from '@/assets/img/stage/trash-island.png';
@@ -194,6 +196,7 @@ const LockedOverlay = styled.div`
 const StageSelectScreen: React.FC = () => {
     const { mapId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [stages, setStages] = useState<ProcessedStageInfo[]>([]);
     const [clearedStages, setClearedStages] = useState<number[]>([]);
     const [selectedStage, setSelectedStage] = useState<ProcessedStageInfo | null>(null);
@@ -323,9 +326,35 @@ const StageSelectScreen: React.FC = () => {
         navigate('/inventory');
     };
 
-    const handleStartGame = () => {
-        if (selectedStage) {
-            navigate(`/game/${selectedStage.stageIdx}`);
+    const handleStartGame = async () => {
+        console.log('게임 시작 버튼 클릭됨');
+        console.log('선택된 스테이지:', selectedStage);
+        console.log('현재 유저:', user);
+
+        if (!selectedStage || !user?.email) {
+            console.log('게임 시작 실패: 스테이지 또는 유저 정보 없음');
+            return;
+        }
+
+        try {
+            console.log('게임 시작 API 호출 시도:', {
+                email: user.email,
+                stageIdx: selectedStage.stageIdx,
+            });
+            // 1. 게임 시작 API 호출
+            const response = await startGame(user.email, selectedStage.stageIdx);
+            console.log('게임 시작 API 응답:', response);
+
+            if (response.success) {
+                console.log('게임 화면으로 이동 시도');
+                // 2. 성공하면 게임 화면으로 이동
+                navigate(`/game/${selectedStage.stageIdx}`);
+            } else {
+                console.log('게임 시작 실패:', response.message);
+            }
+        } catch (error) {
+            console.error('게임 시작 실패:', error);
+            // TODO: 에러 처리
         }
     };
 
@@ -369,34 +398,20 @@ const StageSelectScreen: React.FC = () => {
                             key={`stage-${stage.stageIdx}`}
                             $unlocked={stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx)}
                             onClick={() =>
-                                (stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx)) &&
-                                handleStageSelect(stage.stageIdx)
+                                (stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx)) && handleStageSelect(stage.stageIdx)
                             }
                         >
                             <div>
                                 <StageName>{stage.stageName}</StageName>
                                 <StageDescription>{stage.stageMission.mission}</StageDescription>
                             </div>
-                            <DifficultyBadge
-                                $difficulty={difficulty}
-                                style={{ marginTop: 'auto', alignSelf: 'flex-start' }}
-                            >
-                                {diffIcon && (
-                                    <img
-                                        src={diffIcon}
-                                        alt='난이도'
-                                        style={{ width: 22, height: 22, marginRight: 6 }}
-                                    />
-                                )}
+                            <DifficultyBadge $difficulty={difficulty} style={{ marginTop: 'auto', alignSelf: 'flex-start' }}>
+                                {diffIcon && <img src={diffIcon} alt='난이도' style={{ width: 22, height: 22, marginRight: 6 }} />}
                                 {getDifficultyText(stage.stageStep)}
                             </DifficultyBadge>
                             {stage.stageIdx !== 1 && !clearedStages.includes(stage.stageIdx) && (
                                 <LockedOverlay>
-                                    <img
-                                        src={lockerIcon}
-                                        alt='잠김'
-                                        style={{ width: 48, height: 48 }}
-                                    />
+                                    <img src={lockerIcon} alt='잠김' style={{ width: 48, height: 48 }} />
                                 </LockedOverlay>
                             )}
                         </StageCard>

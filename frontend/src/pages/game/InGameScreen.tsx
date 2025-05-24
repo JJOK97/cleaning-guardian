@@ -9,6 +9,8 @@ import GamePreparationModal from '@/components/game/GamePreparationModal';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import TransitionWrapper from '@/components/common/TransitionWrapper';
 import Matter from 'matter-js';
+import { startGame, completeGame, getStagePollutions } from '@/api/game';
+import { useAuth } from '@/hooks/useAuth';
 
 const Container = styled.div`
     position: relative;
@@ -25,6 +27,26 @@ const GameUI = styled.div`
     height: 100%;
     pointer-events: none;
     z-index: 10;
+`;
+
+const SettingsButton = styled.button`
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
 `;
 
 const Score = styled.div`
@@ -90,6 +112,7 @@ interface GameResult {
 const InGameScreen: React.FC = () => {
     const navigate = useNavigate();
     const { stageId } = useParams<{ stageId: string }>();
+    const { user } = useAuth();
     const [score, setScore] = useState(0);
     const [slicePoints, setSlicePoints] = useState<number[]>([]);
     const [isSlicing, setIsSlicing] = useState(false);
@@ -104,6 +127,13 @@ const InGameScreen: React.FC = () => {
     const [pollutantQueue, setPollutantQueue] = useState<PollutantBody[]>([]); // 오염물질 큐
     const [gameEnded, setGameEnded] = useState(false); // 게임 종료 상태 추가
     const startTime = useRef(Date.now());
+    const [gameData, setGameData] = useState<{
+        stageIdx: number | null;
+        pollutions: any[];
+    }>({
+        stageIdx: null,
+        pollutions: [],
+    });
 
     const stageRef = useRef<any>(null);
     const [stageSize, setStageSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -227,10 +257,7 @@ const InGameScreen: React.FC = () => {
             }
 
             // 화면 밖으로 너무 멀리 나가는 경우 방지
-            if (
-                bodyRef.current.position.x < -p.radius * 2 ||
-                bodyRef.current.position.x > stageSize.width + p.radius * 2
-            ) {
+            if (bodyRef.current.position.x < -p.radius * 2 || bodyRef.current.position.x > stageSize.width + p.radius * 2) {
                 // 화면 안으로 다시 들어오도록 힘을 가함
                 Matter.Body.applyForce(bodyRef.current, bodyRef.current.position, {
                     x: bodyRef.current.position.x < 0 ? 0.005 : -0.005,
@@ -249,19 +276,33 @@ const InGameScreen: React.FC = () => {
     }, [pollutantQueue, currentIndex, stageSize.height, showPreparation, gameEnded]);
 
     // 게임 종료 함수
-    const endGame = useCallback(() => {
+    const endGame = useCallback(async () => {
+        if (!user?.email || !gameData.stageIdx) return;
+
         setGameEnded(true);
-        const result: GameResult = {
-            score,
-            stageId: parseInt(stageId || '0'),
-            timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
-            pollutantsRemoved: currentIndex,
-            maxCombo,
-        };
-        setTimeout(() => {
-            navigate('/result', { state: result });
-        }, 1000);
-    }, [score, stageId, currentIndex, maxCombo, navigate]);
+        const successYn = lives > 0 ? 'Y' : 'N';
+
+        try {
+            const clearResponse = await completeGame(gameData.stageIdx, user.email, successYn);
+
+            const result = {
+                score,
+                stageId: gameData.stageIdx,
+                timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
+                pollutantsRemoved: currentIndex,
+                maxCombo,
+                success: clearResponse.success,
+                message: clearResponse.message,
+            };
+
+            setTimeout(() => {
+                navigate('/result', { state: result });
+            }, 1000);
+        } catch (error) {
+            console.error('게임 종료 처리 실패:', error);
+            // TODO: 에러 처리
+        }
+    }, [gameData.stageIdx, lives, score, currentIndex, maxCombo, navigate, user?.email]);
 
     // 오염물질 자르기(슬라이스) 처리 - 직접 클릭/탭 했을 때의 로직
     const handlePollutantSlice = useCallback(() => {
@@ -387,6 +428,35 @@ const InGameScreen: React.FC = () => {
         setShowPreparation(false);
     };
 
+    const handleSettingsClick = () => {
+        // TODO: 설정 모달 구현
+        console.log('설정 버튼 클릭');
+    };
+
+    // 게임 시작 시 API 호출
+    useEffect(() => {
+        const initializeGame = async () => {
+            if (!user?.email) return;
+
+            try {
+                // 1. 게임 시작
+                const startResponse = await startGame(user.email, parseInt(stageId || '0'));
+                setGameData((prev) => ({ ...prev, stageIdx: startResponse.stageIdx }));
+
+                // 2. 스테이지 오염물질 정보 조회
+                const pollutionsResponse = await getStagePollutions(parseInt(stageId || '0'));
+                setGameData((prev) => ({ ...prev, pollutions: pollutionsResponse.pollutionsList || [] }));
+            } catch (error) {
+                console.error('게임 초기화 실패:', error);
+                // TODO: 에러 처리
+            }
+        };
+
+        if (!showPreparation) {
+            initializeGame();
+        }
+    }, [showPreparation, stageId, user?.email]);
+
     // 로딩 화면 표시
     if (isLoading) {
         return <LoadingScreen />;
@@ -396,6 +466,9 @@ const InGameScreen: React.FC = () => {
         <Container>
             <GameBackground />
             <GameUI>
+                <SettingsButton onClick={handleSettingsClick}>
+                    <img src='/src/assets/icons/settings.svg' alt='설정' />
+                </SettingsButton>
                 <Score>점수: {score}</Score>
                 <Timer>시간: {time}</Timer>
                 <Lives>
@@ -485,12 +558,7 @@ const InGameScreen: React.FC = () => {
 
                     {/* 스테이지 경계선 표시 (디버깅용) */}
                     {/* 디버그 표시 - 항상 보이도록 수정 */}
-                    <Circle
-                        x={stageSize.width / 2}
-                        y={stageSize.height / 2}
-                        radius={5}
-                        fill='red'
-                    />
+                    <Circle x={stageSize.width / 2} y={stageSize.height / 2} radius={5} fill='red' />
                 </Layer>
             </Stage>
             <TransitionWrapper $isVisible={true}>

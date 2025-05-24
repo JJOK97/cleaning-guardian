@@ -31,7 +31,6 @@ public class GamePlayServiceImpl implements GamePlayService {
 			return GameClearDTO.builder().success(false).message("스테이지 클리어 실패").email(email).stageIdx(stageIdx)
 					.successYn(successYn).build();
 		}
-		successYn = "Y";
 		return GameClearDTO.builder().success(true).message("스테이지 클리어 성공").email(email).stageIdx(stageIdx)
 				.successYn(successYn).build();
 	}
