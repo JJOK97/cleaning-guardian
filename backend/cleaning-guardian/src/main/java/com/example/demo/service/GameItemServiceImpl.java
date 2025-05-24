@@ -245,4 +245,117 @@ public class GameItemServiceImpl implements GameItemService {
 				.items(items)
 				.build();
 	}
+
+	@Override
+	@Transactional
+	public UserItemDTO equipItem(String email, Long itemIdx, int slot) {
+		try {
+			// 사용자 정보 조회
+			UserVO user = userMapper.findByEmail(email);
+			if (user == null) {
+				return UserItemDTO.builder()
+						.success(false)
+						.message("사용자를 찾을 수 없습니다.")
+						.build();
+			}
+
+			// 아이템 정보 조회
+			UserItemVO userItem = gameItemMapper.getUserItem(email, itemIdx);
+			if (userItem == null || userItem.getCount() <= 0) {
+				return UserItemDTO.builder()
+						.success(false)
+						.message("보유한 아이템이 없습니다.")
+						.build();
+			}
+
+			// 해당 슬롯에 이미 장착된 아이템이 있는지 확인
+			UserItemVO equippedItem = gameItemMapper.getEquippedItemBySlot(email, slot);
+			if (equippedItem != null) {
+				// 기존 아이템 해제
+				gameItemMapper.unequipItem(email, equippedItem.getItemIdx());
+			}
+
+			// 새 아이템 장착
+			gameItemMapper.equipItem(email, itemIdx, slot);
+
+			// 장착된 아이템 정보 조회
+			UserItemVO updatedItem = gameItemMapper.getUserItem(email, itemIdx);
+			
+			return UserItemDTO.builder()
+					.success(true)
+					.message("아이템 장착 성공")
+					.userItem(updatedItem)
+					.build();
+		} catch (Exception e) {
+			return UserItemDTO.builder()
+					.success(false)
+					.message("아이템 장착 실패: " + e.getMessage())
+					.build();
+		}
+	}
+
+	@Override
+	@Transactional
+	public UserItemDTO unequipItem(String email, Long itemIdx) {
+		try {
+			// 사용자 정보 조회
+			UserVO user = userMapper.findByEmail(email);
+			if (user == null) {
+				return UserItemDTO.builder()
+						.success(false)
+						.message("사용자를 찾을 수 없습니다.")
+						.build();
+			}
+
+			// 아이템 정보 조회
+			UserItemVO userItem = gameItemMapper.getUserItem(email, itemIdx);
+			if (userItem == null) {
+				return UserItemDTO.builder()
+						.success(false)
+						.message("보유한 아이템이 없습니다.")
+						.build();
+			}
+
+			// 아이템 해제
+			gameItemMapper.unequipItem(email, itemIdx);
+
+			return UserItemDTO.builder()
+					.success(true)
+					.message("아이템 해제 성공")
+					.build();
+		} catch (Exception e) {
+			return UserItemDTO.builder()
+					.success(false)
+					.message("아이템 해제 실패: " + e.getMessage())
+					.build();
+		}
+	}
+
+	@Override
+	public UserItemDTO getEquippedItems(String email) {
+		try {
+			// 사용자 정보 조회
+			UserVO user = userMapper.findByEmail(email);
+			if (user == null) {
+				return UserItemDTO.builder()
+						.success(false)
+						.message("사용자를 찾을 수 없습니다.")
+						.build();
+			}
+
+			// 장착된 아이템 목록 조회
+			List<UserItemVO> equippedItems = gameItemMapper.getEquippedItems(email);
+			
+			return UserItemDTO.builder()
+					.success(true)
+					.message("장착된 아이템 목록 조회 성공")
+					.items(equippedItems)
+					.build();
+		} catch (Exception e) {
+			return UserItemDTO.builder()
+					.success(false)
+					.message("장착된 아이템 목록 조회 실패: " + e.getMessage())
+					.build();
+		}
+	}
 }

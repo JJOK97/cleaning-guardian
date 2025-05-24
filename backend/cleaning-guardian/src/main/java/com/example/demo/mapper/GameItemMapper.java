@@ -70,4 +70,34 @@ public interface GameItemMapper {
 	 * @return 캐시 아이템 목록
 	 */
 	List<GameItemVO> getCashItems();
+
+	/**
+	 * 특정 슬롯에 장착된 아이템을 조회합니다.
+	 * @param email 사용자 이메일
+	 * @param slot 장착 슬롯 번호
+	 * @return 장착된 아이템 정보
+	 */
+	UserItemVO getEquippedItemBySlot(String email, int slot);
+
+	/**
+	 * 아이템을 장착합니다.
+	 * @param email 사용자 이메일
+	 * @param itemIdx 아이템 인덱스
+	 * @param slot 장착할 슬롯 번호
+	 */
+	void equipItem(String email, Long itemIdx, int slot);
+
+	/**
+	 * 아이템을 해제합니다.
+	 * @param email 사용자 이메일
+	 * @param itemIdx 아이템 인덱스
+	 */
+	void unequipItem(String email, Long itemIdx);
+
+	/**
+	 * 사용자가 장착한 모든 아이템 목록을 조회합니다.
+	 * @param email 사용자 이메일
+	 * @return 장착된 아이템 목록
+	 */
+	List<UserItemVO> getEquippedItems(String email);
 }

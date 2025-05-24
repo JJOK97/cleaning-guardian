@@ -43,6 +43,17 @@ export interface GameItemsResponse {
     uitemlist?: UserItem[];
 }
 
+export interface UserItemDTO {
+    success: boolean;
+    message: string;
+    email: string;
+    uitemIdx: number;
+    itemIdx: number;
+    getType: string;
+    createdAt: string;
+    item: GameItem;
+}
+
 // 게임 시작
 export const startGame = async (email: string, stageIdx: number): Promise<UserPlayResponse> => {
     try {
@@ -99,4 +110,34 @@ export const useItem = async (email: string, itemIdx: number): Promise<GameItems
     } catch (error) {
         throw error;
     }
+};
+
+// 아이템 장착
+export const equipItem = async (email: string, itemIdx: number, slot: number): Promise<UserItemDTO> => {
+    const res = await api.post(`/items/equip/${itemIdx}?slot=${slot}`, null, {
+        headers: {
+            email: email,
+        },
+    });
+    return res.data;
+};
+
+// 아이템 해제
+export const unequipItem = async (email: string, itemIdx: number): Promise<UserItemDTO> => {
+    const res = await api.post(`/items/unequip/${itemIdx}`, null, {
+        headers: {
+            email: email,
+        },
+    });
+    return res.data;
+};
+
+// 장착된 아이템 목록 조회
+export const getEquippedItems = async (email: string): Promise<UserItemDTO> => {
+    const res = await api.get('/items/equipped', {
+        headers: {
+            email: email,
+        },
+    });
+    return res.data;
 };

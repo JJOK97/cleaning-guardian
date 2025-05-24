@@ -23,4 +23,13 @@ public interface GameItemService {
 	// 캐시 아이템 목록 조회
 	GameItemsDTO getCashItems();
 
+	// 아이템 장착
+	UserItemDTO equipItem(String email, Long itemIdx, int slot);
+	
+	// 아이템 해제
+	UserItemDTO unequipItem(String email, Long itemIdx);
+	
+	// 장착된 아이템 목록 조회
+	UserItemDTO getEquippedItems(String email);
+
 }
