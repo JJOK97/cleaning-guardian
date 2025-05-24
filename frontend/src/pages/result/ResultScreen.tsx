@@ -1,108 +1,122 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Button from '@/components/common/Button';
-import { GameResult } from '@/types/game';
+import { RewardAnimation } from '@/components/game/RewardAnimation';
+import { postReward } from '@/api/game';
+import { stageRewards } from '@/constants/stageRewards';
+import { Reward } from '@/types/reward';
 
-const Container = styled.div`
+interface GameResult {
+    success: boolean;
+    message: string;
+    email: string;
+    stageIdx: number;
+    successYn: string;
+}
+
+const ResultContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
-    gap: 2rem;
+    min-height: 100vh;
+    padding: 20px;
+    background: #f5f5f5;
 `;
 
-const ResultCard = styled.div`
-    background-color: ${({ theme }) => theme.colors.background.card};
-    border-radius: 16px;
-    padding: 2rem;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+const ResultTitle = styled.h1`
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #333;
 `;
 
-const Title = styled.h1`
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
+const ResultMessage = styled.p`
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: #666;
 `;
 
-const Score = styled.div`
-    font-size: 3rem;
-    font-weight: bold;
-    color: ${({ theme }) => theme.colors.primary.main};
-    margin: 1rem 0;
-`;
-
-const Stats = styled.div`
+const ButtonContainer = styled.div`
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin: 1.5rem 0;
+    gap: 20px;
+    margin-top: 30px;
 `;
 
-const StatItem = styled.div`
-    display: flex;
-    justify-content: space-between;
-    color: ${({ theme }) => theme.colors.text.secondary};
-`;
+const Button = styled.button`
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    background: #4caf50;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
 
-const ButtonGroup = styled.div`
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
+    &:hover {
+        background: #45a049;
+    }
 `;
 
 const ResultScreen: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const result = location.state as GameResult;
+    const [gameResult, setGameResult] = useState<GameResult | null>(null);
+    const [rewards, setRewards] = useState<Reward[]>([]);
+    const [isRewardComplete, setIsRewardComplete] = useState(false);
 
-    const handleRetry = () => {
-        navigate(`/game/${result.stageId}`);
+    useEffect(() => {
+        const result = location.state as GameResult;
+        if (result) {
+            setGameResult(result);
+            if (result.success && result.successYn === 'Y') {
+                const stageRewardList = stageRewards[result.stageIdx] || [];
+                setRewards(stageRewardList);
+                giveRewards(result.email, stageRewardList);
+            }
+        }
+    }, [location]);
+
+    const giveRewards = async (email: string, rewards: Reward[]) => {
+        try {
+            // 보상 지급 요청
+            await postReward(email, rewards);
+        } catch (error) {
+            // 에러 처리
+        }
     };
 
-    const handleMainMenu = () => {
-        navigate('/main');
+    const handleRewardComplete = () => {
+        setIsRewardComplete(true);
     };
+
+    const handleNextStage = () => {
+        if (gameResult) {
+            navigate(`/game/${gameResult.stageIdx + 1}`);
+        }
+    };
+
+    const handleStageSelect = () => {
+        navigate('/stage-select/1'); // 맵 ID는 1로 가정
+    };
+
+    if (!gameResult) {
+        return <div>로딩 중...</div>;
+    }
 
     return (
-        <Container>
-            <ResultCard>
-                <Title>게임 결과</Title>
-                <Score>{result.score}점</Score>
-                <Stats>
-                    <StatItem>
-                        <span>스테이지</span>
-                        <span>{result.stageId}</span>
-                    </StatItem>
-                    <StatItem>
-                        <span>소요 시간</span>
-                        <span>{result.timeSpent}초</span>
-                    </StatItem>
-                    <StatItem>
-                        <span>제거한 오염물질</span>
-                        <span>{result.pollutantsRemoved}개</span>
-                    </StatItem>
-                </Stats>
-                <ButtonGroup>
-                    <Button
-                        $variant='primary'
-                        onClick={handleRetry}
-                    >
-                        다시 도전
-                    </Button>
-                    <Button
-                        $variant='secondary'
-                        onClick={handleMainMenu}
-                    >
-                        메인 메뉴
-                    </Button>
-                </ButtonGroup>
-            </ResultCard>
-        </Container>
+        <ResultContainer>
+            <ResultTitle>{gameResult.success && gameResult.successYn === 'Y' ? '스테이지 클리어!' : '스테이지 실패'}</ResultTitle>
+            <ResultMessage>스테이지 {gameResult.stageIdx}</ResultMessage>
+
+            {rewards.length > 0 && !isRewardComplete && <RewardAnimation rewards={rewards} onComplete={handleRewardComplete} />}
+
+            {isRewardComplete && (
+                <ButtonContainer>
+                    {gameResult.success && gameResult.successYn === 'Y' && <Button onClick={handleNextStage}>다음 스테이지</Button>}
+                    <Button onClick={handleStageSelect}>스테이지 선택</Button>
+                </ButtonContainer>
+            )}
+        </ResultContainer>
     );
 };
 
