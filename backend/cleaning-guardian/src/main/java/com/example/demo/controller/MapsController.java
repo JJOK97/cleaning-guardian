@@ -20,24 +20,31 @@ public class MapsController {
 	MapsServiceImpl mapService;
 
 	// 모든 맵 가져오기
-		@GetMapping("/maps")
-		public ResponseEntity<MapsDTO> getAllmaps() {
-			MapsDTO maps = mapService.getAllmaps();
-			return new ResponseEntity<>(maps, HttpStatus.OK);
-		}
+	@GetMapping("/maps")
+	public ResponseEntity<MapsDTO> getAllmaps() {
+		MapsDTO maps = mapService.getAllmaps();
+		return new ResponseEntity<>(maps, HttpStatus.OK);
+	}
 
-		// 클리어한 모든 맵 가져오기
-		@GetMapping("/maps/clear")
-		public ResponseEntity<MapsDTO> getClearedMaps(@RequestParam("email") String email) {
-			MapsDTO maps = mapService.getClearedMaps(email);
-			return new ResponseEntity<>(maps, HttpStatus.OK);
-		}
-		
-		// 선택한 맵 가져오기
-		@GetMapping("/maps/{mapIdx}")
-		public ResponseEntity<MapsDTO> mapJoin(@PathVariable("mapIdx") long map_idx) {
-			MapsDTO maps = mapService.getMap(map_idx);
-			return new ResponseEntity<>(maps, HttpStatus.OK);
-		}
-		
+	// 클리어한 모든 맵 가져오기
+	@GetMapping("/maps/cleared")
+	public ResponseEntity<MapsDTO> getClearedMaps(@RequestParam("email") String email) {
+		MapsDTO maps = mapService.getClearedMaps(email);
+		return new ResponseEntity<>(maps, HttpStatus.OK);
+	}
+	
+	// 선택한 맵 가져오기
+	@GetMapping("/maps/{mapIdx}")
+	public ResponseEntity<MapsDTO> mapJoin(@PathVariable("mapIdx") long map_idx) {
+		MapsDTO maps = mapService.getMap(map_idx);
+		return new ResponseEntity<>(maps, HttpStatus.OK);
+	}
+
+	// 맵 클리어 상태 체크
+	@GetMapping("/maps/{mapIdx}/clear-check")
+	public ResponseEntity<?> checkMapClear(
+			@PathVariable("mapIdx") long mapIdx,
+			@RequestParam("email") String email) {
+		return new ResponseEntity<>(mapService.checkMapClear(mapIdx, email), HttpStatus.OK);
+	}
 }
