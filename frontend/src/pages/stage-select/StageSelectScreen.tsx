@@ -26,12 +26,13 @@ interface StageInfo {
     mapIdx: number;
     stageName: string;
     stageMission: string;
-    isFinalStage: string;
+    isFinalStage: 'Y' | 'N';
     stageStep: number;
 }
 
 interface ProcessedStageInfo extends Omit<StageInfo, 'stageMission'> {
     stageMission: StageMission;
+    unlocked: boolean;
 }
 
 const getBackgroundImage = (mapId: string) => {
@@ -86,11 +87,6 @@ const StageGrid = styled.div`
         border-radius: 4px;
     }
 `;
-
-const getStageCardBg = (unlocked: boolean) =>
-    unlocked
-        ? 'linear-gradient(135deg, rgba(120, 200, 120, 0.25) 0%, rgba(200, 240, 200, 0.25) 100%)'
-        : 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)';
 
 const StageCard = styled.div<{ $unlocked: boolean }>`
     background: ${({ $unlocked }) =>
@@ -212,12 +208,22 @@ const StageSelectScreen: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
+        console.log('useEffect 실행됨, mapId:', mapId);
         const fetchStages = async () => {
             try {
                 console.log('현재 선택된 맵 ID:', mapId);
                 const stagesResponse = await getMapStages(Number(mapId));
                 console.log('API 응답 전체:', stagesResponse);
                 console.log('스테이지 목록 원본:', stagesResponse.stagelist);
+
+                const email = localStorage.getItem('email');
+                let clearedStagesList: number[] = [];
+                if (email) {
+                    const clearedResponse = await getClearedStages(Number(mapId), email);
+                    console.log('클리어한 스테이지 응답:', clearedResponse);
+                    clearedStagesList = clearedResponse.stagelist?.map((stage: StageInfo) => stage.stageIdx) || [];
+                    setClearedStages(clearedStagesList);
+                }
 
                 const processedStages =
                     stagesResponse.stagelist?.map((stage: StageInfo) => {
@@ -231,6 +237,8 @@ const StageSelectScreen: React.FC = () => {
                             const processed = {
                                 ...stage,
                                 stageMission: JSON.parse(stage.stageMission),
+                                isFinalStage: stage.isFinalStage as 'Y' | 'N',
+                                unlocked: stage.stageIdx === 1 || clearedStagesList.includes(stage.stageIdx),
                             };
                             console.log('처리된 스테이지:', processed);
                             return processed;
@@ -243,19 +251,14 @@ const StageSelectScreen: React.FC = () => {
                                     target: '',
                                     action: '',
                                 },
+                                isFinalStage: stage.isFinalStage as 'Y' | 'N',
+                                unlocked: stage.stageIdx === 1 || clearedStagesList.includes(stage.stageIdx),
                             };
                         }
                     }) || [];
 
                 console.log('최종 처리된 스테이지 목록:', processedStages);
                 setStages(processedStages);
-
-                const email = localStorage.getItem('email');
-                if (email) {
-                    const clearedResponse = await getClearedStages(Number(mapId), email);
-                    console.log('클리어한 스테이지 응답:', clearedResponse);
-                    setClearedStages(clearedResponse.stagelist?.map((stage: StageInfo) => stage.stageIdx) || []);
-                }
             } catch (error) {
                 console.error('스테이지 정보 로딩 실패:', error);
             }
@@ -266,13 +269,21 @@ const StageSelectScreen: React.FC = () => {
     }, [mapId]);
 
     const fetchEquippedSkins = async () => {
+        console.log('fetchEquippedSkins 호출됨');
+        const email = localStorage.getItem('email');
+        console.log('fetchEquippedSkins email:', email);
+        if (!email) {
+            console.error('로그인 정보가 없습니다.');
+            return;
+        }
         try {
-            const [sliceResponse, tapResponse] = await Promise.all([getEquippedSliceSkin(), getEquippedTapSkin()]);
-
-            setEquippedSkins({
-                slice: sliceResponse.uskin?.skinType === 'S' ? sliceResponse.uskin : null,
-                tap: tapResponse.uskin?.skinType === 'T' ? tapResponse.uskin : null,
-            });
+            console.log('getEquippedSliceSkin 호출');
+            const slice = await getEquippedSliceSkin(email);
+            console.log('getEquippedSliceSkin 응답:', slice);
+            console.log('getEquippedTapSkin 호출');
+            const tap = await getEquippedTapSkin(email);
+            console.log('getEquippedTapSkin 응답:', tap);
+            setEquippedSkins({ slice, tap });
         } catch (error) {
             console.error('장착된 스킨 조회 실패:', error);
         }
@@ -287,10 +298,16 @@ const StageSelectScreen: React.FC = () => {
         try {
             const response = await getStagePollutions(stage.stageIdx);
             console.log('오염물 응답:', response);
-            if (response.success && response.pollutions) {
-                setPollutions(response.pollutions);
+            if (response.success && response.pollutionsList) {
+                console.log('설정할 오염물 데이터:', response.pollutionsList);
+                setPollutions(response.pollutionsList);
                 setIsModalOpen(true);
-                console.log('모달 열기');
+                console.log('모달 상태:', {
+                    isModalOpen: true,
+                    selectedStage: stage,
+                    pollutions: response.pollutionsList,
+                    equippedSkins: equippedSkins,
+                });
             }
         } catch (error) {
             console.error('스테이지 오염물 조회 실패:', error);
@@ -386,6 +403,20 @@ const StageSelectScreen: React.FC = () => {
                     );
                 })}
             </StageGrid>
+            {(() => {
+                console.log('렌더링 시점 모달 상태:', { selectedStage, isModalOpen, pollutions });
+                return selectedStage && isModalOpen && pollutions.length > 0 ? (
+                    <StageInfoModal
+                        isOpen={isModalOpen}
+                        onClose={handleCloseModal}
+                        stageInfo={selectedStage}
+                        pollutions={pollutions}
+                        equippedSkins={equippedSkins}
+                        onChangeSkin={handleChangeSkin}
+                        onStartGame={handleStartGame}
+                    />
+                ) : null;
+            })()}
         </Container>
     );
 };

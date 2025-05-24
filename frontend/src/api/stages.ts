@@ -17,6 +17,7 @@ export interface StagePollutionsResponse {
     message: string;
     pollution?: PollutionData;
     pollutions?: PollutionData[];
+    pollutionsList?: PollutionData[];
 }
 
 // 스테이지 오염물 정보 조회

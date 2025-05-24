@@ -88,6 +88,12 @@ const SettingsScreen: React.FC = () => {
         });
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('email');
+        navigate('/auth/login');
+    };
+
     return (
         <Container>
             <SettingsCard>
@@ -136,6 +142,11 @@ const SettingsScreen: React.FC = () => {
                             </Button>
                         ))}
                     </div>
+                </SettingItem>
+
+                <SettingItem>
+                    <SettingLabel>로그아웃</SettingLabel>
+                    <Button onClick={handleLogout}>로그아웃</Button>
                 </SettingItem>
 
                 <ButtonGroup>
