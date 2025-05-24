@@ -32,4 +32,12 @@ public interface GameItemService {
 	// 장착된 아이템 목록 조회
 	UserItemDTO getEquippedItems(String email);
 
+	/**
+	 * 아이템 지급
+	 * @param email 사용자 이메일
+	 * @param itemIdx 지급할 아이템 ID
+	 * @return 지급 결과
+	 */
+	UserItemDTO giveItem(String email, Long itemIdx);
+
 }

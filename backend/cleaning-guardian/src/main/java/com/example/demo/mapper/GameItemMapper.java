@@ -100,4 +100,12 @@ public interface GameItemMapper {
 	 * @return 장착된 아이템 목록
 	 */
 	List<UserItemVO> getEquippedItems(String email);
+
+	/**
+	 * 아이템 지급
+	 * @param email 사용자 이메일
+	 * @param itemIdx 지급할 아이템 ID
+	 * @return 처리 결과
+	 */
+	int giveItem(String email, Long itemIdx);
 }

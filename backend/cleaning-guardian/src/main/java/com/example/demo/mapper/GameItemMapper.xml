@@ -242,4 +242,21 @@
 		ORDER BY ui."equipped_slot"
 	</select>
 
+	<!-- 아이템 지급 -->
+	<insert id="giveItem">
+		INSERT INTO "user_items" (
+			"email",
+			"item_idx",
+			"get_type",
+			"is_used",
+			"count"
+		) VALUES (
+			#{email},
+			#{itemIdx},
+			'REWARD',
+			'N',
+			1
+		)
+	</insert>
+
 </mapper> 

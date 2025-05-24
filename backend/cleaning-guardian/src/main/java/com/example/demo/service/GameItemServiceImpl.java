@@ -358,4 +358,32 @@ public class GameItemServiceImpl implements GameItemService {
 					.build();
 		}
 	}
+
+	@Override
+	public UserItemDTO giveItem(String email, Long itemIdx) {
+		try {
+			// 아이템 지급 처리
+			int result = gameItemMapper.giveItem(email, itemIdx);
+			
+			if (result == 0) {
+				return UserItemDTO.builder()
+					.success(false)
+					.message("아이템 지급에 실패했습니다.")
+					.build();
+			}
+			
+			return UserItemDTO.builder()
+				.success(true)
+				.message("아이템이 성공적으로 지급되었습니다.")
+				.email(email)
+				.itemIdx(itemIdx)
+				.build();
+				
+		} catch (Exception e) {
+			return UserItemDTO.builder()
+				.success(false)
+				.message("아이템 지급 중 오류가 발생했습니다: " + e.getMessage())
+				.build();
+		}
+	}
 }

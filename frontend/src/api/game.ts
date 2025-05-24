@@ -54,6 +54,13 @@ export interface UserItemDTO {
     item: GameItem;
 }
 
+export interface RewardDTO {
+    success: boolean;
+    message: string;
+    point: number;
+    cash: number;
+}
+
 // 게임 시작
 export const startGame = async (email: string, stageIdx: number): Promise<UserPlayResponse> => {
     try {
@@ -140,4 +147,28 @@ export const getEquippedItems = async (email: string): Promise<UserItemDTO> => {
         },
     });
     return res.data;
+};
+
+// 포인트 보상 수령
+export const postPointReward = async (email: string, value: number): Promise<RewardDTO> => {
+    try {
+        const response = await api.patch('/reward/point', null, {
+            params: { email, value },
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// 캐시 보상 수령
+export const postCashReward = async (email: string, value: number): Promise<RewardDTO> => {
+    try {
+        const response = await api.patch('/reward/cash', null, {
+            params: { email, value },
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
 };

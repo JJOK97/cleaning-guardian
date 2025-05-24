@@ -1,11 +1,11 @@
 package com.example.demo.service;
 
+import java.util.List;
 import com.example.demo.dto.RewardDTO;
+import com.example.demo.dto.RewardDetail;
 
 public interface RewardService {
 
-	RewardDTO postPointReward(int value, String email);
-
-	RewardDTO postCashReward(int value, String email);
+	RewardDTO postReward(String email, List<RewardDetail> rewards);
 
 }
