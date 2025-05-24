@@ -168,4 +168,95 @@
 		ORDER BY "item_idx"
 	</select>
 
+	<!-- 특정 슬롯에 장착된 아이템 조회 -->
+	<select id="getEquippedItemBySlot" resultMap="userItemResultMap">
+		SELECT 
+			ui."user_item_idx" as userItemIdx,
+			ui."email" as email,
+			ui."item_idx" as itemIdx,
+			ui."item_type" as itemType,
+			ui."is_used" as isUsed,
+			ui."created_at" as createdAt,
+			ui."count" as count,
+			ui."equipped_slot" as equippedSlot,
+			ui."is_equipped" as isEquipped,
+			gi."item_idx" as item_itemIdx,
+			gi."game_idx" as item_gameIdx,
+			gi."item_name" as item_itemName,
+			gi."item_desc" as item_itemDesc,
+			gi."item_img" as item_itemImg,
+			gi."item_price" as item_itemPrice,
+			TRIM(gi."price_type") as item_priceType,
+			gi."created_at" as item_createdAt
+		FROM "user_items" ui
+		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
+		WHERE ui."email" = #{email}
+		AND ui."equipped_slot" = #{slot}
+		AND ui."is_equipped" = 'Y'
+	</select>
+
+	<!-- 아이템 장착 -->
+	<update id="equipItem">
+		UPDATE "user_items"
+		SET "equipped_slot" = #{slot},
+			"is_equipped" = 'Y',
+			"updated_at" = SYSDATE
+		WHERE "email" = #{email}
+		AND "item_idx" = #{itemIdx}
+	</update>
+
+	<!-- 아이템 해제 -->
+	<update id="unequipItem">
+		UPDATE "user_items"
+		SET "equipped_slot" = NULL,
+			"is_equipped" = 'N',
+			"updated_at" = SYSDATE
+		WHERE "email" = #{email}
+		AND "item_idx" = #{itemIdx}
+	</update>
+
+	<!-- 장착된 아이템 목록 조회 -->
+	<select id="getEquippedItems" resultMap="userItemResultMap">
+		SELECT 
+			ui."user_item_idx" as userItemIdx,
+			ui."email" as email,
+			ui."item_idx" as itemIdx,
+			ui."item_type" as itemType,
+			ui."is_used" as isUsed,
+			ui."created_at" as createdAt,
+			ui."count" as count,
+			ui."equipped_slot" as equippedSlot,
+			ui."is_equipped" as isEquipped,
+			gi."item_idx" as item_itemIdx,
+			gi."game_idx" as item_gameIdx,
+			gi."item_name" as item_itemName,
+			gi."item_desc" as item_itemDesc,
+			gi."item_img" as item_itemImg,
+			gi."item_price" as item_itemPrice,
+			TRIM(gi."price_type") as item_priceType,
+			gi."created_at" as item_createdAt
+		FROM "user_items" ui
+		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
+		WHERE ui."email" = #{email}
+		AND ui."is_equipped" = 'Y'
+		ORDER BY ui."equipped_slot"
+	</select>
+
+	<!-- 아이템 지급 -->
+	<insert id="giveItem">
+		INSERT INTO "user_items" (
+			"email",
+			"item_idx",
+			"get_type",
+			"is_used",
+			"count"
+		) VALUES (
+			#{email},
+			#{itemIdx},
+			'REWARD',
+			'N',
+			1
+		)
+	</insert>
+
 </mapper> 

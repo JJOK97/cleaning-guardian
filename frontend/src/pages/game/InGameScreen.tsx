@@ -299,8 +299,7 @@ const InGameScreen: React.FC = () => {
                 navigate('/result', { state: result });
             }, 1000);
         } catch (error) {
-            console.error('게임 종료 처리 실패:', error);
-            // TODO: 에러 처리
+            // 에러 처리
         }
     }, [gameData.stageIdx, lives, score, currentIndex, maxCombo, navigate, user?.email]);
 
@@ -439,16 +438,13 @@ const InGameScreen: React.FC = () => {
             if (!user?.email) return;
 
             try {
-                // 1. 게임 시작
                 const startResponse = await startGame(user.email, parseInt(stageId || '0'));
                 setGameData((prev) => ({ ...prev, stageIdx: startResponse.stageIdx }));
 
-                // 2. 스테이지 오염물질 정보 조회
                 const pollutionsResponse = await getStagePollutions(parseInt(stageId || '0'));
                 setGameData((prev) => ({ ...prev, pollutions: pollutionsResponse.pollutionsList || [] }));
             } catch (error) {
-                console.error('게임 초기화 실패:', error);
-                // TODO: 에러 처리
+                // 에러 처리
             }
         };
 

@@ -43,6 +43,24 @@ export interface GameItemsResponse {
     uitemlist?: UserItem[];
 }
 
+export interface UserItemDTO {
+    success: boolean;
+    message: string;
+    email: string;
+    uitemIdx: number;
+    itemIdx: number;
+    getType: string;
+    createdAt: string;
+    item: GameItem;
+}
+
+export interface RewardDTO {
+    success: boolean;
+    message: string;
+    point: number;
+    cash: number;
+}
+
 // 게임 시작
 export const startGame = async (email: string, stageIdx: number): Promise<UserPlayResponse> => {
     try {
@@ -51,7 +69,6 @@ export const startGame = async (email: string, stageIdx: number): Promise<UserPl
         });
         return response.data;
     } catch (error) {
-        console.error('게임 시작 실패:', error);
         throw error;
     }
 };
@@ -64,7 +81,6 @@ export const completeGame = async (stageIdx: number, email: string, successYn: s
         });
         return response.data;
     } catch (error) {
-        console.error('게임 클리어 실패:', error);
         throw error;
     }
 };
@@ -75,7 +91,6 @@ export const getStagePollutions = async (stageIdx: number) => {
         const response = await api.get(`/user-plays/${stageIdx}/pollutions`);
         return response.data;
     } catch (error) {
-        console.error('스테이지 오염물질 정보 조회 실패:', error);
         throw error;
     }
 };
@@ -84,11 +99,10 @@ export const getStagePollutions = async (stageIdx: number) => {
 export const getUserItems = async (email: string): Promise<GameItemsResponse> => {
     try {
         const response = await api.get('/items/user', {
-            params: { email },
+            headers: { email },
         });
         return response.data;
     } catch (error) {
-        console.error('사용자 아이템 조회 실패:', error);
         throw error;
     }
 };
@@ -97,11 +111,64 @@ export const getUserItems = async (email: string): Promise<GameItemsResponse> =>
 export const useItem = async (email: string, itemIdx: number): Promise<GameItemsResponse> => {
     try {
         const response = await api.post(`/items/use/${itemIdx}`, null, {
-            params: { email },
+            headers: { email },
         });
         return response.data;
     } catch (error) {
-        console.error('아이템 사용 실패:', error);
+        throw error;
+    }
+};
+
+// 아이템 장착
+export const equipItem = async (email: string, itemIdx: number, slot: number): Promise<UserItemDTO> => {
+    const res = await api.post(`/items/equip/${itemIdx}?slot=${slot}`, null, {
+        headers: {
+            email: email,
+        },
+    });
+    return res.data;
+};
+
+// 아이템 해제
+export const unequipItem = async (email: string, itemIdx: number): Promise<UserItemDTO> => {
+    const res = await api.post(`/items/unequip/${itemIdx}`, null, {
+        headers: {
+            email: email,
+        },
+    });
+    return res.data;
+};
+
+// 장착된 아이템 목록 조회
+export const getEquippedItems = async (email: string): Promise<UserItemDTO> => {
+    const res = await api.get('/items/equipped', {
+        headers: {
+            email: email,
+        },
+    });
+    return res.data;
+};
+
+// 포인트 보상 수령
+export const postPointReward = async (email: string, value: number): Promise<RewardDTO> => {
+    try {
+        const response = await api.patch('/reward/point', null, {
+            params: { email, value },
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// 캐시 보상 수령
+export const postCashReward = async (email: string, value: number): Promise<RewardDTO> => {
+    try {
+        const response = await api.patch('/reward/cash', null, {
+            params: { email, value },
+        });
+        return response.data;
+    } catch (error) {
         throw error;
     }
 };

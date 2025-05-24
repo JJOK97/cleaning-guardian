@@ -1,14 +1,17 @@
 package com.example.demo.controller;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.RewardDTO;
+import com.example.demo.dto.RewardDetail;
 import com.example.demo.service.RewardService;
 
 @RestController
@@ -16,20 +19,20 @@ import com.example.demo.service.RewardService;
 public class RewardController {
 
 	@Autowired
-	RewardService rewardService;
+	private RewardService rewardService;
 
-	// 보상 수령 (포인트) PATCH
-	@PatchMapping("/reward/point")
-	public ResponseEntity<RewardDTO> postPointReward(@RequestParam int value, @RequestParam String email) {
-		RewardDTO reward = rewardService.postPointReward(value, email);
-		return new ResponseEntity<>(reward, HttpStatus.OK);
-	}
-	
-	// 보상 수령 (캐쉬) PATCH
-	@PatchMapping("/reward/cash")
-	public ResponseEntity<RewardDTO> postCashReward(@RequestParam int value, @RequestParam String email) {
-		RewardDTO reward = rewardService.postCashReward(value, email);
-		return new ResponseEntity<>(reward, HttpStatus.OK);
+	/**
+	 * 보상 지급
+	 * @param email 사용자 이메일
+	 * @param rewards 보상 목록
+	 * @return 보상 지급 결과
+	 */
+	@PostMapping("/reward")
+	public ResponseEntity<RewardDTO> postReward(
+			@RequestParam String email,
+			@RequestBody List<RewardDetail> rewards) {
+		RewardDTO response = rewardService.postReward(email, rewards);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 }

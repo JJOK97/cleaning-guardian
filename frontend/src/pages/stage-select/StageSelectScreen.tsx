@@ -211,31 +211,19 @@ const StageSelectScreen: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        console.log('useEffect 실행됨, mapId:', mapId);
         const fetchStages = async () => {
             try {
-                console.log('현재 선택된 맵 ID:', mapId);
                 const stagesResponse = await getMapStages(Number(mapId));
-                console.log('API 응답 전체:', stagesResponse);
-                console.log('스테이지 목록 원본:', stagesResponse.stagelist);
-
                 const email = localStorage.getItem('email');
                 let clearedStagesList: number[] = [];
                 if (email) {
                     const clearedResponse = await getClearedStages(Number(mapId), email);
-                    console.log('클리어한 스테이지 응답:', clearedResponse);
                     clearedStagesList = clearedResponse.stagelist?.map((stage: StageInfo) => stage.stageIdx) || [];
                     setClearedStages(clearedStagesList);
                 }
 
                 const processedStages =
                     stagesResponse.stagelist?.map((stage: StageInfo) => {
-                        console.log(`스테이지 처리 중:`, {
-                            stageIdx: stage.stageIdx,
-                            mapIdx: stage.mapIdx,
-                            stageName: stage.stageName,
-                            rawMission: stage.stageMission,
-                        });
                         try {
                             const processed = {
                                 ...stage,
@@ -243,10 +231,8 @@ const StageSelectScreen: React.FC = () => {
                                 isFinalStage: stage.isFinalStage as 'Y' | 'N',
                                 unlocked: stage.stageIdx === 1 || clearedStagesList.includes(stage.stageIdx),
                             };
-                            console.log('처리된 스테이지:', processed);
                             return processed;
                         } catch (error) {
-                            console.error('스테이지 미션 파싱 실패:', stage.stageMission);
                             return {
                                 ...stage,
                                 stageMission: {
@@ -260,10 +246,9 @@ const StageSelectScreen: React.FC = () => {
                         }
                     }) || [];
 
-                console.log('최종 처리된 스테이지 목록:', processedStages);
                 setStages(processedStages);
             } catch (error) {
-                console.error('스테이지 정보 로딩 실패:', error);
+                // 에러 처리
             }
         };
 
@@ -272,23 +257,14 @@ const StageSelectScreen: React.FC = () => {
     }, [mapId]);
 
     const fetchEquippedSkins = async () => {
-        console.log('fetchEquippedSkins 호출됨');
         const email = localStorage.getItem('email');
-        console.log('fetchEquippedSkins email:', email);
-        if (!email) {
-            console.error('로그인 정보가 없습니다.');
-            return;
-        }
+        if (!email) return;
         try {
-            console.log('getEquippedSliceSkin 호출');
             const slice = await getEquippedSliceSkin(email);
-            console.log('getEquippedSliceSkin 응답:', slice);
-            console.log('getEquippedTapSkin 호출');
             const tap = await getEquippedTapSkin(email);
-            console.log('getEquippedTapSkin 응답:', tap);
             setEquippedSkins({ slice, tap });
         } catch (error) {
-            console.error('장착된 스킨 조회 실패:', error);
+            // 에러 처리
         }
     };
 
@@ -296,24 +272,15 @@ const StageSelectScreen: React.FC = () => {
         const stage = stages.find((s) => s.stageIdx === stageIdx);
         if (!stage) return;
 
-        console.log('선택된 스테이지:', stage);
         setSelectedStage(stage);
         try {
             const response = await getStagePollutions(stage.stageIdx);
-            console.log('오염물 응답:', response);
             if (response.success && response.pollutionsList) {
-                console.log('설정할 오염물 데이터:', response.pollutionsList);
                 setPollutions(response.pollutionsList);
                 setIsModalOpen(true);
-                console.log('모달 상태:', {
-                    isModalOpen: true,
-                    selectedStage: stage,
-                    pollutions: response.pollutionsList,
-                    equippedSkins: equippedSkins,
-                });
             }
         } catch (error) {
-            console.error('스테이지 오염물 조회 실패:', error);
+            // 에러 처리
         }
     };
 
@@ -327,34 +294,15 @@ const StageSelectScreen: React.FC = () => {
     };
 
     const handleStartGame = async () => {
-        console.log('게임 시작 버튼 클릭됨');
-        console.log('선택된 스테이지:', selectedStage);
-        console.log('현재 유저:', user);
-
-        if (!selectedStage || !user?.email) {
-            console.log('게임 시작 실패: 스테이지 또는 유저 정보 없음');
-            return;
-        }
+        if (!selectedStage || !user?.email) return;
 
         try {
-            console.log('게임 시작 API 호출 시도:', {
-                email: user.email,
-                stageIdx: selectedStage.stageIdx,
-            });
-            // 1. 게임 시작 API 호출
             const response = await startGame(user.email, selectedStage.stageIdx);
-            console.log('게임 시작 API 응답:', response);
-
             if (response.success) {
-                console.log('게임 화면으로 이동 시도');
-                // 2. 성공하면 게임 화면으로 이동
                 navigate(`/game/${selectedStage.stageIdx}`);
-            } else {
-                console.log('게임 시작 실패:', response.message);
             }
         } catch (error) {
-            console.error('게임 시작 실패:', error);
-            // TODO: 에러 처리
+            // 에러 처리
         }
     };
 
@@ -419,7 +367,6 @@ const StageSelectScreen: React.FC = () => {
                 })}
             </StageGrid>
             {(() => {
-                console.log('렌더링 시점 모달 상태:', { selectedStage, isModalOpen, pollutions });
                 return selectedStage && isModalOpen && pollutions.length > 0 ? (
                     <StageInfoModal
                         isOpen={isModalOpen}

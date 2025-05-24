@@ -355,7 +355,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                     setUserItems(response.uitemlist);
                 }
             } catch (error) {
-                console.error('아이템 조회 실패:', error);
+                // 에러 처리
             }
         };
 
@@ -369,14 +369,13 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
         try {
             const response = await useItem(user.email, itemIdx);
             if (response.success) {
-                // 아이템 사용 후 목록 새로고침
                 const updatedItems = await getUserItems(user.email);
                 if (updatedItems.success && updatedItems.uitemlist) {
                     setUserItems(updatedItems.uitemlist);
                 }
             }
         } catch (error) {
-            console.error('아이템 사용 실패:', error);
+            // 에러 처리
         }
     };
 

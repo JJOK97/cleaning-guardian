@@ -41,17 +41,13 @@ export interface SkinsResponse {
 
 // 현재 장착된 슬라이스 스킨 조회
 export const getEquippedSliceSkin = async (email: string): Promise<UserSkinData> => {
-    console.log('getEquippedSliceSkin API 호출', email);
     const response = await api.get('/skins/slice/equipped', { params: { email } });
-    console.log('getEquippedSliceSkin API 응답:', response);
     return response.data;
 };
 
 // 현재 장착된 탭 스킨 조회
 export const getEquippedTapSkin = async (email: string): Promise<UserSkinData> => {
-    console.log('getEquippedTapSkin API 호출', email);
     const response = await api.get('/skins/tap/equipped', { params: { email } });
-    console.log('getEquippedTapSkin API 응답:', response);
     return response.data;
 };
 
@@ -61,7 +57,6 @@ export const getUserSliceSkins = async (): Promise<SkinsResponse> => {
         const response = await api.get('/skins/slice/user');
         return response.data;
     } catch (error) {
-        console.error('보유한 슬라이스 스킨 조회 실패:', error);
         throw error;
     }
 };
@@ -72,7 +67,6 @@ export const getUserTapSkins = async (): Promise<SkinsResponse> => {
         const response = await api.get('/skins/tap/user');
         return response.data;
     } catch (error) {
-        console.error('보유한 탭 스킨 조회 실패:', error);
         throw error;
     }
 };

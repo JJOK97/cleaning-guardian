@@ -26,4 +26,5 @@ public class UserItemDTO {
     private LocalDateTime createdAt;
     private GameItemVO item;
     private List<UserItemVO> items;
+    private UserItemVO userItem;
 } 

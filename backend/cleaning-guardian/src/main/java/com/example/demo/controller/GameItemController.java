@@ -87,4 +87,46 @@ public class GameItemController {
 		GameItemsDTO response = gameItemService.getCashItems();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	/**
+	 * 아이템 장착
+	 * @param email 사용자 이메일
+	 * @param itemIdx 장착할 아이템의 인덱스
+	 * @param slot 장착할 슬롯 번호 (1, 2, 3)
+	 * @return 장착 결과
+	 */
+	@PostMapping("/equip/{itemIdx}")
+	public ResponseEntity<UserItemDTO> equipItem(
+			@RequestHeader("email") String email,
+			@PathVariable Long itemIdx,
+			@RequestParam int slot) {
+		UserItemDTO response = gameItemService.equipItem(email, itemIdx, slot);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	/**
+	 * 아이템 해제
+	 * @param email 사용자 이메일
+	 * @param itemIdx 해제할 아이템의 인덱스
+	 * @return 해제 결과
+	 */
+	@PostMapping("/unequip/{itemIdx}")
+	public ResponseEntity<UserItemDTO> unequipItem(
+			@RequestHeader("email") String email,
+			@PathVariable Long itemIdx) {
+		UserItemDTO response = gameItemService.unequipItem(email, itemIdx);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	/**
+	 * 장착된 아이템 목록 조회
+	 * @param email 사용자 이메일
+	 * @return 장착된 아이템 목록
+	 */
+	@GetMapping("/equipped")
+	public ResponseEntity<UserItemDTO> getEquippedItems(
+			@RequestHeader("email") String email) {
+		UserItemDTO response = gameItemService.getEquippedItems(email);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }
