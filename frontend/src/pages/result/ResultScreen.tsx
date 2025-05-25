@@ -70,7 +70,9 @@ const ResultScreen: React.FC = () => {
 
     useEffect(() => {
         const result = location.state as GameResult;
-        console.log('ResultScreen result:', result);
+        console.log('ResultScreen - useEffect');
+        console.log('Location state:', location.state);
+        console.log('Parsed result:', result);
         if (result) {
             setGameResult(result);
             if (result.success && result.successYn === 'Y') {
@@ -108,7 +110,11 @@ const ResultScreen: React.FC = () => {
     };
 
     const handleStageSelect = () => {
-        navigate('/stage-select/1'); // 맵 ID는 1로 가정
+        const currentMapIdx = localStorage.getItem('currentMapIdx');
+        console.log('ResultScreen - handleStageSelect');
+        console.log('currentMapIdx from localStorage:', currentMapIdx);
+        console.log('gameResult:', gameResult);
+        navigate(`/stage-select/${currentMapIdx || '1'}`);
     };
 
     if (!gameResult) {

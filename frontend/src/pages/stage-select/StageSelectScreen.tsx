@@ -7,6 +7,7 @@ import { getEquippedSliceSkin, getEquippedTapSkin, UserSkinData } from '@/api/sk
 import StageInfoModal from '@/components/modal/StageInfoModal';
 import { startGame } from '@/api/game';
 import { useAuth } from '@/hooks/useAuth';
+import { checkStageClear } from '@/api/stages';
 
 // 배경 이미지 import
 import trashIsland from '@/assets/img/stage/trash-island.png';
@@ -293,18 +294,43 @@ const StageSelectScreen: React.FC = () => {
         navigate('/inventory');
     };
 
-    const handleStartGame = async () => {
-        if (!selectedStage || !user?.email) return;
-
+    const fetchStageClearInfo = async (stageIdx: number) => {
+        if (!user?.email) return;
         try {
-            const response = await startGame(user.email, selectedStage.stageIdx);
-            if (response.success) {
-                navigate(`/game/${selectedStage.stageIdx}`);
+            const response = await checkStageClear(stageIdx, user.email);
+            if (response.success && response.clearInfo) {
+                const { clearedStagesCount, totalStagesCount } = response.clearInfo;
+                if (clearedStagesCount === totalStagesCount) {
+                    navigate(`/stage-select/${Number(mapId) + 1}`);
+                } else {
+                    const nextStageIdx = stageIdx + 1;
+                    if (stages.some((stage) => stage.stageIdx === nextStageIdx)) {
+                        handleStageSelect(nextStageIdx);
+                    }
+                }
             }
         } catch (error) {
-            // 에러 처리
+            console.error('스테이지 클리어 정보 조회 실패:', error);
         }
     };
+
+    const handleStartGame = () => {
+        if (selectedStage) {
+            navigate(`/game/${mapId}/${selectedStage.stageIdx}`);
+        }
+    };
+
+    useEffect(() => {
+        const handleGameComplete = async () => {
+            const lastClearedStage = localStorage.getItem('lastClearedStage');
+            if (lastClearedStage) {
+                await fetchStageClearInfo(Number(lastClearedStage));
+                localStorage.removeItem('lastClearedStage');
+            }
+        };
+
+        handleGameComplete();
+    }, []);
 
     const getDifficultyText = (step: number) => {
         switch (step) {

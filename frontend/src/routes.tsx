@@ -24,7 +24,7 @@ const AppRoutes: React.FC = () => {
             <Route path='/auth/login' element={<LoginScreen />} />
             <Route path='/auth/signup/terms' element={<SignupTermsScreen />} />
             <Route path='/auth/signup' element={<SignupScreen />} />
-            <Route path='/game/:stageId' element={<InGameScreen />} />
+            <Route path='/game/:mapId/:stageId' element={<InGameScreen />} />
             <Route path='/result' element={<ResultScreen />} />
 
             {/* 헤더/푸터 있는 화면 */}

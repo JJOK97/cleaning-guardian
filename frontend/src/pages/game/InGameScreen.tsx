@@ -111,7 +111,7 @@ interface GameResult {
 
 const InGameScreen: React.FC = () => {
     const navigate = useNavigate();
-    const { stageId } = useParams<{ stageId: string }>();
+    const { stageId, mapId } = useParams<{ stageId: string; mapId: string }>();
     const { user } = useAuth();
     const [score, setScore] = useState(0);
     const [slicePoints, setSlicePoints] = useState<number[]>([]);
@@ -289,6 +289,11 @@ const InGameScreen: React.FC = () => {
         try {
             const clearResponse = await completeGame(gameData.stageIdx, user.email, successYn);
 
+            console.log('InGameScreen - endGame');
+            console.log('gameData.stageIdx:', gameData.stageIdx);
+            console.log('stageId from params:', stageId);
+            console.log('mapId from params:', mapId);
+
             const result = {
                 score,
                 stageIdx: gameData.stageIdx,
@@ -299,15 +304,25 @@ const InGameScreen: React.FC = () => {
                 message: clearResponse.message,
                 successYn: clearResponse.successYn,
                 email: user.email,
+                mapIdx: Number(mapId) || 1, // mapId가 없으면 1로 기본값 설정
             };
+
+            console.log('Result object:', result);
+
+            // 성공적으로 클리어한 경우에만 다음 스테이지 정보 저장
+            if (isSuccess) {
+                localStorage.setItem('lastClearedStage', gameData.stageIdx.toString());
+                localStorage.setItem('currentMapIdx', result.mapIdx.toString());
+                console.log('Saved to localStorage - currentMapIdx:', result.mapIdx);
+            }
 
             setTimeout(() => {
                 navigate('/result', { state: result });
             }, 1000);
         } catch (error) {
-            // 에러 처리
+            console.error('Error in endGame:', error);
         }
-    }, [gameData.stageIdx, lives, time, score, currentIndex, maxCombo, navigate, user?.email, pollutantQueue.length]);
+    }, [gameData.stageIdx, lives, time, score, currentIndex, maxCombo, navigate, user?.email, pollutantQueue.length, mapId, stageId]);
 
     // 오염물질 자르기(슬라이스) 처리 - 직접 클릭/탭 했을 때의 로직
     const handlePollutantSlice = useCallback(() => {

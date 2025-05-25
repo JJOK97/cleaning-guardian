@@ -73,7 +73,25 @@ const MainScreen: React.FC = () => {
 
                 console.log('최종 처리된 맵 목록:', processedMaps);
                 setMaps(processedMaps);
-                setVisibleMap(processedMaps[0]);
+
+                // 가장 높은 맵 찾기
+                const highestUnlockedMap = processedMaps.reduce((highest, current) => {
+                    if (current.unlocked && current.mapIdx > highest.mapIdx) {
+                        return current;
+                    }
+                    return highest;
+                }, processedMaps[0]);
+
+                setVisibleMap(highestUnlockedMap);
+
+                // 스크롤 위치 조정
+                if (scrollContainerRef.current) {
+                    const mapIndex = processedMaps.findIndex((map) => map.mapIdx === highestUnlockedMap.mapIdx);
+                    scrollContainerRef.current.scrollTo({
+                        top: mapIndex * window.innerHeight,
+                        behavior: 'smooth',
+                    });
+                }
             } catch (error) {
                 console.error('맵 데이터 로딩 실패:', error);
             }
