@@ -69,6 +69,11 @@ public class MapsServiceImpl implements MapsService {
 		log.info("Map clear status - clearedStages: {}, totalStages: {}, nextMapIdx: {}", 
 			clearedStages, totalStages, nextMapIdx);
 
+		// 모든 스테이지 클리어 시 다음 맵 오픈
+		if (clearedStages == totalStages && nextMapIdx != null) {
+			log.info("All stages cleared for map: {}, next map will be opened: {}", mapIdx, nextMapIdx);
+		}
+
 		return clearInfo;
 	}
 }

@@ -13,15 +13,21 @@ FROM "maps"
 SELECT "map_idx", "game_idx", "map_title", DBMS_LOB.SUBSTR("map_desc", 4000, 1) AS "map_desc",
 		"map_theme", "created_at"
 FROM "maps"
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM "stages"
-  LEFT JOIN "game_clear"
-    ON "stages"."stage_idx" = "game_clear"."stage_idx"
-    AND "email" = #{email}
-  WHERE "maps"."map_idx" = "stages"."map_idx"
-    AND ("game_clear"."stage_idx" IS NULL OR "game_clear"."success_yn" != 'Y')
-)
+WHERE "map_idx" = 1 
+   OR EXISTS (
+     SELECT 1
+     FROM "maps" "prev_map"
+     WHERE "prev_map"."map_idx" = "maps"."map_idx" - 1
+       AND NOT EXISTS (
+         SELECT 1
+         FROM "stages" "s"
+         LEFT JOIN "game_clear" "gc" ON "s"."stage_idx" = "gc"."stage_idx"
+           AND "gc"."email" = #{email}
+           AND "gc"."success_yn" = 'Y'
+         WHERE "s"."map_idx" = "prev_map"."map_idx"
+           AND "gc"."stage_idx" IS NULL
+       )
+   )
 </select>
 
 <!-- 맵 상세 조회 > 선택한 맵 만 조회-->
