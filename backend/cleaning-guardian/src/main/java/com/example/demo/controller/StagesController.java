@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.StageDTO;
 import com.example.demo.service.StagesServiceImpl;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1")
 public class StagesController {
@@ -38,6 +40,15 @@ public class StagesController {
 	public ResponseEntity<StageDTO> stageJoin(@PathVariable("stageIdx") long stageIdx) {
 		StageDTO game = stagesservice.getStage(stageIdx);
 		return new ResponseEntity<>(game, HttpStatus.OK);
+	}
+
+	// 스테이지 클리어 체크
+	@GetMapping("/stages/{stageIdx}/clear-check")
+	public ResponseEntity<Map<String, Object>> checkStageClear(
+			@PathVariable("stageIdx") long stageIdx,
+			@RequestParam String email) {
+		Map<String, Object> clearInfo = stagesservice.checkStageClear(stageIdx, email);
+		return new ResponseEntity<>(clearInfo, HttpStatus.OK);
 	}
 
 }

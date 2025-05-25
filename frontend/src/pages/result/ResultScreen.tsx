@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { RewardAnimation } from '@/components/game/RewardAnimation';
 import { postReward } from '@/api/game';
+import { checkStageClear } from '@/api/stages';
 import { stageRewards } from '@/constants/stageRewards';
 import { Reward } from '@/types/reward';
 
@@ -97,9 +98,35 @@ const ResultScreen: React.FC = () => {
         setIsRewardComplete(true);
     };
 
-    const handleNextStage = () => {
-        if (gameResult) {
-            navigate(`/game/${gameResult.stageIdx + 1}`);
+    const handleNextStage = async () => {
+        if (!gameResult) return;
+
+        try {
+            console.log('Checking stage clear for stage:', gameResult.stageIdx);
+            const response = await checkStageClear(gameResult.stageIdx, gameResult.email);
+            console.log('Stage clear check response:', response);
+
+            if (response.success && response.clearInfo) {
+                const { clearedStagesCount, totalStagesCount, isFinalStage } = response.clearInfo;
+                console.log('Clear info:', { clearedStagesCount, totalStagesCount, isFinalStage });
+
+                // 마지막 스테이지면 메인 화면으로
+                if (isFinalStage === 'Y') {
+                    console.log('Final stage cleared, moving to main screen');
+                    navigate('/main');
+                    return;
+                }
+
+                // 다음 스테이지로 이동
+                const currentMapIdx = localStorage.getItem('currentMapIdx');
+                console.log('Moving to next stage with mapId:', currentMapIdx);
+                navigate(`/game/${currentMapIdx}/${gameResult.stageIdx + 1}`);
+            }
+        } catch (error) {
+            console.error('스테이지 클리어 체크 실패:', error);
+            // 에러가 발생해도 다음 스테이지로 이동
+            const currentMapIdx = localStorage.getItem('currentMapIdx');
+            navigate(`/game/${currentMapIdx}/${gameResult.stageIdx + 1}`);
         }
     };
 
