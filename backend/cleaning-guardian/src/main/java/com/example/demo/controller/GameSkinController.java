@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.UserSkinDTO;
 import com.example.demo.service.GameSkinService;
 import com.example.demo.vo.GameSkinVO;
 import com.example.demo.vo.UserSkinVO;
@@ -48,8 +49,12 @@ public class GameSkinController {
 	}
 
 	@GetMapping("/slice/user")
-	public List<UserSkinVO> getUserSliceSkins(@RequestParam String email) {
-		return skinService.getUserSliceSkins(email);
+	public UserSkinDTO getUserSliceSkins(@RequestParam String email) {
+		List<UserSkinVO> userSkins = skinService.getUserSliceSkins(email);
+		return UserSkinDTO.builder()
+				.userSkinList(userSkins)
+				.success(true)
+				.build();
 	}
 
 	@GetMapping("/slice/user/{skinIdx}")
@@ -74,8 +79,12 @@ public class GameSkinController {
 	}
 
 	@GetMapping("/tap/user")
-	public List<UserSkinVO> getUserTapSkins(@RequestParam String email) {
-		return skinService.getUserTapSkins(email);
+	public UserSkinDTO getUserTapSkins(@RequestParam String email) {
+		List<UserSkinVO> userSkins = skinService.getUserTapSkins(email);
+		return UserSkinDTO.builder()
+				.userSkinList(userSkins)
+				.success(true)
+				.build();
 	}
 
 	@GetMapping("/tap/user/{skinIdx}")

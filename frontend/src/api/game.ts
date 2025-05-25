@@ -1,5 +1,9 @@
 import api from './index';
 import { Reward } from '@/types/reward';
+import axios from 'axios';
+import { UserItem } from '@/types/inventory';
+
+const BASE_URL = 'http://54.180.101.153:8088/api/v1';
 
 export interface UserPlayResponse {
     success: boolean;
@@ -24,15 +28,6 @@ export interface GameItem {
     itemPrice: number;
     itemType: string; // 'TIME' | 'LIFE' | 'SCORE'
     createdAt: string;
-}
-
-export interface UserItem {
-    uitemIdx: number;
-    email: string;
-    itemIdx: number;
-    getType: string;
-    createdAt: string;
-    item: GameItem;
 }
 
 export interface GameItemsResponse {
@@ -109,14 +104,17 @@ export const getStagePollutions = async (stageIdx: number) => {
     }
 };
 
-// 사용자 보유 아이템 목록 조회
-export const getUserItems = async (email: string): Promise<GameItemsResponse> => {
+// 아이템 목록 조회
+export const getUserItems = async (email: string) => {
     try {
-        const response = await api.get('/items/user', {
+        const response = await axios.get(`${BASE_URL}/items/user`, {
             headers: { email },
         });
+        console.log('getUserItems 요청:', { email });
+        console.log('getUserItems 응답:', response.data);
         return response.data;
     } catch (error) {
+        console.error('getUserItems 에러:', error);
         throw error;
     }
 };
@@ -134,33 +132,49 @@ export const useItem = async (email: string, itemIdx: number): Promise<GameItems
 };
 
 // 아이템 장착
-export const equipItem = async (email: string, itemIdx: number, slot: number): Promise<UserItemDTO> => {
-    const res = await api.post(`/items/equip/${itemIdx}?slot=${slot}`, null, {
-        headers: {
-            email: email,
-        },
-    });
-    return res.data;
+export const equipItem = async (email: string, itemIdx: number, slot: number) => {
+    try {
+        const response = await api.post(`/items/equip/${itemIdx}`, null, {
+            headers: { email },
+            params: { slot },
+        });
+        console.log('equipItem 요청:', { email, itemIdx, slot });
+        console.log('equipItem 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('equipItem 에러:', error);
+        throw error;
+    }
 };
 
 // 아이템 해제
-export const unequipItem = async (email: string, itemIdx: number): Promise<UserItemDTO> => {
-    const res = await api.post(`/items/unequip/${itemIdx}`, null, {
-        headers: {
-            email: email,
-        },
-    });
-    return res.data;
+export const unequipItem = async (email: string, itemIdx: number) => {
+    try {
+        const response = await api.post(`/items/unequip/${itemIdx}`, null, {
+            headers: { email },
+        });
+        console.log('unequipItem 요청:', { email, itemIdx });
+        console.log('unequipItem 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('unequipItem 에러:', error);
+        throw error;
+    }
 };
 
-// 장착된 아이템 목록 조회
-export const getEquippedItems = async (email: string): Promise<UserItemDTO> => {
-    const res = await api.get('/items/equipped', {
-        headers: {
-            email: email,
-        },
-    });
-    return res.data;
+// 장착된 아이템 조회
+export const getEquippedItems = async (email: string) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/items/equipped`, {
+            headers: { email },
+        });
+        console.log('getEquippedItems 요청:', { email });
+        console.log('getEquippedItems 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('getEquippedItems 에러:', error);
+        throw error;
+    }
 };
 
 // 포인트 보상 수령
@@ -197,6 +211,78 @@ export const postReward = async (email: string, rewards: Reward[]) => {
         return response;
     } catch (error) {
         console.error('Reward error:', error);
+        throw error;
+    }
+};
+
+// 스킨 목록 조회
+export const getUserSkins = async (email: string) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/skins/user`, {
+            headers: { email },
+        });
+        console.log('getUserSkins 요청:', { email });
+        console.log('getUserSkins 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('getUserSkins 에러:', error);
+        throw error;
+    }
+};
+
+// 장착된 스킨 조회
+export const getEquippedSkins = async (email: string) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/skins/equipped`, {
+            headers: { email },
+        });
+        console.log('getEquippedSkins 요청:', { email });
+        console.log('getEquippedSkins 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('getEquippedSkins 에러:', error);
+        throw error;
+    }
+};
+
+// 스킨 장착
+export const equipSkin = async (email: string, skinIdx: number) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/skins/equip/${skinIdx}`, null, {
+            headers: { email },
+        });
+        console.log('equipSkin 요청:', { email, skinIdx });
+        console.log('equipSkin 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('equipSkin 에러:', error);
+        throw error;
+    }
+};
+
+// 스킨 해제
+export const unequipSkin = async (email: string, skinIdx: number) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/skins/unequip/${skinIdx}`, null, {
+            headers: { email },
+        });
+        console.log('unequipSkin 요청:', { email, skinIdx });
+        console.log('unequipSkin 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('unequipSkin 에러:', error);
+        throw error;
+    }
+};
+
+// 아이템 구매
+export const purchaseItem = async (email: string, itemIdx: number): Promise<GameItemsResponse> => {
+    try {
+        const response = await api.post(`/items/purchase/${itemIdx}`, null, {
+            headers: { email },
+        });
+        return response.data;
+    } catch (error) {
         throw error;
     }
 };

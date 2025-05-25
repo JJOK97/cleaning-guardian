@@ -5,14 +5,14 @@
 <mapper namespace="com.example.demo.mapper.GameSkinMapper">
 
     <resultMap id="skinResultMap" type="com.example.demo.vo.GameSkinVO">
-        <id property="skinIdx" column="skin_idx"/>
-        <result property="gameIdx" column="game_idx"/>
-        <result property="skinName" column="skin_name"/>
-        <result property="skinDesc" column="skin_desc"/>
-        <result property="skinImg" column="skin_img"/>
-        <result property="skinPrice" column="skin_price"/>
-        <result property="actionType" column="action_type"/>
-        <result property="createdAt" column="created_at"/>
+        <id property="skinIdx" column="skin_skin_idx"/>
+        <result property="gameIdx" column="skin_game_idx"/>
+        <result property="skinName" column="skin_skin_name"/>
+        <result property="skinDesc" column="skin_skin_desc"/>
+        <result property="skinImg" column="skin_skin_img"/>
+        <result property="skinPrice" column="skin_skin_price"/>
+        <result property="actionType" column="skin_action_type"/>
+        <result property="createdAt" column="skin_created_at"/>
     </resultMap>
 
     <resultMap id="userSkinResultMap" type="com.example.demo.vo.UserSkinVO">

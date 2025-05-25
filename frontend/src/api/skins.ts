@@ -1,4 +1,5 @@
 import api from './index';
+import axios from 'axios';
 
 export interface SkinData {
     skinIdx: number;
@@ -47,26 +48,110 @@ export const getEquippedSliceSkin = async (email: string): Promise<UserSkinData>
 
 // 현재 장착된 탭 스킨 조회
 export const getEquippedTapSkin = async (email: string): Promise<UserSkinData> => {
-    const response = await api.get('/skins/tap/equipped', { params: { email } });
-    return response.data;
+    try {
+        console.log('Calling getEquippedTapSkin with email:', email);
+        const response = await api.get('/skins/tap/equipped', { params: { email } });
+        console.log('getEquippedTapSkin response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error in getEquippedTapSkin:', error);
+        throw error;
+    }
 };
 
 // 보유한 슬라이스 스킨 목록 조회
-export const getUserSliceSkins = async (): Promise<SkinsResponse> => {
+export const getUserSliceSkins = async (email: string): Promise<SkinsResponse> => {
     try {
-        const response = await api.get('/skins/slice/user');
+        const response = await api.get('/skins/slice/user', {
+            params: { email },
+        });
+        console.log('getUserSliceSkins response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('getUserSliceSkins error:', error);
+        throw error;
+    }
+};
+
+// 보유한 탭 스킨 목록 조회
+export const getUserTapSkins = async (email: string): Promise<SkinsResponse> => {
+    try {
+        console.log('Calling getUserTapSkins with email:', email);
+        const response = await api.get('/skins/tap/user', {
+            params: { email },
+        });
+        console.log('getUserTapSkins response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('getUserTapSkins error:', error);
+        throw error;
+    }
+};
+
+// 스킨 장착
+export const equipTapSkin = async (email: string, skinIdx: number): Promise<string> => {
+    try {
+        const response = await api.post(`/skins/equip/${skinIdx}`, null, {
+            params: { email },
+            responseType: 'text',
+        });
+        return response.data;
+    } catch (error) {
+        console.error('equipTapSkin 에러:', error);
+        throw error;
+    }
+};
+
+// 스킨 해제
+export const unequipTapSkin = async (email: string, skinIdx: number): Promise<string> => {
+    try {
+        const response = await api.post(`/skins/unequip/${skinIdx}`, null, {
+            params: { email },
+            responseType: 'text',
+        });
+        return response.data;
+    } catch (error) {
+        console.error('unequipTapSkin 에러:', error);
+        throw error;
+    }
+};
+
+// 스킨 구매
+export const purchaseSkin = async (email: string, skinIdx: number): Promise<SkinData> => {
+    try {
+        const response = await api.post(`/skins/purchase/${skinIdx}`, null, {
+            params: { email },
+        });
         return response.data;
     } catch (error) {
         throw error;
     }
 };
 
-// 보유한 탭 스킨 목록 조회
-export const getUserTapSkins = async (): Promise<SkinsResponse> => {
+// 전체 슬라이스 스킨 목록 조회
+export const getAllSliceSkins = async (email: string): Promise<SkinsResponse> => {
     try {
-        const response = await api.get('/skins/tap/user');
+        const response = await api.get('/skins/slice', {
+            headers: { email },
+        });
+        console.log('getAllSliceSkins response:', response.data);
         return response.data;
     } catch (error) {
+        console.error('getAllSliceSkins error:', error);
+        throw error;
+    }
+};
+
+// 전체 탭 스킨 목록 조회
+export const getAllTapSkins = async (email: string): Promise<SkinsResponse> => {
+    try {
+        const response = await api.get('/skins/tap', {
+            headers: { email },
+        });
+        console.log('getAllTapSkins response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('getAllTapSkins error:', error);
         throw error;
     }
 };

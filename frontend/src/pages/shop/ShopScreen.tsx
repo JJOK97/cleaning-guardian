@@ -1,23 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
+import LoadingScreen from '@/components/common/LoadingScreen';
+import { useAuth } from '@/hooks/useAuth';
+import { getUserItems } from '@/api/game';
+import { getAllSliceSkins, getAllTapSkins, getUserSliceSkins, getUserTapSkins } from '@/api/skins';
+import ShopItemModal from '@/components/modal/ShopItemModal';
+import ShopSkinModal from '@/components/modal/ShopSkinModal';
 
 const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex: 1;
     padding: 2rem;
-    min-height: 100vh;
-`;
-
-const ShopCard = styled.div`
-    background-color: ${({ theme }) => theme.colors.background.card};
-    border-radius: 16px;
-    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
     width: 100%;
-    max-width: 800px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding-top: 80px;
+    padding-bottom: 60px;
 `;
 
 const Title = styled.h1`
@@ -25,6 +23,27 @@ const Title = styled.h1`
     font-size: 2rem;
     margin-bottom: 2rem;
     text-align: center;
+`;
+
+const TabContainer = styled.div`
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+`;
+
+const Tab = styled.button<{ $active: boolean }>`
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    background-color: ${({ $active, theme }) => ($active ? theme.colors.primary.main : theme.colors.background.light)};
+    color: ${({ $active, theme }) => ($active ? theme.colors.text.white : theme.colors.text.primary)};
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: ${({ $active, theme }) => ($active ? theme.colors.primary.dark : theme.colors.background.hover)};
+    }
 `;
 
 const ItemGrid = styled.div`
@@ -42,17 +61,19 @@ const ItemCard = styled.div`
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
 `;
 
-const ItemImage = styled.div`
+const ItemImage = styled.img`
     width: 100px;
     height: 100px;
-    background-color: ${({ theme }) => theme.colors.background.main};
+    object-fit: cover;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
 `;
 
 const ItemName = styled.h3`
@@ -66,67 +87,160 @@ const ItemPrice = styled.span`
     font-size: 0.9rem;
 `;
 
-const ButtonGroup = styled.div`
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-`;
-
-interface ShopItem {
-    id: number;
-    name: string;
-    price: number;
-    icon: string;
-}
-
 const ShopScreen: React.FC = () => {
-    const navigate = useNavigate();
-    const [items] = useState<ShopItem[]>([
-        { id: 1, name: '청소기 업그레이드', price: 1000, icon: '🧹' },
-        { id: 2, name: '빗자루 업그레이드', price: 800, icon: '🧹' },
-        { id: 3, name: '물뿌리개 업그레이드', price: 600, icon: '💧' },
-        { id: 4, name: '장갑 업그레이드', price: 400, icon: '🧤' },
-    ]);
+    const { user } = useAuth();
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'skins' | 'items'>('items');
+    const [items, setItems] = useState([]);
+    const [skins, setSkins] = useState([]);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedSkin, setSelectedSkin] = useState(null);
 
-    const handlePurchase = (itemId: number) => {
-        // TODO: 구매 로직 구현
-        console.log(`구매: ${itemId}`);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                if (user?.email) {
+                    console.log('상점 데이터 로딩 시작');
+                    const [itemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] = await Promise.all([
+                        getUserItems(user.email),
+                        getAllSliceSkins(user.email),
+                        getAllTapSkins(user.email),
+                        getUserSliceSkins(user.email),
+                        getUserTapSkins(user.email),
+                    ]);
+
+                    console.log('아이템 데이터:', itemsData);
+                    console.log('슬라이스 스킨 데이터:', sliceSkinsData);
+                    console.log('탭 스킨 데이터:', tapSkinsData);
+                    console.log('보유한 슬라이스 스킨:', userSliceSkins);
+                    console.log('보유한 탭 스킨:', userTapSkins);
+
+                    // 아이템 데이터 구조 수정
+                    const processedItems =
+                        itemsData.items?.map((userItem) => ({
+                            ...userItem.item,
+                            userItemIdx: userItem.userItemIdx,
+                            isUsed: userItem.isUsed,
+                        })) || [];
+
+                    console.log('가공된 아이템 데이터:', processedItems);
+
+                    // 보유한 스킨 인덱스 목록 생성
+                    const ownedSkinIndices = new Set([
+                        ...(userSliceSkins || []).map((skin) => skin.skinIdx),
+                        ...(userTapSkins || []).map((skin) => skin.skinIdx),
+                    ]);
+
+                    // 스킨 데이터 구조 수정
+                    const processedSkins = [...(sliceSkinsData || []), ...(tapSkinsData || [])].filter(
+                        (skin) => !ownedSkinIndices.has(skin.skinIdx),
+                    );
+
+                    console.log('가공된 스킨 데이터:', processedSkins);
+
+                    setItems(processedItems);
+                    setSkins(processedSkins);
+                }
+            } catch (error) {
+                console.error('데이터 로딩 실패:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [user]);
+
+    const handlePurchase = async () => {
+        try {
+            if (user?.email) {
+                console.log('구매 후 데이터 갱신 시작');
+                const [itemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] = await Promise.all([
+                    getUserItems(user.email),
+                    getAllSliceSkins(user.email),
+                    getAllTapSkins(user.email),
+                    getUserSliceSkins(user.email),
+                    getUserTapSkins(user.email),
+                ]);
+
+                console.log('갱신된 아이템 데이터:', itemsData);
+                console.log('갱신된 슬라이스 스킨 데이터:', sliceSkinsData);
+                console.log('갱신된 탭 스킨 데이터:', tapSkinsData);
+                console.log('갱신된 보유한 슬라이스 스킨:', userSliceSkins);
+                console.log('갱신된 보유한 탭 스킨:', userTapSkins);
+
+                // 아이템 데이터 구조 수정
+                const processedItems =
+                    itemsData.items?.map((userItem) => ({
+                        ...userItem.item,
+                        userItemIdx: userItem.userItemIdx,
+                        isUsed: userItem.isUsed,
+                    })) || [];
+
+                console.log('갱신된 가공 아이템 데이터:', processedItems);
+
+                // 보유한 스킨 인덱스 목록 생성
+                const ownedSkinIndices = new Set([
+                    ...(userSliceSkins || []).map((skin) => skin.skinIdx),
+                    ...(userTapSkins || []).map((skin) => skin.skinIdx),
+                ]);
+
+                // 스킨 데이터 구조 수정
+                const processedSkins = [...(sliceSkinsData || []), ...(tapSkinsData || [])].filter(
+                    (skin) => !ownedSkinIndices.has(skin.skinIdx),
+                );
+
+                console.log('갱신된 가공 스킨 데이터:', processedSkins);
+
+                setItems(processedItems);
+                setSkins(processedSkins);
+            }
+        } catch (error) {
+            console.error('데이터 갱신 실패:', error);
+        }
     };
 
-    const handleBack = () => {
-        navigate('/main');
-    };
+    if (loading) {
+        return <LoadingScreen />;
+    }
 
     return (
         <Container>
-            <ShopCard>
-                <Title>상점</Title>
+            <Title>상점</Title>
 
-                <ItemGrid>
-                    {items.map((item) => (
-                        <ItemCard key={item.id}>
-                            <ItemImage>{item.icon}</ItemImage>
-                            <ItemName>{item.name}</ItemName>
-                            <ItemPrice>{item.price} 코인</ItemPrice>
-                            <Button
-                                $variant='primary'
-                                onClick={() => handlePurchase(item.id)}
-                            >
-                                구매
-                            </Button>
-                        </ItemCard>
-                    ))}
-                </ItemGrid>
+            <TabContainer>
+                <Tab $active={activeTab === 'items'} onClick={() => setActiveTab('items')}>
+                    아이템
+                </Tab>
+                <Tab $active={activeTab === 'skins'} onClick={() => setActiveTab('skins')}>
+                    스킨
+                </Tab>
+            </TabContainer>
 
-                <ButtonGroup>
-                    <Button
-                        $variant='secondary'
-                        onClick={handleBack}
-                    >
-                        뒤로가기
-                    </Button>
-                </ButtonGroup>
-            </ShopCard>
+            <ItemGrid>
+                {activeTab === 'skins'
+                    ? skins.map((skin) => (
+                          <ItemCard key={skin.skinIdx} onClick={() => setSelectedSkin(skin)}>
+                              <ItemImage src={skin.skinImg} alt={skin.skinName} />
+                              <ItemName>{skin.skinName}</ItemName>
+                              <ItemPrice>
+                                  {skin.priceType === 'P' ? '포인트' : '캐시'} {skin.skinPrice}
+                              </ItemPrice>
+                          </ItemCard>
+                      ))
+                    : items.map((item) => (
+                          <ItemCard key={item.itemIdx} onClick={() => setSelectedItem(item)}>
+                              <ItemImage src={item.itemImg} alt={item.itemName} />
+                              <ItemName>{item.itemName}</ItemName>
+                              <ItemPrice>
+                                  {item.priceType === 'P' ? '포인트' : '캐시'} {item.itemPrice}
+                              </ItemPrice>
+                          </ItemCard>
+                      ))}
+            </ItemGrid>
+
+            {selectedItem && <ShopItemModal item={selectedItem} onClose={() => setSelectedItem(null)} onPurchase={handlePurchase} />}
+            {selectedSkin && <ShopSkinModal skin={selectedSkin} onClose={() => setSelectedSkin(null)} onPurchase={handlePurchase} />}
         </Container>
     );
 };
