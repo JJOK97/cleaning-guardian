@@ -230,7 +230,10 @@ const StageSelectScreen: React.FC = () => {
                                 ...stage,
                                 stageMission: JSON.parse(stage.stageMission),
                                 isFinalStage: stage.isFinalStage as 'Y' | 'N',
-                                unlocked: stage.stageIdx === 1 || clearedStagesList.includes(stage.stageIdx - 1),
+                                unlocked:
+                                    stage.stageIdx === 1 ||
+                                    clearedStagesList.includes(stage.stageIdx - 1) ||
+                                    clearedStagesList.includes(stage.stageIdx),
                             };
                             return processed;
                         } catch (error) {
@@ -242,7 +245,10 @@ const StageSelectScreen: React.FC = () => {
                                     action: '',
                                 },
                                 isFinalStage: stage.isFinalStage as 'Y' | 'N',
-                                unlocked: stage.stageIdx === 1 || clearedStagesList.includes(stage.stageIdx - 1),
+                                unlocked:
+                                    stage.stageIdx === 1 ||
+                                    clearedStagesList.includes(stage.stageIdx - 1) ||
+                                    clearedStagesList.includes(stage.stageIdx),
                             };
                         }
                     }) || [];
@@ -370,9 +376,14 @@ const StageSelectScreen: React.FC = () => {
                     return (
                         <StageCard
                             key={`stage-${stage.stageIdx}`}
-                            $unlocked={stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx)}
+                            $unlocked={
+                                stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx) || clearedStages.includes(stage.stageIdx - 1)
+                            }
                             onClick={() =>
-                                (stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx)) && handleStageSelect(stage.stageIdx)
+                                (stage.stageIdx === 1 ||
+                                    clearedStages.includes(stage.stageIdx) ||
+                                    clearedStages.includes(stage.stageIdx - 1)) &&
+                                handleStageSelect(stage.stageIdx)
                             }
                         >
                             <div>
@@ -383,11 +394,13 @@ const StageSelectScreen: React.FC = () => {
                                 {diffIcon && <img src={diffIcon} alt='난이도' style={{ width: 22, height: 22, marginRight: 6 }} />}
                                 {getDifficultyText(stage.stageStep)}
                             </DifficultyBadge>
-                            {stage.stageIdx !== 1 && !clearedStages.includes(stage.stageIdx) && (
-                                <LockedOverlay>
-                                    <img src={lockerIcon} alt='잠김' style={{ width: 48, height: 48 }} />
-                                </LockedOverlay>
-                            )}
+                            {stage.stageIdx !== 1 &&
+                                !clearedStages.includes(stage.stageIdx) &&
+                                !clearedStages.includes(stage.stageIdx - 1) && (
+                                    <LockedOverlay>
+                                        <img src={lockerIcon} alt='잠김' style={{ width: 48, height: 48 }} />
+                                    </LockedOverlay>
+                                )}
                         </StageCard>
                     );
                 })}

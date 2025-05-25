@@ -279,7 +279,7 @@ const InGameScreen: React.FC = () => {
 
     // 게임 종료 함수
     const endGame = useCallback(async () => {
-        if (!user?.email || !gameData.stageIdx) return;
+        if (!user?.email || !gameData.stageIdx || gameEnded) return;
         setGameEnded(true);
 
         // 게임 종료 조건에 따른 성공/실패 판정
@@ -304,7 +304,7 @@ const InGameScreen: React.FC = () => {
                 message: clearResponse.message,
                 successYn: clearResponse.successYn,
                 email: user.email,
-                mapIdx: Number(mapId) || 1, // mapId가 없으면 1로 기본값 설정
+                mapIdx: Number(mapId) || 1,
             };
 
             console.log('Result object:', result);
@@ -321,8 +321,57 @@ const InGameScreen: React.FC = () => {
             }, 1000);
         } catch (error) {
             console.error('Error in endGame:', error);
+            // 에러 발생 시에도 결과 화면으로 이동
+            navigate('/result', {
+                state: {
+                    gameResult: {
+                        score,
+                        stageIdx: gameData.stageIdx,
+                        timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
+                        pollutantsRemoved: currentIndex,
+                        success: lives > 0 && time > 0 && currentIndex >= pollutantQueue.length,
+                    },
+                },
+            });
         }
-    }, [gameData.stageIdx, lives, time, score, currentIndex, maxCombo, navigate, user?.email, pollutantQueue.length, mapId, stageId]);
+    }, [
+        gameData.stageIdx,
+        lives,
+        time,
+        score,
+        currentIndex,
+        maxCombo,
+        navigate,
+        user?.email,
+        pollutantQueue.length,
+        mapId,
+        stageId,
+        gameEnded,
+    ]);
+
+    // 게임 종료 조건 체크
+    useEffect(() => {
+        if ((lives === 0 || time === 0 || currentIndex >= pollutantQueue.length) && !gameEnded) {
+            endGame();
+        }
+    }, [lives, time, currentIndex, pollutantQueue.length, gameEnded, endGame]);
+
+    // 시간 로직
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (!showPreparation && !gameEnded) {
+            timer = setInterval(() => {
+                setTime((prev) => {
+                    if (prev <= 0) {
+                        clearInterval(timer);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [showPreparation, gameEnded]);
 
     // 오염물질 자르기(슬라이스) 처리 - 직접 클릭/탭 했을 때의 로직
     const handlePollutantSlice = useCallback(() => {
@@ -347,40 +396,6 @@ const InGameScreen: React.FC = () => {
             }
         }, 100);
     }, [pollutant, gameEnded]);
-
-    // 시간 로직
-    useEffect(() => {
-        let timer: NodeJS.Timeout;
-        if (!showPreparation && !gameEnded) {
-            timer = setInterval(() => {
-                setTime((prev) => {
-                    if (prev <= 0) {
-                        clearInterval(timer);
-                        endGame();
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        }
-        return () => clearInterval(timer);
-    }, [showPreparation, gameEnded, endGame]);
-
-    // 게임 종료 조건 추가
-    useEffect(() => {
-        if (lives === 0 || time === 0) {
-            endGame();
-        }
-    }, [lives, time]);
-
-    // 로딩 화면 처리
-    useEffect(() => {
-        const loadingTimer = setTimeout(() => {
-            setIsLoading(false);
-        }, 2000);
-
-        return () => clearTimeout(loadingTimer);
-    }, []);
 
     // 마우스/터치 이벤트 핸들러
     const handleMouseDown = (e: any) => {

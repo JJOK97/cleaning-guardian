@@ -17,6 +17,7 @@ interface GameResult {
     email: string;
     stageIdx: number;
     successYn: string;
+    mapIdx: string;
 }
 
 const ResultContainer = styled.div`
@@ -102,31 +103,22 @@ const ResultScreen: React.FC = () => {
         if (!gameResult) return;
 
         try {
-            console.log('Checking stage clear for stage:', gameResult.stageIdx);
             const response = await checkStageClear(gameResult.stageIdx, gameResult.email);
             console.log('Stage clear check response:', response);
 
-            if (response.success && response.clearInfo) {
-                const { clearedStagesCount, totalStagesCount, isFinalStage } = response.clearInfo;
-                console.log('Clear info:', { clearedStagesCount, totalStagesCount, isFinalStage });
-
-                // 마지막 스테이지면 메인 화면으로
-                if (isFinalStage === 'Y') {
-                    console.log('Final stage cleared, moving to main screen');
-                    navigate('/main');
-                    return;
-                }
-
-                // 다음 스테이지로 이동
-                const currentMapIdx = localStorage.getItem('currentMapIdx');
-                console.log('Moving to next stage with mapId:', currentMapIdx);
-                navigate(`/game/${currentMapIdx}/${gameResult.stageIdx + 1}`);
+            if (response.is_final_stage === 'Y') {
+                navigate('/main');
+            } else {
+                const nextStageIdx = gameResult.stageIdx + 1;
+                console.log('Moving to next stage:', nextStageIdx, 'with mapId:', response.map_idx);
+                navigate(`/game/${response.map_idx}/${nextStageIdx}`);
             }
         } catch (error) {
-            console.error('스테이지 클리어 체크 실패:', error);
+            console.error('Error checking stage clear:', error);
             // 에러가 발생해도 다음 스테이지로 이동
-            const currentMapIdx = localStorage.getItem('currentMapIdx');
-            navigate(`/game/${currentMapIdx}/${gameResult.stageIdx + 1}`);
+            const nextStageIdx = gameResult.stageIdx + 1;
+            console.log('Error occurred, moving to next stage:', nextStageIdx, 'with mapId:', gameResult.mapIdx);
+            navigate(`/game/${gameResult.mapIdx}/${nextStageIdx}`);
         }
     };
 

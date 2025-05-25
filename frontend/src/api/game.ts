@@ -76,14 +76,27 @@ export const startGame = async (email: string, stageIdx: number): Promise<UserPl
 
 // 게임 클리어
 export const completeGame = async (stageIdx: number, email: string, successYn: string): Promise<GameClearResponse> => {
-    try {
-        const response = await api.post(`/stages/${stageIdx}/complete`, null, {
-            params: { email, successYn },
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
+    const maxRetries = 3;
+    let retryCount = 0;
+
+    while (retryCount < maxRetries) {
+        try {
+            const response = await api.post(`/stages/${stageIdx}/complete`, null, {
+                params: { email, successYn },
+            });
+            return response.data;
+        } catch (error) {
+            retryCount++;
+            if (retryCount === maxRetries) {
+                console.error('게임 클리어 처리 실패:', error);
+                throw error;
+            }
+            // 재시도 전 잠시 대기
+            await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
+        }
     }
+
+    throw new Error('최대 재시도 횟수 초과');
 };
 
 // 스테이지 오염물질 정보 조회
