@@ -4,17 +4,18 @@
 
     <select id="selectAllPollutions" resultType="com.example.demo.vo.PollutionsVO">
         SELECT 
-            "pol_idx" as polIdx,
-            "game_idx" as gameIdx,
-            "pol_name" as polName,
-            "pol_desc" as polDesc,
-            "pol_img1" as polImg1,
-            "pol_img2" as polImg2,
-            "pol_img3" as polImg3,
-            "type",
-            "created_at" as createdAt
-        FROM "pollutions"
-        ORDER BY "pol_idx"
+            p."pol_idx" as polIdx,
+            p."game_idx" as gameIdx,
+            p."pol_name" as polName,
+            p."pol_desc" as polDesc,
+            p."pol_img1" as polImg1,
+            p."pol_img2" as polImg2,
+            p."pol_img3" as polImg3,
+            p."type",
+            (SELECT COUNT(*) FROM "user_collection" WHERE "pol_idx" = p."pol_idx") as count,
+            p."created_at" as createdAt
+        FROM "pollutions" p
+        ORDER BY p."pol_idx"
     </select>
 
     <select id="selectUserCollections" resultType="com.example.demo.vo.UserCollectionVO">
@@ -30,17 +31,18 @@
 
     <select id="selectPollution" resultType="com.example.demo.vo.PollutionsVO">
         SELECT 
-            "pol_idx" as polIdx,
-            "game_idx" as gameIdx,
-            "pol_name" as polName,
-            "pol_desc" as polDesc,
-            "pol_img1" as polImg1,
-            "pol_img2" as polImg2,
-            "pol_img3" as polImg3,
-            "type",
-            "created_at" as createdAt
-        FROM "pollutions"
-        WHERE "pol_idx" = #{polIdx}
+            p."pol_idx" as polIdx,
+            p."game_idx" as gameIdx,
+            p."pol_name" as polName,
+            p."pol_desc" as polDesc,
+            p."pol_img1" as polImg1,
+            p."pol_img2" as polImg2,
+            p."pol_img3" as polImg3,
+            p."type",
+            (SELECT COUNT(*) FROM "user_collection" WHERE "pol_idx" = p."pol_idx") as count,
+            p."created_at" as createdAt
+        FROM "pollutions" p
+        WHERE p."pol_idx" = #{polIdx}
     </select>
 
     <select id="selectUserCollection" resultType="com.example.demo.vo.UserCollectionVO">
@@ -51,6 +53,70 @@
             "collected_at" as collectedAt
         FROM "user_collection"
         WHERE "pol_idx" = #{polIdx}
+    </select>
+
+    <insert id="insertUserCollection">
+        INSERT INTO "user_collection" (
+            "email",
+            "pol_idx",
+            "collected_at"
+        ) VALUES (
+            #{email},
+            #{polIdx},
+            SYSTIMESTAMP
+        )
+    </insert>
+
+    <update id="incrementPollutionCount">
+        UPDATE "pollutions"
+        SET "pollution_count" = NVL("pollution_count", 0) + 1
+        WHERE "pol_idx" = #{polIdx}
+    </update>
+
+    <select id="existsUserCollection" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM "user_collection"
+        WHERE "email" = #{email} AND "pol_idx" = #{polIdx}
+    </select>
+
+    <select id="getTotalPollutionsCount" resultType="int">
+        SELECT COUNT(*)
+        FROM "pollutions"
+    </select>
+
+    <select id="getUserCollectionsCount" resultType="int">
+        SELECT COUNT(*)
+        FROM "user_collection"
+        WHERE "email" = #{email}
+    </select>
+
+    <select id="getUserCollectionDetails" resultType="com.example.demo.dto.CollectionDTO$UserCollectionDetailDTO">
+        SELECT 
+            p."pol_idx" as polIdx,
+            p."pol_name" as polName,
+            p."pol_img1" as polImg1,
+            p."type",
+            TO_CHAR(uc."collected_at", 'YYYY-MM-DD HH24:MI:SS') as collectedAt
+        FROM "user_collection" uc
+        JOIN "pollutions" p ON uc."pol_idx" = p."pol_idx"
+        WHERE uc."email" = #{email}
+        ORDER BY uc."collected_at" DESC
+    </select>
+
+    <select id="getAllPollutions" resultType="com.example.demo.vo.PollutionsVO">
+        SELECT 
+            p."pol_idx" as polIdx,
+            p."game_idx" as gameIdx,
+            p."pol_name" as polName,
+            p."pol_desc" as polDesc,
+            p."pol_img1" as polImg1,
+            p."pol_img2" as polImg2,
+            p."pol_img3" as polImg3,
+            p."type",
+            (SELECT COUNT(*) FROM "user_collection" WHERE "pol_idx" = p."pol_idx") as count,
+            p."created_at" as createdAt
+        FROM "pollutions" p
+        ORDER BY p."pol_idx"
     </select>
 
 </mapper> 

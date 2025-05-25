@@ -13,4 +13,11 @@ public interface CollectionMapper {
     List<UserCollectionVO> selectUserCollections(@Param("email") String email);
     PollutionsVO selectPollution(@Param("polIdx") Long polIdx);
     UserCollectionVO selectUserCollection(@Param("polIdx") Long polIdx);
+    
+    // 수집 관련 메서드 추가
+    int insertUserCollection(@Param("email") String email, @Param("polIdx") Long polIdx);
+    boolean existsUserCollection(@Param("email") String email, @Param("polIdx") Long polIdx);
+    int getTotalPollutionsCount();
+    int getUserCollectionsCount(@Param("email") String email);
+    List<PollutionsVO> getUserCollectionDetails(@Param("email") String email);
 } 
