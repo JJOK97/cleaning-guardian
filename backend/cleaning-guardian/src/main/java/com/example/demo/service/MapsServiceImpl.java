@@ -64,7 +64,8 @@ public class MapsServiceImpl implements MapsService {
 
 		int clearedStages = ((Number) clearInfo.get("cleared_stages_count")).intValue();
 		int totalStages = ((Number) clearInfo.get("total_stages_count")).intValue();
-		Long nextMapIdx = (Long) clearInfo.get("next_map_idx");
+		Long nextMapIdx = clearInfo.get("next_map_idx") != null ? 
+			((Number) clearInfo.get("next_map_idx")).longValue() : null;
 
 		log.info("Map clear status - clearedStages: {}, totalStages: {}, nextMapIdx: {}", 
 			clearedStages, totalStages, nextMapIdx);
