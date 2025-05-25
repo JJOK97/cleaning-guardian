@@ -23,7 +23,10 @@ const InventoryScreen: React.FC = () => {
     const [items, setItems] = useState<UserItem[]>([]);
     const [equippedItems, setEquippedItems] = useState<UserItem[]>([]);
     const [skins, setSkins] = useState<UserSkinData[]>([]);
-    const [equippedSkin, setEquippedSkin] = useState<UserSkinData | null>(null);
+    const [equippedSkins, setEquippedSkins] = useState<{ tap: UserSkinData | null; slice: UserSkinData | null }>({
+        tap: null,
+        slice: null,
+    });
     const [selectedItem, setSelectedItem] = useState<UserItem | UserSkinData | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -119,18 +122,13 @@ const InventoryScreen: React.FC = () => {
             console.log('Equipped tap skin response:', equippedTapSkin);
             console.log('Equipped slice skin response:', equippedSliceSkin);
 
-            // 현재 선택된 탭에 따라 장착된 스킨 설정
-            if (activeTab === 'skins') {
-                // 장착된 스킨이 있는 경우에만 설정
-                if (equippedTapSkin || equippedSliceSkin) {
-                    setEquippedSkin(equippedTapSkin || equippedSliceSkin);
-                } else {
-                    setEquippedSkin(null);
-                }
-            }
+            setEquippedSkins({
+                tap: equippedTapSkin,
+                slice: equippedSliceSkin,
+            });
         } catch (error) {
             console.error('Error fetching equipped skins:', error);
-            setEquippedSkin(null);
+            setEquippedSkins({ tap: null, slice: null });
         }
     };
 
@@ -213,8 +211,8 @@ const InventoryScreen: React.FC = () => {
         } else {
             const skinA = a as UserSkinData;
             const skinB = b as UserSkinData;
-            const isAEquipped = equippedSkin?.skinIdx === skinA.skinIdx;
-            const isBEquipped = equippedSkin?.skinIdx === skinB.skinIdx;
+            const isAEquipped = equippedSkins.tap?.skinIdx === skinA.skinIdx || equippedSkins.slice?.skinIdx === skinA.skinIdx;
+            const isBEquipped = equippedSkins.tap?.skinIdx === skinB.skinIdx || equippedSkins.slice?.skinIdx === skinB.skinIdx;
             if (isAEquipped && !isBEquipped) return -1;
             if (!isAEquipped && isBEquipped) return 1;
         }
@@ -261,21 +259,37 @@ const InventoryScreen: React.FC = () => {
                             : // 스킨 목록 렌더링
                               sortedItems.map((skin) => {
                                   const skinData = (skin as UserSkinData).skin;
+                                  // skin 객체가 없는 경우 기본값 사용
+                                  const displayName = skinData?.skinName || `스킨 ${(skin as UserSkinData).skinIdx}`;
+                                  const displayImg = skinData?.skinImg || '/src/assets/img/skins/default.png';
+
                                   return (
                                       <ItemCard
                                           key={(skin as UserSkinData).uskinIdx}
-                                          $isEquipped={equippedSkin?.skinIdx === (skin as UserSkinData).skinIdx}
+                                          $isEquipped={
+                                              equippedSkins.tap?.skinIdx === (skin as UserSkinData).skinIdx ||
+                                              equippedSkins.slice?.skinIdx === (skin as UserSkinData).skinIdx
+                                          }
                                           onClick={() => {
                                               setSelectedItem(skin);
                                               setIsModalOpen(true);
                                           }}
                                       >
-                                          <ItemIcon src={skinData.skinImg || '/src/assets/img/skins/default.png'} alt={skinData.skinName} />
-                                          <ItemName>{skinData.skinName}</ItemName>
+                                          <ItemIcon src={displayImg} alt={displayName} />
+                                          <ItemName>{displayName}</ItemName>
                                           <ItemCount>보유</ItemCount>
-                                          {equippedSkin?.skinIdx === (skin as UserSkinData).skinIdx && (
-                                              <EquippedBadge>장착됨</EquippedBadge>
-                                          )}
+                                          {(() => {
+                                              const skinData = skin as UserSkinData;
+                                              const isTapEquipped = equippedSkins.tap?.skinIdx === skinData.skinIdx;
+                                              const isSliceEquipped = equippedSkins.slice?.skinIdx === skinData.skinIdx;
+
+                                              if (isTapEquipped) {
+                                                  return <EquippedBadge>탭</EquippedBadge>;
+                                              } else if (isSliceEquipped) {
+                                                  return <EquippedBadge>슬라이스</EquippedBadge>;
+                                              }
+                                              return null;
+                                          })()}
                                       </ItemCard>
                                   );
                               })}
@@ -292,7 +306,7 @@ const InventoryScreen: React.FC = () => {
                     onEquip={handleEquip}
                     onUnequip={handleUnequip}
                     equippedItems={activeTab === 'items' ? equippedItems : []}
-                    equippedSkin={equippedSkin}
+                    equippedSkins={equippedSkins}
                     activeTab={activeTab}
                 />
             </ContentWrapper>

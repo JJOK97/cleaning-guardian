@@ -53,9 +53,12 @@ public class GameSkinServiceImpl implements GameSkinService {
 	public List<UserSkinVO> getUserSliceSkins(String email) {
 		List<UserSkinVO> userSkins = skinMapper.getUserSliceSkins(email);
 		for (UserSkinVO userSkin : userSkins) {
-			if (userSkin != null && userSkin.getSkin() == null) {
-				GameSkinVO skinInfo = skinMapper.getSkin(userSkin.getSkinIdx());
-				userSkin.setSkin(skinInfo);
+			if (userSkin != null) {
+				// 스킨 정보가 없거나 불완전한 경우 다시 조회
+				if (userSkin.getSkin() == null || userSkin.getSkin().getSkinName() == null) {
+					GameSkinVO skinInfo = skinMapper.getSkin(userSkin.getSkinIdx());
+					userSkin.setSkin(skinInfo);
+				}
 			}
 		}
 		return userSkins;
@@ -91,9 +94,12 @@ public class GameSkinServiceImpl implements GameSkinService {
 	public List<UserSkinVO> getUserTapSkins(String email) {
 		List<UserSkinVO> userSkins = skinMapper.getUserTapSkins(email);
 		for (UserSkinVO userSkin : userSkins) {
-			if (userSkin != null && userSkin.getSkin() == null) {
-				GameSkinVO skinInfo = skinMapper.getSkin(userSkin.getSkinIdx());
-				userSkin.setSkin(skinInfo);
+			if (userSkin != null) {
+				// 스킨 정보가 없거나 불완전한 경우 다시 조회
+				if (userSkin.getSkin() == null || userSkin.getSkin().getSkinName() == null) {
+					GameSkinVO skinInfo = skinMapper.getSkin(userSkin.getSkinIdx());
+					userSkin.setSkin(skinInfo);
+				}
 			}
 		}
 		return userSkins;

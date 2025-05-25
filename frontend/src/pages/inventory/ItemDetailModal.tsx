@@ -10,7 +10,7 @@ interface ItemDetailModalProps {
     onEquip: (slot: number) => void;
     onUnequip: () => void;
     equippedItems: UserItem[];
-    equippedSkin: UserSkinData | null;
+    equippedSkins: { tap: UserSkinData | null; slice: UserSkinData | null };
     activeTab: 'items' | 'skins';
 }
 
@@ -21,22 +21,40 @@ const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
     onEquip,
     onUnequip,
     equippedItems,
-    equippedSkin,
+    equippedSkins,
     activeTab,
 }) => {
     const [selectedSlot, setSelectedSlot] = useState<number>(1);
     if (!isOpen || !item) return null;
 
     const isItem = 'item' in item;
-    const isEquipped = isItem
-        ? equippedItems.some((eq) => eq.itemIdx === (item as UserItem).itemIdx)
-        : equippedSkin?.skinIdx === (item as UserSkinData).skinIdx;
+
+    // 스킨의 경우 탭/슬라이스 장착 상태 확인
+    let isEquipped = false;
+    let equippedType = '';
+
+    if (isItem) {
+        isEquipped = equippedItems.some((eq) => eq.itemIdx === (item as UserItem).itemIdx);
+    } else {
+        const skinData = item as UserSkinData;
+        const isTapEquipped = equippedSkins.tap?.skinIdx === skinData.skinIdx;
+        const isSliceEquipped = equippedSkins.slice?.skinIdx === skinData.skinIdx;
+
+        if (isTapEquipped) {
+            isEquipped = true;
+            equippedType = '탭';
+        } else if (isSliceEquipped) {
+            isEquipped = true;
+            equippedType = '슬라이스';
+        }
+    }
 
     // 스킨 데이터 구조 확인
     console.log('Modal item data:', item);
     console.log('Is item:', isItem);
     console.log('Is equipped:', isEquipped);
     if (!isItem) {
+        console.log('Equipped type:', equippedType);
         console.log('Skin data:', (item as UserSkinData).skin);
     }
 
@@ -56,7 +74,9 @@ const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 <ItemDescription>
                     {isItem ? (item as UserItem).item.itemDesc : (item as UserSkinData).skin?.skinDesc || '스킨 설명'}
                 </ItemDescription>
-                <ItemCount>{isItem ? `보유 수량: ${(item as UserItem).count}` : '보유'}</ItemCount>
+                <ItemCount>
+                    {isItem ? `보유 수량: ${(item as UserItem).count}` : isEquipped ? `보유 (${equippedType} 장착됨)` : '보유'}
+                </ItemCount>
                 {isItem && !isEquipped && (
                     <SlotContainer>
                         <SlotLabel>장착 슬롯 선택:</SlotLabel>
@@ -71,9 +91,9 @@ const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 )}
                 <ButtonContainer>
                     {isEquipped ? (
-                        <UnequipButton onClick={onUnequip}>장착 해제</UnequipButton>
+                        <UnequipButton onClick={onUnequip}>{isItem ? '장착 해제' : `${equippedType} 장착 해제`}</UnequipButton>
                     ) : (
-                        <EquipButton onClick={() => onEquip(selectedSlot)}>장착하기</EquipButton>
+                        <EquipButton onClick={() => onEquip(selectedSlot)}>{isItem ? '장착하기' : '장착하기'}</EquipButton>
                     )}
                 </ButtonContainer>
             </ModalContent>
