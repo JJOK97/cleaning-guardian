@@ -71,20 +71,15 @@ const ResultScreen: React.FC = () => {
     const [isRewardComplete, setIsRewardComplete] = useState(false);
 
     useEffect(() => {
-        const result = location.state as GameResult;
-        console.log('ResultScreen - useEffect');
-        console.log('Location state:', location.state);
-        console.log('Parsed result:', result);
-        if (result) {
-            setGameResult(result);
-            if (result.success && result.successYn === 'Y') {
-                const stageRewardList = stageRewards[result.stageIdx] || [];
-                console.log('stageIdx:', result.stageIdx, 'stageRewardList:', stageRewardList);
-                setRewards(stageRewardList);
-                giveRewards(result.email, stageRewardList);
-            }
+        const locationState = location.state;
+        if (!locationState) {
+            navigate('/');
+            return;
         }
-    }, [location]);
+
+        const result = typeof locationState === 'string' ? JSON.parse(locationState) : locationState;
+        setGameResult(result);
+    }, [location, navigate]);
 
     const giveRewards = async (email: string, rewards: Reward[]) => {
         try {
@@ -107,11 +102,14 @@ const ResultScreen: React.FC = () => {
             console.log('Stage clear check response:', response);
 
             if (response.is_final_stage === 'Y') {
-                navigate('/main');
+                // 다음 맵의 스테이지 선택 화면으로 이동
+                const nextMapIdx = Number(gameResult.mapIdx) + 1;
+                console.log('Moving to main screen with next map:', nextMapIdx);
+                navigate('/main', { state: { selectedMap: nextMapIdx } });
             } else {
                 const nextStageIdx = gameResult.stageIdx + 1;
-                console.log('Moving to next stage:', nextStageIdx, 'with mapId:', response.map_idx);
-                navigate(`/game/${response.map_idx}/${nextStageIdx}`);
+                console.log('Moving to next stage:', nextStageIdx, 'with mapId:', gameResult.mapIdx);
+                navigate(`/game/${gameResult.mapIdx}/${nextStageIdx}`);
             }
         } catch (error) {
             console.error('Error checking stage clear:', error);
@@ -129,11 +127,12 @@ const ResultScreen: React.FC = () => {
     };
 
     const handleStageSelect = () => {
-        const currentMapIdx = localStorage.getItem('currentMapIdx');
-        console.log('ResultScreen - handleStageSelect');
-        console.log('currentMapIdx from localStorage:', currentMapIdx);
-        console.log('gameResult:', gameResult);
-        navigate(`/stage-select/${currentMapIdx || '1'}`);
+        const currentMapIdx = localStorage.getItem('currentMapIdx') || '1';
+        navigate(`/stage-select/${currentMapIdx}`);
+    };
+
+    const handleMainMenu = () => {
+        navigate('/');
     };
 
     if (!gameResult) {

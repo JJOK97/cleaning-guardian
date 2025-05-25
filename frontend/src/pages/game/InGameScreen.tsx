@@ -112,7 +112,9 @@ interface GameResult {
 const InGameScreen: React.FC = () => {
     const navigate = useNavigate();
     const { stageId, mapId } = useParams<{ stageId: string; mapId: string }>();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+
+    // 모든 state 선언
     const [score, setScore] = useState(0);
     const [slicePoints, setSlicePoints] = useState<number[]>([]);
     const [isSlicing, setIsSlicing] = useState(false);
@@ -122,11 +124,10 @@ const InGameScreen: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [combo, setCombo] = useState(0);
     const [maxCombo, setMaxCombo] = useState(0);
-    const [currentIndex, setCurrentIndex] = useState(0); // 현재 오염물질 인덱스
-    const [pollutant, setPollutant] = useState<PollutantBody | null>(null); // 현재 오염물질
-    const [pollutantQueue, setPollutantQueue] = useState<PollutantBody[]>([]); // 오염물질 큐
-    const [gameEnded, setGameEnded] = useState(false); // 게임 종료 상태 추가
-    const startTime = useRef(Date.now());
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [pollutant, setPollutant] = useState<PollutantBody | null>(null);
+    const [pollutantQueue, setPollutantQueue] = useState<PollutantBody[]>([]);
+    const [gameEnded, setGameEnded] = useState(false);
     const [gameData, setGameData] = useState<{
         stageIdx: number | null;
         pollutions: any[];
@@ -134,16 +135,16 @@ const InGameScreen: React.FC = () => {
         stageIdx: null,
         pollutions: [],
     });
-
-    const stageRef = useRef<any>(null);
     const [stageSize, setStageSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
-    // Matter.js 관련
+    // 모든 ref 선언
+    const startTime = useRef(Date.now());
+    const stageRef = useRef<any>(null);
     const engineRef = useRef<Matter.Engine | null>(null);
     const bodyRef = useRef<Matter.Body | null>(null);
     const animationRef = useRef<number | null>(null);
 
-    // 화면 크기 업데이트
+    // 모든 callback 선언
     const updateStageSize = useCallback(() => {
         if (stageRef.current) {
             const container = stageRef.current.container();
@@ -155,13 +156,139 @@ const InGameScreen: React.FC = () => {
         }
     }, []);
 
+    const handlePollutantSlice = useCallback(() => {
+        if (!pollutant || gameEnded) return;
+        setScore((prev) => prev + 100);
+        setCombo((prev) => {
+            const newCombo = prev + 1;
+            setMaxCombo((prevMax) => Math.max(prevMax, newCombo));
+            return newCombo;
+        });
+        setPollutant(null);
+        if (bodyRef.current && engineRef.current) {
+            Matter.World.remove(engineRef.current.world, bodyRef.current);
+            bodyRef.current = null;
+        }
+        setTimeout(() => {
+            if (!gameEnded) {
+                setCurrentIndex((idx) => idx + 1);
+            }
+        }, 100);
+    }, [pollutant, gameEnded]);
+
+    const endGame = useCallback(async () => {
+        if (!user?.email || !gameData.stageIdx || gameEnded) return;
+        setGameEnded(true);
+        const isSuccess = lives > 0 && time > 0 && currentIndex >= pollutantQueue.length;
+        const successYn = isSuccess ? 'Y' : 'N';
+
+        try {
+            // 최대 3번까지 재시도
+            let retryCount = 0;
+            let clearResponse;
+
+            while (retryCount < 3) {
+                try {
+                    clearResponse = await completeGame(gameData.stageIdx, user.email, successYn);
+                    if (clearResponse.success) break;
+                } catch (error) {
+                    console.error(`게임 종료 처리 시도 ${retryCount + 1} 실패:`, error);
+                    retryCount++;
+                    if (retryCount === 3) throw error;
+                    await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
+                }
+            }
+
+            if (!clearResponse) {
+                throw new Error('게임 종료 처리 실패');
+            }
+
+            const result = {
+                score,
+                stageIdx: gameData.stageIdx,
+                timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
+                pollutantsRemoved: currentIndex,
+                maxCombo,
+                success: clearResponse.success,
+                message: clearResponse.message,
+                successYn: clearResponse.successYn,
+                email: user.email,
+                mapIdx: Number(mapId) || 1,
+            };
+
+            if (isSuccess) {
+                localStorage.setItem('lastClearedStage', gameData.stageIdx.toString());
+                localStorage.setItem('currentMapIdx', result.mapIdx.toString());
+            }
+
+            setTimeout(() => {
+                navigate('/result', { state: result });
+            }, 1000);
+        } catch (error) {
+            console.error('게임 종료 처리 중 오류 발생:', error);
+            // 에러 발생 시에도 결과 화면으로 이동
+            navigate('/result', {
+                state: {
+                    score,
+                    stageIdx: gameData.stageIdx,
+                    timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
+                    pollutantsRemoved: currentIndex,
+                    maxCombo,
+                    success: false,
+                    message: '게임 종료 처리 중 오류가 발생했습니다.',
+                    email: user.email,
+                    mapIdx: Number(mapId) || 1,
+                },
+            });
+        }
+    }, [gameData.stageIdx, lives, time, score, currentIndex, maxCombo, navigate, user?.email, pollutantQueue.length, mapId, gameEnded]);
+
+    // 게임 초기화 함수
+    const initializeGame = async () => {
+        if (!user?.email || !stageId) {
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const startResponse = await startGame(user.email, parseInt(stageId));
+            if (!startResponse.success) {
+                setIsLoading(false);
+                return;
+            }
+
+            setGameData((prev) => ({ ...prev, stageIdx: startResponse.stageIdx }));
+
+            const pollutionsResponse = await getStagePollutions(parseInt(stageId));
+            if (!pollutionsResponse.success) {
+                setIsLoading(false);
+                return;
+            }
+
+            setGameData((prev) => ({ ...prev, pollutions: pollutionsResponse.pollutionsList || [] }));
+        } catch (error) {
+            console.error('게임 초기화 중 오류 발생:', error);
+            setIsLoading(false);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // 모든 effect 선언
+    useEffect(() => {
+        if (!authLoading && !user) {
+            console.error('사용자 정보가 없습니다. 메인 화면으로 이동합니다.');
+            navigate('/main');
+        }
+    }, [user, authLoading, stageId, mapId, navigate]);
+
     useEffect(() => {
         updateStageSize();
         window.addEventListener('resize', updateStageSize);
         return () => window.removeEventListener('resize', updateStageSize);
     }, [updateStageSize]);
 
-    // 오염물질 큐 미리 생성
     useEffect(() => {
         if (showPreparation) return;
         const { width, height } = stageSize;
@@ -188,11 +315,9 @@ const InGameScreen: React.FC = () => {
         setCurrentIndex(0);
     }, [stageSize, showPreparation]);
 
-    // Matter.js 엔진/월드/바디 관리 및 오염물질 하나씩만 추가
     useEffect(() => {
         if (showPreparation || gameEnded) return;
         if (!pollutantQueue.length) return;
-
         // 게임 종료 확인
         if (currentIndex >= pollutantQueue.length) {
             endGame();
@@ -277,86 +402,12 @@ const InGameScreen: React.FC = () => {
         };
     }, [pollutantQueue, currentIndex, stageSize.height, showPreparation, gameEnded]);
 
-    // 게임 종료 함수
-    const endGame = useCallback(async () => {
-        if (!user?.email || !gameData.stageIdx || gameEnded) return;
-        setGameEnded(true);
-
-        // 게임 종료 조건에 따른 성공/실패 판정
-        const isSuccess = lives > 0 && time > 0 && currentIndex >= pollutantQueue.length;
-        const successYn = isSuccess ? 'Y' : 'N';
-
-        try {
-            const clearResponse = await completeGame(gameData.stageIdx, user.email, successYn);
-
-            console.log('InGameScreen - endGame');
-            console.log('gameData.stageIdx:', gameData.stageIdx);
-            console.log('stageId from params:', stageId);
-            console.log('mapId from params:', mapId);
-
-            const result = {
-                score,
-                stageIdx: gameData.stageIdx,
-                timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
-                pollutantsRemoved: currentIndex,
-                maxCombo,
-                success: clearResponse.success,
-                message: clearResponse.message,
-                successYn: clearResponse.successYn,
-                email: user.email,
-                mapIdx: Number(mapId) || 1,
-            };
-
-            console.log('Result object:', result);
-
-            // 성공적으로 클리어한 경우에만 다음 스테이지 정보 저장
-            if (isSuccess) {
-                localStorage.setItem('lastClearedStage', gameData.stageIdx.toString());
-                localStorage.setItem('currentMapIdx', result.mapIdx.toString());
-                console.log('Saved to localStorage - currentMapIdx:', result.mapIdx);
-            }
-
-            setTimeout(() => {
-                navigate('/result', { state: result });
-            }, 1000);
-        } catch (error) {
-            console.error('Error in endGame:', error);
-            // 에러 발생 시에도 결과 화면으로 이동
-            navigate('/result', {
-                state: {
-                    gameResult: {
-                        score,
-                        stageIdx: gameData.stageIdx,
-                        timeSpent: Math.floor((Date.now() - startTime.current) / 1000),
-                        pollutantsRemoved: currentIndex,
-                        success: lives > 0 && time > 0 && currentIndex >= pollutantQueue.length,
-                    },
-                },
-            });
-        }
-    }, [
-        gameData.stageIdx,
-        lives,
-        time,
-        score,
-        currentIndex,
-        maxCombo,
-        navigate,
-        user?.email,
-        pollutantQueue.length,
-        mapId,
-        stageId,
-        gameEnded,
-    ]);
-
-    // 게임 종료 조건 체크
     useEffect(() => {
         if ((lives === 0 || time === 0 || currentIndex >= pollutantQueue.length) && !gameEnded) {
             endGame();
         }
     }, [lives, time, currentIndex, pollutantQueue.length, gameEnded, endGame]);
 
-    // 시간 로직
     useEffect(() => {
         let timer: NodeJS.Timeout;
         if (!showPreparation && !gameEnded) {
@@ -373,139 +424,22 @@ const InGameScreen: React.FC = () => {
         return () => clearInterval(timer);
     }, [showPreparation, gameEnded]);
 
-    // 오염물질 자르기(슬라이스) 처리 - 직접 클릭/탭 했을 때의 로직
-    const handlePollutantSlice = useCallback(() => {
-        if (!pollutant || gameEnded) return;
-
-        setScore((prev) => prev + 100);
-        setCombo((prev) => {
-            const newCombo = prev + 1;
-            setMaxCombo((prevMax) => Math.max(prevMax, newCombo));
-            return newCombo;
-        });
-
-        setPollutant(null);
-        if (bodyRef.current && engineRef.current) {
-            Matter.World.remove(engineRef.current.world, bodyRef.current);
-            bodyRef.current = null;
-        }
-
-        setTimeout(() => {
-            if (!gameEnded) {
-                setCurrentIndex((idx) => idx + 1);
-            }
-        }, 100);
-    }, [pollutant, gameEnded]);
-
-    // 마우스/터치 이벤트 핸들러
-    const handleMouseDown = (e: any) => {
-        if (gameEnded || showPreparation) return;
-        e.evt.preventDefault();
-        const stage = e.target.getStage();
-        const point = stage.getPointerPosition();
-        setIsSlicing(true);
-        setSlicePoints([point.x, point.y]);
-    };
-
-    const handleMouseMove = (e: any) => {
-        if (gameEnded || showPreparation || !isSlicing) return;
-        e.evt.preventDefault();
-        const stage = e.target.getStage();
-        const point = stage.getPointerPosition();
-        setSlicePoints((prev) => [...prev, point.x, point.y]);
-
-        // 슬라이스가 현재 오염물질과 충돌하는지 확인
-        if (pollutant) {
-            const { x, y, radius } = pollutant;
-            const lastIdx = slicePoints.length;
-            if (lastIdx >= 4) {
-                const x1 = slicePoints[lastIdx - 4];
-                const y1 = slicePoints[lastIdx - 3];
-                const x2 = slicePoints[lastIdx - 2];
-                const y2 = slicePoints[lastIdx - 1];
-
-                // 선분과 원의 충돌 검사
-                const dx = x2 - x1;
-                const dy = y2 - y1;
-                const lineLength = Math.sqrt(dx * dx + dy * dy);
-
-                if (lineLength > 0) {
-                    const distance = Math.abs((dy * x - dx * y + x2 * y1 - x1 * y2) / lineLength);
-
-                    if (distance < radius) {
-                        handlePollutantSlice();
-                    }
-                }
-            }
-        }
-    };
-
-    const handleMouseUp = (e: any) => {
-        if (gameEnded || showPreparation) return;
-        e.evt.preventDefault();
-        if (!isSlicing) return;
-        setIsSlicing(false);
-
-        // 슬라이스 길이 계산
-        let length = 0;
-        for (let i = 0; i < slicePoints.length - 2; i += 2) {
-            const dx = slicePoints[i + 2] - slicePoints[i];
-            const dy = slicePoints[i + 3] - slicePoints[i + 1];
-            length += Math.sqrt(dx * dx + dy * dy);
-        }
-
-        // 점수 추가 (슬라이스 길이에 비례)
-        if (length > 50) {
-            setScore((prev) => prev + Math.floor(length / 10));
-        }
-
-        // 조금 시간이 지난 후 슬라이스 트레일 초기화
-        setTimeout(() => {
-            setSlicePoints([]);
-        }, 200);
-    };
-
-    const handleGameStart = () => {
-        startTime.current = Date.now();
-        setShowPreparation(false);
-    };
-
-    const handleSettingsClick = () => {
-        // TODO: 설정 모달 구현
-        console.log('설정 버튼 클릭');
-    };
-
-    // 게임 시작 시 API 호출
-    useEffect(() => {
-        const initializeGame = async () => {
-            if (!user?.email) return;
-
-            try {
-                const startResponse = await startGame(user.email, parseInt(stageId || '0'));
-                setGameData((prev) => ({ ...prev, stageIdx: startResponse.stageIdx }));
-
-                const pollutionsResponse = await getStagePollutions(parseInt(stageId || '0'));
-                setGameData((prev) => ({ ...prev, pollutions: pollutionsResponse.pollutionsList || [] }));
-            } catch (error) {
-                // 에러 처리
-            }
-        };
-
-        if (!showPreparation) {
-            initializeGame();
-        }
-    }, [showPreparation, stageId, user?.email]);
-
-    // 로딩 화면 표시
-    if (isLoading) {
+    // 로딩 중이거나 사용자 정보가 없으면 로딩 화면 표시
+    if (authLoading || !user) {
         return <LoadingScreen />;
     }
 
+    // 나머지 렌더링 로직
     return (
         <Container>
             <GameBackground />
             <GameUI>
-                <SettingsButton onClick={handleSettingsClick}>
+                <SettingsButton
+                    onClick={() => {
+                        // TODO: 설정 모달 구현
+                        console.log('설정 버튼 클릭');
+                    }}
+                >
                     <img src='/src/assets/icons/settings.svg' alt='설정' />
                 </SettingsButton>
                 <Score>점수: {score}</Score>
@@ -556,7 +490,11 @@ const InGameScreen: React.FC = () => {
                 <GamePreparationModal
                     isOpen={showPreparation}
                     onClose={() => setShowPreparation(false)}
-                    onStart={handleGameStart}
+                    onStart={() => {
+                        startTime.current = Date.now();
+                        setShowPreparation(false);
+                        initializeGame();
+                    }}
                     stageInfo={{
                         name: '스테이지 시작',
                         description: '준비되셨나요?',
@@ -569,12 +507,142 @@ const InGameScreen: React.FC = () => {
                 width={stageSize.width}
                 height={stageSize.height}
                 style={{ width: '100%', height: '100%', touchAction: 'none' }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onTouchStart={handleMouseDown}
-                onTouchMove={handleMouseMove}
-                onTouchEnd={handleMouseUp}
+                onMouseDown={(e) => {
+                    if (gameEnded || showPreparation) return;
+                    e.evt.preventDefault();
+                    const stage = e.target.getStage();
+                    if (!stage) return;
+                    const point = stage.getPointerPosition();
+                    if (!point) return;
+                    setIsSlicing(true);
+                    setSlicePoints([point.x, point.y]);
+                }}
+                onMouseMove={(e) => {
+                    if (gameEnded || showPreparation || !isSlicing) return;
+                    e.evt.preventDefault();
+                    const stage = e.target.getStage();
+                    if (!stage) return;
+                    const point = stage.getPointerPosition();
+                    if (!point) return;
+                    setSlicePoints((prev) => [...prev, point.x, point.y]);
+
+                    // 슬라이스가 현재 오염물질과 충돌하는지 확인
+                    if (pollutant) {
+                        const { x, y, radius } = pollutant;
+                        const lastIdx = slicePoints.length;
+                        if (lastIdx >= 4) {
+                            const x1 = slicePoints[lastIdx - 4];
+                            const y1 = slicePoints[lastIdx - 3];
+                            const x2 = slicePoints[lastIdx - 2];
+                            const y2 = slicePoints[lastIdx - 1];
+
+                            // 선분과 원의 충돌 검사
+                            const dx = x2 - x1;
+                            const dy = y2 - y1;
+                            const lineLength = Math.sqrt(dx * dx + dy * dy);
+
+                            if (lineLength > 0) {
+                                const distance = Math.abs((dy * x - dx * y + x2 * y1 - x1 * y2) / lineLength);
+
+                                if (distance < radius) {
+                                    handlePollutantSlice();
+                                }
+                            }
+                        }
+                    }
+                }}
+                onMouseUp={(e) => {
+                    if (gameEnded || showPreparation) return;
+                    e.evt.preventDefault();
+                    if (!isSlicing) return;
+                    setIsSlicing(false);
+
+                    // 슬라이스 길이 계산
+                    let length = 0;
+                    for (let i = 0; i < slicePoints.length - 2; i += 2) {
+                        const dx = slicePoints[i + 2] - slicePoints[i];
+                        const dy = slicePoints[i + 3] - slicePoints[i + 1];
+                        length += Math.sqrt(dx * dx + dy * dy);
+                    }
+
+                    // 점수 추가 (슬라이스 길이에 비례)
+                    if (length > 50) {
+                        setScore((prev) => prev + Math.floor(length / 10));
+                    }
+
+                    // 조금 시간이 지난 후 슬라이스 트레일 초기화
+                    setTimeout(() => {
+                        setSlicePoints([]);
+                    }, 200);
+                }}
+                onTouchStart={(e) => {
+                    if (gameEnded || showPreparation) return;
+                    e.evt.preventDefault();
+                    const stage = e.target.getStage();
+                    if (!stage) return;
+                    const point = stage.getPointerPosition();
+                    if (!point) return;
+                    setIsSlicing(true);
+                    setSlicePoints([point.x, point.y]);
+                }}
+                onTouchMove={(e) => {
+                    if (gameEnded || showPreparation || !isSlicing) return;
+                    e.evt.preventDefault();
+                    const stage = e.target.getStage();
+                    if (!stage) return;
+                    const point = stage.getPointerPosition();
+                    if (!point) return;
+                    setSlicePoints((prev) => [...prev, point.x, point.y]);
+
+                    // 슬라이스가 현재 오염물질과 충돌하는지 확인
+                    if (pollutant) {
+                        const { x, y, radius } = pollutant;
+                        const lastIdx = slicePoints.length;
+                        if (lastIdx >= 4) {
+                            const x1 = slicePoints[lastIdx - 4];
+                            const y1 = slicePoints[lastIdx - 3];
+                            const x2 = slicePoints[lastIdx - 2];
+                            const y2 = slicePoints[lastIdx - 1];
+
+                            // 선분과 원의 충돌 검사
+                            const dx = x2 - x1;
+                            const dy = y2 - y1;
+                            const lineLength = Math.sqrt(dx * dx + dy * dy);
+
+                            if (lineLength > 0) {
+                                const distance = Math.abs((dy * x - dx * y + x2 * y1 - x1 * y2) / lineLength);
+
+                                if (distance < radius) {
+                                    handlePollutantSlice();
+                                }
+                            }
+                        }
+                    }
+                }}
+                onTouchEnd={(e) => {
+                    if (gameEnded || showPreparation) return;
+                    e.evt.preventDefault();
+                    if (!isSlicing) return;
+                    setIsSlicing(false);
+
+                    // 슬라이스 길이 계산
+                    let length = 0;
+                    for (let i = 0; i < slicePoints.length - 2; i += 2) {
+                        const dx = slicePoints[i + 2] - slicePoints[i];
+                        const dy = slicePoints[i + 3] - slicePoints[i + 1];
+                        length += Math.sqrt(dx * dx + dy * dy);
+                    }
+
+                    // 점수 추가 (슬라이스 길이에 비례)
+                    if (length > 50) {
+                        setScore((prev) => prev + Math.floor(length / 10));
+                    }
+
+                    // 조금 시간이 지난 후 슬라이스 트레일 초기화
+                    setTimeout(() => {
+                        setSlicePoints([]);
+                    }, 200);
+                }}
             >
                 <Layer>
                     {/* 슬라이스 트레일 */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getClearedMaps, getMapDetail, getMaps } from '@/api/maps';
-import { getUserInfo } from '@/api/user';
+import { useAuth } from '@/hooks/useAuth';
 import MapInfoModal from '@/components/modal/MapInfoModal';
 import { ProcessedMap } from '@/types/map';
 import { getMapImage, getMapTitle } from '@/utils/mapUtils';
@@ -21,39 +21,35 @@ import {
     StartButtonContainer,
     StartButton,
 } from '@/styles/MainScreen.styles';
+import LoadingScreen from '@/components/common/LoadingScreen';
 
 const MainScreen: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { user } = useAuth();
     const [maps, setMaps] = useState<ProcessedMap[]>([]);
     const [visibleMap, setVisibleMap] = useState<ProcessedMap | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMap, setSelectedMap] = useState<ProcessedMap | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchMaps = async () => {
             try {
-                const userInfo = await getUserInfo();
-                if (!userInfo.success) {
-                    console.error('유저 정보 조회 실패');
-                    return;
-                }
-
-                // 전체 맵 리스트 가져오기
-                const allMapsResponse = await getMaps();
-                console.log('전체 맵 응답:', allMapsResponse);
+                setIsLoading(true);
+                const [allMapsResponse, clearedMapsResponse] = await Promise.all([
+                    getMaps(),
+                    user?.email ? getClearedMaps(user.email) : Promise.resolve({ maplist: [] }),
+                ]);
 
                 if (!allMapsResponse.success || !allMapsResponse.maplist) {
                     console.error('맵 데이터가 없습니다');
                     return;
                 }
 
-                // 클리어한 맵 리스트 가져오기
-                const clearedResponse = await getClearedMaps(userInfo.email);
-                console.log('클리어한 맵 응답:', clearedResponse);
-
                 const mapList = allMapsResponse.maplist;
-                const clearedMaps = clearedResponse.maplist || [];
+                const clearedMaps = clearedMapsResponse.maplist || [];
 
                 const processedMaps = mapList.map((map) => {
                     const parsedDesc = JSON.parse(map.mapDesc);
@@ -71,34 +67,54 @@ const MainScreen: React.FC = () => {
                     } as ProcessedMap;
                 });
 
-                console.log('최종 처리된 맵 목록:', processedMaps);
                 setMaps(processedMaps);
 
-                // 가장 높은 맵 찾기
-                const highestUnlockedMap = processedMaps.reduce((highest, current) => {
-                    if (current.unlocked && current.mapIdx > highest.mapIdx) {
-                        return current;
+                // location state에서 selectedMap이 있으면 해당 맵 선택
+                const state = location.state as { selectedMap?: number } | null;
+                if (state?.selectedMap) {
+                    const nextMap = processedMaps.find((map) => map.mapIdx === state.selectedMap);
+                    if (nextMap) {
+                        setSelectedMap(nextMap);
+                        setVisibleMap(nextMap);
+                        // 스크롤 위치 조정
+                        if (scrollContainerRef.current) {
+                            const mapIndex = processedMaps.findIndex((map) => map.mapIdx === nextMap.mapIdx);
+                            scrollContainerRef.current.scrollTo({
+                                top: mapIndex * window.innerHeight,
+                                behavior: 'smooth',
+                            });
+                        }
                     }
-                    return highest;
-                }, processedMaps[0]);
+                } else {
+                    // 가장 높은 맵 찾기
+                    const highestUnlockedMap = processedMaps.reduce((highest, current) => {
+                        if (current.unlocked && current.mapIdx > highest.mapIdx) {
+                            return current;
+                        }
+                        return highest;
+                    }, processedMaps[0]);
 
-                setVisibleMap(highestUnlockedMap);
+                    setVisibleMap(highestUnlockedMap);
+                    setSelectedMap(highestUnlockedMap);
 
-                // 스크롤 위치 조정
-                if (scrollContainerRef.current) {
-                    const mapIndex = processedMaps.findIndex((map) => map.mapIdx === highestUnlockedMap.mapIdx);
-                    scrollContainerRef.current.scrollTo({
-                        top: mapIndex * window.innerHeight,
-                        behavior: 'smooth',
-                    });
+                    // 스크롤 위치 조정
+                    if (scrollContainerRef.current) {
+                        const mapIndex = processedMaps.findIndex((map) => map.mapIdx === highestUnlockedMap.mapIdx);
+                        scrollContainerRef.current.scrollTo({
+                            top: mapIndex * window.innerHeight,
+                            behavior: 'smooth',
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('맵 데이터 로딩 실패:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchMaps();
-    }, []);
+    }, [location.state, navigate, user?.email]);
 
     const handleScroll = () => {
         const container = scrollContainerRef.current;
@@ -153,6 +169,10 @@ const MainScreen: React.FC = () => {
             navigate(`/stage-select/${visibleMap.mapIdx}`);
         }
     };
+
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
 
     return (
         <Container>

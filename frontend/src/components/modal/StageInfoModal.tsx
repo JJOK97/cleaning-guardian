@@ -458,7 +458,17 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                 </ContentSection>
 
                 <ButtonGroup>
-                    <Button $primary onClick={onStartGame}>
+                    <Button
+                        $primary
+                        onClick={() => {
+                            console.log('게임 시작 버튼 클릭:', {
+                                stageInfo,
+                                pollutions,
+                                equippedSkins,
+                            });
+                            onStartGame();
+                        }}
+                    >
                         게임 시작
                     </Button>
                 </ButtonGroup>

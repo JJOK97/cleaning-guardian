@@ -220,22 +220,47 @@ const StageSelectScreen: React.FC = () => {
                 if (email) {
                     const clearedResponse = await getClearedStages(Number(mapId), email);
                     clearedStagesList = clearedResponse.stagelist?.map((stage: StageInfo) => stage.stageIdx) || [];
+                    console.log('현재 맵 클리어된 스테이지:', clearedStagesList);
+                    console.log('현재 맵 ID:', mapId);
                     setClearedStages(clearedStagesList);
+                }
+
+                // 이전 맵의 클리어 상태 확인
+                const prevMapId = Number(mapId) - 1;
+                let prevMapClearedStages: number[] = [];
+                if (email && prevMapId > 0) {
+                    const prevMapResponse = await getClearedStages(prevMapId, email);
+                    prevMapClearedStages = prevMapResponse.stagelist?.map((stage: StageInfo) => stage.stageIdx) || [];
+                    console.log('이전 맵 클리어된 스테이지:', prevMapClearedStages);
+                    console.log('이전 맵 ID:', prevMapId);
                 }
 
                 const processedStages =
                     stagesResponse.stagelist?.map((stage: StageInfo) => {
+                        const isFirstStageOfMap = stage.stageIdx === Number(mapId) * 3 - 2; // 각 맵의 첫 번째 스테이지 번호 계산
+                        const isUnlocked =
+                            isFirstStageOfMap ||
+                            clearedStagesList.includes(stage.stageIdx - 1) ||
+                            clearedStagesList.includes(stage.stageIdx) ||
+                            (Number(mapId) > 1 && isFirstStageOfMap && prevMapClearedStages.length === 3); // 이전 맵의 모든 스테이지가 클리어되었을 때
+
+                        console.log(`스테이지 ${stage.stageIdx} 잠금 해제 상태:`, {
+                            stageIdx: stage.stageIdx,
+                            isFirstStageOfMap,
+                            prevStageCleared: clearedStagesList.includes(stage.stageIdx - 1),
+                            currentStageCleared: clearedStagesList.includes(stage.stageIdx),
+                            isNextMapFirstStage: Number(mapId) > 1 && isFirstStageOfMap,
+                            prevMapAllCleared: prevMapClearedStages.length === 3,
+                            isUnlocked,
+                        });
+
                         try {
-                            const processed = {
+                            return {
                                 ...stage,
                                 stageMission: JSON.parse(stage.stageMission),
                                 isFinalStage: stage.isFinalStage as 'Y' | 'N',
-                                unlocked:
-                                    stage.stageIdx === 1 ||
-                                    clearedStagesList.includes(stage.stageIdx - 1) ||
-                                    clearedStagesList.includes(stage.stageIdx),
+                                unlocked: isUnlocked,
                             };
-                            return processed;
                         } catch (error) {
                             return {
                                 ...stage,
@@ -245,10 +270,7 @@ const StageSelectScreen: React.FC = () => {
                                     action: '',
                                 },
                                 isFinalStage: stage.isFinalStage as 'Y' | 'N',
-                                unlocked:
-                                    stage.stageIdx === 1 ||
-                                    clearedStagesList.includes(stage.stageIdx - 1) ||
-                                    clearedStagesList.includes(stage.stageIdx),
+                                unlocked: isUnlocked,
                             };
                         }
                     }) || [];
@@ -376,15 +398,8 @@ const StageSelectScreen: React.FC = () => {
                     return (
                         <StageCard
                             key={`stage-${stage.stageIdx}`}
-                            $unlocked={
-                                stage.stageIdx === 1 || clearedStages.includes(stage.stageIdx) || clearedStages.includes(stage.stageIdx - 1)
-                            }
-                            onClick={() =>
-                                (stage.stageIdx === 1 ||
-                                    clearedStages.includes(stage.stageIdx) ||
-                                    clearedStages.includes(stage.stageIdx - 1)) &&
-                                handleStageSelect(stage.stageIdx)
-                            }
+                            $unlocked={stage.unlocked}
+                            onClick={() => stage.unlocked && handleStageSelect(stage.stageIdx)}
                         >
                             <div>
                                 <StageName>{stage.stageName}</StageName>
@@ -394,13 +409,11 @@ const StageSelectScreen: React.FC = () => {
                                 {diffIcon && <img src={diffIcon} alt='난이도' style={{ width: 22, height: 22, marginRight: 6 }} />}
                                 {getDifficultyText(stage.stageStep)}
                             </DifficultyBadge>
-                            {stage.stageIdx !== 1 &&
-                                !clearedStages.includes(stage.stageIdx) &&
-                                !clearedStages.includes(stage.stageIdx - 1) && (
-                                    <LockedOverlay>
-                                        <img src={lockerIcon} alt='잠김' style={{ width: 48, height: 48 }} />
-                                    </LockedOverlay>
-                                )}
+                            {!stage.unlocked && (
+                                <LockedOverlay>
+                                    <img src={lockerIcon} alt='잠김' style={{ width: 48, height: 48 }} />
+                                </LockedOverlay>
+                            )}
                         </StageCard>
                     );
                 })}
