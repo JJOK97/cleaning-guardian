@@ -192,6 +192,7 @@ public class CollectionServiceImpl implements CollectionService {
                     .type(p.getType())
                     .isCollected(userCollections != null && userCollections.stream()
                         .anyMatch(uc -> uc.getPolIdx().equals(p.getPolIdx())))
+                    .collectionCount(p.getCount())
                     .build();
                 
                 return pollutionDTO;

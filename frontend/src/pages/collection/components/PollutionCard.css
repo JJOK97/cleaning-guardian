@@ -1,0 +1,49 @@
+.pollution-card {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pollution-card:hover {
+    transform: scale(1.05);
+}
+
+.pollution-card.not-collected {
+    filter: grayscale(100%);
+}
+
+.pollution-card .image-container {
+    width: 96px;
+    height: 96px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f3f4f6;
+}
+
+.pollution-card .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.pollution-card .card-info {
+    margin-top: 8px;
+    text-align: center;
+}
+
+.pollution-card .card-info h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
+}
+
+.pollution-card .card-info .collected-badge {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #166534;
+    background-color: #dcfce7;
+    border-radius: 9999px;
+}

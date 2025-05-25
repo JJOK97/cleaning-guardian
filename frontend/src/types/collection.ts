@@ -1,15 +1,14 @@
 export interface Pollution {
     polIdx: number;
-    gameIdx: number;
     polName: string;
     polDesc: string;
     polImg1: string;
     polImg2: string;
     polImg3: string;
     type: string;
-    isCollected: boolean;
+    count: number;
     collectionCount: number;
-    createdAt: string;
+    collected?: boolean;
 }
 
 export interface UserCollection {
@@ -27,5 +26,10 @@ export interface CollectionData {
     totalCount: number;
     collectedCount: number;
     completionRate: number;
-    userCollections: UserCollection[];
+    userCollections: Pollution[] | null;
+}
+
+export interface ApiResponse<T> {
+    success: boolean;
+    data: T;
 }

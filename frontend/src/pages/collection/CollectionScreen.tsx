@@ -1,72 +1,96 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { getCollectionCompletion } from '@/api/collection';
-import { CollectionData, Pollution } from '@/types/collection';
-import CollectionHeader from './components/CollectionHeader';
+import { Pollution } from '@/types/collection';
+import { getAllPollutions, getUserCollections } from '@/api/collection';
 import PollutionCard from './components/PollutionCard';
+import './CollectionScreen.css';
+import CollectionHeader from './components/CollectionHeader';
 import PollutionDetailModal from './components/PollutionDetailModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const CollectionScreen: React.FC = () => {
     const { user } = useAuth();
-    const [collectionData, setCollectionData] = useState<CollectionData | null>(null);
+    const [pollutions, setPollutions] = useState<Pollution[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [selectedPollution, setSelectedPollution] = useState<Pollution | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchCollectionData = async () => {
-            if (!user?.email) return;
+        const fetchData = async () => {
+            if (!user?.email) {
+                console.log('사용자 이메일이 없습니다.');
+                return;
+            }
 
             try {
-                setIsLoading(true);
-                const response = await getCollectionCompletion(user.email);
-                if (response.data) {
-                    setCollectionData(response.data as CollectionData);
+                setLoading(true);
+                console.log('데이터 요청 시작');
+
+                // 사용자별 수집 목록 API만 호출
+                const collectionsData = await getUserCollections(user.email);
+                console.log('받은 데이터:', collectionsData);
+
+                if (collectionsData.success) {
+                    setPollutions(collectionsData.data.pollutions);
+                } else {
+                    console.error('API 응답 실패:', collectionsData);
+                    setError('데이터를 불러오는데 실패했습니다.');
                 }
-            } catch (error) {
-                console.error('도감 데이터 로딩 실패:', error);
+            } catch (err) {
+                console.error('데이터 로딩 중 에러:', err);
+                setError('데이터를 불러오는 중 오류가 발생했습니다.');
             } finally {
-                setIsLoading(false);
+                setLoading(false);
             }
         };
 
-        fetchCollectionData();
+        fetchData();
     }, [user?.email]);
 
     const handleCardClick = (pollution: Pollution) => {
+        console.log('오염물질 카드 클릭:', pollution);
         setSelectedPollution(pollution);
         setIsModalOpen(true);
     };
 
-    if (isLoading) {
-        return (
-            <div className='flex items-center justify-center min-h-screen'>
-                <LoadingSpinner />
-            </div>
-        );
+    if (loading) {
+        return <LoadingSpinner />;
     }
 
-    if (!collectionData) {
-        return (
-            <div className='flex items-center justify-center min-h-screen'>
-                <p className='text-gray-500'>데이터를 불러올 수 없습니다.</p>
-            </div>
-        );
+    if (error) {
+        return <div>에러: {error}</div>;
     }
+
+    const collectedPollutions = pollutions.filter((p) => p.collected);
+    const notCollectedPollutions = pollutions.filter((p) => !p.collected);
 
     return (
-        <div className='container mx-auto px-4 py-8'>
+        <div className='collection-screen'>
             <CollectionHeader
-                totalCount={collectionData.totalCount}
-                collectedCount={collectionData.collectedCount}
-                completionRate={collectionData.completionRate}
+                totalCount={pollutions.length}
+                collectedCount={collectedPollutions.length}
+                completionRate={pollutions.length > 0 ? (collectedPollutions.length / pollutions.length) * 100 : 0}
             />
 
-            <div className='mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
-                {collectionData.pollutions.map((pollution) => (
-                    <PollutionCard key={pollution.polIdx} pollution={pollution} onClick={() => handleCardClick(pollution)} />
-                ))}
+            <div className='collection-grids'>
+                <div className='collection-section'>
+                    <h2>수집 완료</h2>
+                    <div className='pollution-grid'>
+                        {collectedPollutions.map((pollution) => (
+                            <PollutionCard key={pollution.polIdx} pollution={pollution} onClick={() => handleCardClick(pollution)} />
+                        ))}
+                    </div>
+                </div>
+
+                <div className='collection-section'>
+                    <h2>미수집</h2>
+                    <div className='pollution-grid'>
+                        {notCollectedPollutions.map((pollution) => (
+                            <PollutionCard key={pollution.polIdx} pollution={pollution} onClick={() => handleCardClick(pollution)} />
+                        ))}
+                    </div>
+                </div>
             </div>
 
             {isModalOpen && selectedPollution && (

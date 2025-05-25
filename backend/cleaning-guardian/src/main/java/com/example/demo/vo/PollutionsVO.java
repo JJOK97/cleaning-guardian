@@ -21,5 +21,6 @@ public class PollutionsVO {
 	private String polImg3;
 	private String type;
 	private Timestamp createdAt;
+	private int count;
 	
 }
