@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.dto.CollectionDTO;
 import com.example.demo.dto.CollectionDetailDTO;
 import com.example.demo.mapper.CollectionMapper;
-import com.example.demo.vo.PollutionVO;
+import com.example.demo.vo.PollutionsVO;
 import com.example.demo.vo.UserCollectionVO;
 
 @Service
@@ -22,14 +22,14 @@ public class CollectionServiceImpl implements CollectionService {
     @Override
     @Transactional(readOnly = true)
     public CollectionDTO getAllPollutions() {
-        List<PollutionVO> pollutions = collectionMapper.selectAllPollutions();
+        List<PollutionsVO> pollutions = collectionMapper.selectAllPollutions();
         return createCollectionDTO(pollutions, null);
     }
 
     @Override
     @Transactional(readOnly = true)
     public CollectionDTO getUserCollections(String email) {
-        List<PollutionVO> pollutions = collectionMapper.selectAllPollutions();
+        List<PollutionsVO> pollutions = collectionMapper.selectAllPollutions();
         List<UserCollectionVO> userCollections = collectionMapper.selectUserCollections(email);
         return createCollectionDTO(pollutions, userCollections);
     }
@@ -37,7 +37,7 @@ public class CollectionServiceImpl implements CollectionService {
     @Override
     @Transactional(readOnly = true)
     public CollectionDetailDTO getPollutionDetail(Long polIdx) {
-        PollutionVO pollution = collectionMapper.selectPollution(polIdx);
+        PollutionsVO pollution = collectionMapper.selectPollution(polIdx);
         UserCollectionVO userCollection = collectionMapper.selectUserCollection(polIdx);
         
         CollectionDetailDTO detail = new CollectionDetailDTO();
@@ -59,7 +59,7 @@ public class CollectionServiceImpl implements CollectionService {
     @Override
     @Transactional(readOnly = true)
     public CollectionDTO getCollectionCompletion(String email) {
-        List<PollutionVO> pollutions = collectionMapper.selectAllPollutions();
+        List<PollutionsVO> pollutions = collectionMapper.selectAllPollutions();
         List<UserCollectionVO> userCollections = collectionMapper.selectUserCollections(email);
         
         CollectionDTO dto = createCollectionDTO(pollutions, userCollections);
@@ -70,7 +70,7 @@ public class CollectionServiceImpl implements CollectionService {
         return dto;
     }
 
-    private CollectionDTO createCollectionDTO(List<PollutionVO> pollutions, List<UserCollectionVO> userCollections) {
+    private CollectionDTO createCollectionDTO(List<PollutionsVO> pollutions, List<UserCollectionVO> userCollections) {
         CollectionDTO dto = new CollectionDTO();
         
         List<CollectionDTO.PollutionDTO> pollutionDTOs = pollutions.stream()
