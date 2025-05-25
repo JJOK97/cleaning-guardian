@@ -6,7 +6,7 @@ import PollutionCard from './components/PollutionCard';
 import './CollectionScreen.css';
 import CollectionHeader from './components/CollectionHeader';
 import PollutionDetailModal from './components/PollutionDetailModal';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import LoadingScreen from '@/components/common/LoadingScreen';
 
 const CollectionScreen: React.FC = () => {
     const { user } = useAuth();
@@ -55,7 +55,7 @@ const CollectionScreen: React.FC = () => {
     };
 
     if (loading) {
-        return <LoadingSpinner />;
+        return <LoadingScreen />;
     }
 
     if (error) {

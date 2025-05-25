@@ -18,7 +18,7 @@ const CollectionHeader: React.FC<CollectionHeaderProps> = ({ totalCount, collect
                         {collectedCount} / {totalCount}
                     </span>
                 </div>
-                <Progress value={completionRate} className='h-2' />
+                <Progress value={completionRate} />
                 <div className='mt-1 text-right'>
                     <span className='text-sm font-medium text-primary'>{completionRate.toFixed(1)}%</span>
                 </div>
