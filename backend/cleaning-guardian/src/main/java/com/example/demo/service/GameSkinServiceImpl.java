@@ -69,7 +69,7 @@ public class GameSkinServiceImpl implements GameSkinService {
 	@Override
 	public UserSkinVO getEquippedSliceSkin(String email) {
 		UserSkinVO userSkin = skinMapper.getEquippedSliceSkin(email);
-		if (userSkin != null && userSkin.getSkin() != null) {
+		if (userSkin != null && userSkin.getSkin() == null) {
 			GameSkinVO skinInfo = skinMapper.getSkin(userSkin.getSkinIdx());
 			userSkin.setSkin(skinInfo);
 		}
@@ -107,7 +107,7 @@ public class GameSkinServiceImpl implements GameSkinService {
 	@Override
 	public UserSkinVO getEquippedTapSkin(String email) {
 		UserSkinVO userSkin = skinMapper.getEquippedTapSkin(email);
-		if (userSkin != null && userSkin.getSkin() != null) {
+		if (userSkin != null && userSkin.getSkin() == null) {
 			GameSkinVO skinInfo = skinMapper.getSkin(userSkin.getSkinIdx());
 			userSkin.setSkin(skinInfo);
 		}

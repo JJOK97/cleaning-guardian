@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { getUserItems, equipItem, unequipItem, getEquippedItems } from '@/api/game';
-import { getUserTapSkins, getUserSliceSkins, getEquippedTapSkin, UserSkinData, equipTapSkin, unequipTapSkin } from '@/api/skins';
+import {
+    getUserTapSkins,
+    getUserSliceSkins,
+    getEquippedTapSkin,
+    getEquippedSliceSkin,
+    UserSkinData,
+    equipTapSkin,
+    unequipTapSkin,
+    equipSliceSkin,
+    unequipSliceSkin,
+} from '@/api/skins';
 import { UserItem } from '@/types/inventory';
 import ItemDetailModal from './ItemDetailModal';
 import { useAuth } from '@/hooks/useAuth';
@@ -56,8 +66,11 @@ const InventoryScreen: React.FC = () => {
             console.log('Raw slice skins response:', sliceSkins);
 
             // 스킨 데이터가 배열이 아닌 경우 처리
-            const processedTapSkins = Array.isArray(tapSkins) ? tapSkins : tapSkins?.uskinlist || [];
-            const processedSliceSkins = Array.isArray(sliceSkins) ? sliceSkins : sliceSkins?.uskinlist || [];
+            const processedTapSkins = Array.isArray(tapSkins) ? tapSkins : tapSkins?.userSkinList || [];
+            const processedSliceSkins = Array.isArray(sliceSkins) ? sliceSkins : sliceSkins?.userSkinList || [];
+
+            console.log('Processed tap skins:', processedTapSkins);
+            console.log('Processed slice skins:', processedSliceSkins);
 
             const allSkins = [...processedTapSkins, ...processedSliceSkins];
             console.log('Combined skins:', allSkins);
@@ -96,14 +109,23 @@ const InventoryScreen: React.FC = () => {
         if (!user?.email) return;
 
         try {
-            console.log('Fetching equipped skin for email:', user.email);
+            console.log('Fetching equipped skins for email:', user.email);
 
-            const response = await getEquippedTapSkin(user.email);
-            console.log('Equipped skin response:', response);
+            const [equippedTapSkin, equippedSliceSkin] = await Promise.all([
+                getEquippedTapSkin(user.email),
+                getEquippedSliceSkin(user.email),
+            ]);
 
-            setEquippedSkin(response);
+            console.log('Equipped tap skin response:', equippedTapSkin);
+            console.log('Equipped slice skin response:', equippedSliceSkin);
+
+            // 현재 선택된 탭에 따라 장착된 스킨 설정
+            if (activeTab === 'skins') {
+                const selectedSkin = equippedTapSkin || equippedSliceSkin;
+                setEquippedSkin(selectedSkin);
+            }
         } catch (error) {
-            console.error('Error fetching equipped skin:', error);
+            console.error('Error fetching equipped skins:', error);
             setEquippedSkin(null);
         }
     };
@@ -133,7 +155,11 @@ const InventoryScreen: React.FC = () => {
                     setIsModalOpen(false);
                 }
             } else {
-                const response = await equipTapSkin(user.email, (selectedItem as UserSkinData).skinIdx);
+                const skin = selectedItem as UserSkinData;
+                const response =
+                    skin.skin.actionType === 'T'
+                        ? await equipTapSkin(user.email, skin.skinIdx)
+                        : await equipSliceSkin(user.email, skin.skinIdx);
                 if (response.includes('완료')) {
                     await Promise.all([fetchSkins(), fetchEquippedSkin()]);
                     setIsModalOpen(false);
@@ -156,7 +182,11 @@ const InventoryScreen: React.FC = () => {
                     setIsModalOpen(false);
                 }
             } else {
-                const response = await unequipTapSkin(user.email, (selectedItem as UserSkinData).skinIdx);
+                const skin = selectedItem as UserSkinData;
+                const response =
+                    skin.skin.actionType === 'T'
+                        ? await unequipTapSkin(user.email, skin.skinIdx)
+                        : await unequipSliceSkin(user.email, skin.skinIdx);
                 if (response.includes('완료')) {
                     await Promise.all([fetchSkins(), fetchEquippedSkin()]);
                     setIsModalOpen(false);
@@ -179,8 +209,8 @@ const InventoryScreen: React.FC = () => {
         } else {
             const skinA = a as UserSkinData;
             const skinB = b as UserSkinData;
-            const isAEquipped = equippedSkin?.skinIdx === skinA.skinIdx;
-            const isBEquipped = equippedSkin?.skinIdx === skinB.skinIdx;
+            const isAEquipped = equippedSkin?.skinIdx === skinA.skinIdx && equippedSkin?.skin.actionType === skinA.skin.actionType;
+            const isBEquipped = equippedSkin?.skinIdx === skinB.skinIdx && equippedSkin?.skin.actionType === skinB.skin.actionType;
             if (isAEquipped && !isBEquipped) return -1;
             if (!isAEquipped && isBEquipped) return 1;
         }

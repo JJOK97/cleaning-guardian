@@ -139,6 +139,28 @@ public class GameSkinController {
 		return skinService.unequipSkin(email, skinIdx);
 	}
 
+	// 슬라이스 스킨 장착/해제
+	@PostMapping("/slice/equip/{skinIdx}")
+	public String equipSliceSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.equipSkin(email, skinIdx);
+	}
+
+	@PostMapping("/slice/unequip/{skinIdx}")
+	public String unequipSliceSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.unequipSkin(email, skinIdx);
+	}
+
+	// 탭 스킨 장착/해제
+	@PostMapping("/tap/equip/{skinIdx}")
+	public String equipTapSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.equipSkin(email, skinIdx);
+	}
+
+	@PostMapping("/tap/unequip/{skinIdx}")
+	public String unequipTapSkin(@RequestParam String email, @PathVariable long skinIdx) {
+		return skinService.unequipSkin(email, skinIdx);
+	}
+
 	// 스킨 구매
 	@PostMapping("/purchase/{skinIdx}")
 	public String purchaseSkin(@RequestParam String email, @PathVariable long skinIdx) {

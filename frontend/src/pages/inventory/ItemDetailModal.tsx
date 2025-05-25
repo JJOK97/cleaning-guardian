@@ -36,18 +36,25 @@ const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
     console.log('Modal item data:', item);
     console.log('Is item:', isItem);
     console.log('Is equipped:', isEquipped);
+    if (!isItem) {
+        console.log('Skin data:', (item as UserSkinData).skin);
+    }
 
     return (
         <ModalOverlay onClick={onClose}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
                 <CloseButton onClick={onClose}>&times;</CloseButton>
                 <ItemImage
-                    src={isItem ? (item as UserItem).item.itemImg : (item as UserSkinData).skinImg || '/src/assets/img/skins/default.png'}
-                    alt={isItem ? (item as UserItem).item.itemName : (item as UserSkinData).skinName || '스킨'}
+                    src={
+                        isItem
+                            ? (item as UserItem).item.itemImg
+                            : (item as UserSkinData).skin?.skinImg || '/src/assets/img/skins/default.png'
+                    }
+                    alt={isItem ? (item as UserItem).item.itemName : (item as UserSkinData).skin?.skinName || '스킨'}
                 />
-                <ItemName>{isItem ? (item as UserItem).item.itemName : (item as UserSkinData).skinName || '스킨'}</ItemName>
+                <ItemName>{isItem ? (item as UserItem).item.itemName : (item as UserSkinData).skin?.skinName || '스킨'}</ItemName>
                 <ItemDescription>
-                    {isItem ? (item as UserItem).item.itemDesc : (item as UserSkinData).skinDesc || '스킨 설명'}
+                    {isItem ? (item as UserItem).item.itemDesc : (item as UserSkinData).skin?.skinDesc || '스킨 설명'}
                 </ItemDescription>
                 <ItemCount>{isItem ? `보유 수량: ${(item as UserItem).count}` : '보유'}</ItemCount>
                 {isItem && !isEquipped && (
