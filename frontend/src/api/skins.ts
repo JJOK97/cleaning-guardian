@@ -103,10 +103,10 @@ export const getUserTapSkins = async (email: string): Promise<UserSkinData[]> =>
     }
 };
 
-// 스킨 장착
+// 탭 스킨 장착
 export const equipTapSkin = async (email: string, skinIdx: number): Promise<string> => {
     try {
-        const response = await api.post(`/skins/equip/${skinIdx}`, null, {
+        const response = await api.post(`/skins/tap/equip/${skinIdx}`, null, {
             params: { email },
             responseType: 'text',
         });
@@ -117,10 +117,10 @@ export const equipTapSkin = async (email: string, skinIdx: number): Promise<stri
     }
 };
 
-// 스킨 해제
+// 탭 스킨 해제
 export const unequipTapSkin = async (email: string, skinIdx: number): Promise<string> => {
     try {
-        const response = await api.post(`/skins/unequip/${skinIdx}`, null, {
+        const response = await api.post(`/skins/tap/unequip/${skinIdx}`, null, {
             params: { email },
             responseType: 'text',
         });

@@ -132,9 +132,9 @@ const ShopScreen: React.FC = () => {
                     ]);
 
                     // 스킨 데이터 구조 수정
-                    const processedSkins = [...(sliceSkinsData || []), ...(tapSkinsData || [])].filter(
-                        (skin) => !ownedSkinIndices.has(skin.skinIdx),
-                    );
+                    const processedSkins = [...(sliceSkinsData || []), ...(tapSkinsData || [])]
+                        .filter((skin) => skin && skin.skinIdx) // null 값 제거
+                        .filter((skin) => !ownedSkinIndices.has(skin.skinIdx));
 
                     console.log('가공된 스킨 데이터:', processedSkins);
 
@@ -186,9 +186,9 @@ const ShopScreen: React.FC = () => {
                 ]);
 
                 // 스킨 데이터 구조 수정
-                const processedSkins = [...(sliceSkinsData || []), ...(tapSkinsData || [])].filter(
-                    (skin) => !ownedSkinIndices.has(skin.skinIdx),
-                );
+                const processedSkins = [...(sliceSkinsData || []), ...(tapSkinsData || [])]
+                    .filter((skin) => skin && skin.skinIdx) // null 값 제거
+                    .filter((skin) => !ownedSkinIndices.has(skin.skinIdx));
 
                 console.log('갱신된 가공 스킨 데이터:', processedSkins);
 

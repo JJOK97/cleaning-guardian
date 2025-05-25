@@ -158,10 +158,27 @@ const InventoryScreen: React.FC = () => {
                 }
             } else {
                 const skin = selectedItem as UserSkinData;
-                const response =
-                    skin.skin.actionType === 'T'
-                        ? await equipTapSkin(user.email, skin.skinIdx)
-                        : await equipSliceSkin(user.email, skin.skinIdx);
+
+                // 스킨 타입 구분 (actionType 우선 사용)
+                const skinType = skin.skin?.actionType;
+
+                console.log('Equipping skin:', {
+                    skinIdx: skin.skinIdx,
+                    skinType,
+                    actionType: skin.skin?.actionType,
+                });
+
+                let response;
+                if (skinType === 'T') {
+                    response = await equipTapSkin(user.email, skin.skinIdx);
+                } else if (skinType === 'S') {
+                    response = await equipSliceSkin(user.email, skin.skinIdx);
+                } else {
+                    // 타입을 알 수 없는 경우, 기본적으로 탭 스킨으로 시도
+                    console.warn('Unknown skin type, trying tap skin first');
+                    response = await equipTapSkin(user.email, skin.skinIdx);
+                }
+
                 if (response.includes('완료')) {
                     await Promise.all([fetchSkins(), fetchEquippedSkin()]);
                     setIsModalOpen(false);
@@ -185,10 +202,28 @@ const InventoryScreen: React.FC = () => {
                 }
             } else {
                 const skin = selectedItem as UserSkinData;
-                const response =
-                    skin.skin.actionType === 'T'
-                        ? await unequipTapSkin(user.email, skin.skinIdx)
-                        : await unequipSliceSkin(user.email, skin.skinIdx);
+
+                // 장착된 스킨 정보를 기반으로 탭/슬라이스 구분
+                const isTapEquipped = equippedSkins.tap?.skinIdx === skin.skinIdx;
+                const isSliceEquipped = equippedSkins.slice?.skinIdx === skin.skinIdx;
+
+                console.log('Unequipping skin:', {
+                    skinIdx: skin.skinIdx,
+                    actionType: skin.skin?.actionType,
+                    isTapEquipped,
+                    isSliceEquipped,
+                });
+
+                let response;
+                if (isTapEquipped) {
+                    response = await unequipTapSkin(user.email, skin.skinIdx);
+                } else if (isSliceEquipped) {
+                    response = await unequipSliceSkin(user.email, skin.skinIdx);
+                } else {
+                    console.error('Skin is not equipped in either tap or slice');
+                    return;
+                }
+
                 if (response.includes('완료')) {
                     await Promise.all([fetchSkins(), fetchEquippedSkin()]);
                     setIsModalOpen(false);
