@@ -101,6 +101,77 @@ public class CollectionServiceImpl implements CollectionService {
     }
 
     /**
+     * 전체 오염물질 목록을 VO로 조회
+     * @return List<PollutionsVO> - 전체 오염물질 목록
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<PollutionsVO> getPollutionsList() {
+        return collectionMapper.selectAllPollutions();
+    }
+
+    /**
+     * 사용자의 수집 목록을 VO로 조회
+     * @param email 사용자 이메일
+     * @return List<UserCollectionVO> - 사용자의 수집 목록
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserCollectionVO> getUserCollectionsList(String email) {
+        return collectionMapper.selectUserCollections(email);
+    }
+
+    /**
+     * 특정 오염물질 정보를 VO로 조회
+     * @param polIdx 오염물질 인덱스
+     * @return PollutionsVO - 오염물질 정보
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public PollutionsVO getPollution(Long polIdx) {
+        return collectionMapper.selectPollution(polIdx);
+    }
+
+    /**
+     * 특정 사용자의 수집 정보를 VO로 조회
+     * @param polIdx 오염물질 인덱스
+     * @return UserCollectionVO - 사용자의 수집 정보
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public UserCollectionVO getUserCollection(Long polIdx) {
+        return collectionMapper.selectUserCollection(polIdx);
+    }
+
+    /**
+     * 오염물질 수집 처리
+     * @param email 사용자 이메일
+     * @param polIdx 오염물질 인덱스
+     * @return boolean - 수집 성공 여부
+     */
+    @Override
+    @Transactional
+    public boolean collectPollution(String email, Long polIdx) {
+        if (collectionMapper.existsUserCollection(email, polIdx)) {
+            return false;
+        }
+        return collectionMapper.insertUserCollection(email, polIdx) > 0;
+    }
+
+    /**
+     * 사용자의 수집 완료율을 백분율로 계산
+     * @param email 사용자 이메일
+     * @return double - 수집 완료율 (0.0 ~ 100.0)
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public double getCollectionCompletionRate(String email) {
+        List<PollutionsVO> pollutions = collectionMapper.selectAllPollutions();
+        List<UserCollectionVO> userCollections = collectionMapper.selectUserCollections(email);
+        return (double) userCollections.size() / pollutions.size() * 100;
+    }
+
+    /**
      * PollutionsVO와 UserCollectionVO를 CollectionDTO로 변환하는 내부 메서드
      * @param pollutions 전체 오염물질 목록
      * @param userCollections 사용자의 수집 목록
@@ -129,23 +200,5 @@ public class CollectionServiceImpl implements CollectionService {
         
         dto.setPollutions(pollutionDTOs);
         return dto;
-    }
-
-    /**
-     * 오염물질 수집 처리
-     * @param email 사용자 이메일
-     * @param polIdx 오염물질 인덱스
-     * @return boolean - 수집 성공 여부
-     */
-    @Override
-    @Transactional
-    public boolean collectPollution(String email, Long polIdx) {
-        // 이미 수집했는지 확인
-        if (collectionMapper.existsUserCollection(email, polIdx)) {
-            return false;
-        }
-        
-        // 수집 처리
-        return collectionMapper.insertUserCollection(email, polIdx) > 0;
     }
 } 

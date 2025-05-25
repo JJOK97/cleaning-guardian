@@ -1,118 +1,78 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import Button from '@/components/common/Button';
-
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding: 2rem;
-`;
-
-const Title = styled.h1`
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 2rem;
-    text-align: center;
-`;
-
-const CollectionGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
-    padding: 1rem;
-`;
-
-const CollectionCard = styled.div`
-    background-color: ${({ theme }) => theme.colors.background.card};
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    transition: transform 0.2s;
-
-    &:hover {
-        transform: translateY(-4px);
-    }
-`;
-
-const ItemImage = styled.div`
-    width: 100px;
-    height: 100px;
-    background-color: ${({ theme }) => theme.colors.background.light};
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-`;
-
-const ItemName = styled.h3`
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 1.2rem;
-    text-align: center;
-`;
-
-const ItemDescription = styled.p`
-    color: ${({ theme }) => theme.colors.text.secondary};
-    font-size: 0.9rem;
-    text-align: center;
-`;
-
-const ButtonGroup = styled.div`
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 2rem;
-`;
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { getCollectionCompletion } from '@/api/collection';
+import { CollectionData, Pollution } from '@/types/collection';
+import CollectionHeader from './components/CollectionHeader';
+import PollutionCard from './components/PollutionCard';
+import PollutionDetailModal from './components/PollutionDetailModal';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const CollectionScreen: React.FC = () => {
-    const navigate = useNavigate();
+    const { user } = useAuth();
+    const [collectionData, setCollectionData] = useState<CollectionData | null>(null);
+    const [selectedPollution, setSelectedPollution] = useState<Pollution | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const collections = [
-        {
-            id: 1,
-            name: '플라스틱',
-            description: '일회용 플라스틱 제품들',
-            icon: '🥤',
-        },
-        {
-            id: 2,
-            name: '유리',
-            description: '깨진 유리 조각들',
-            icon: '🍶',
-        },
-        {
-            id: 3,
-            name: '금속',
-            description: '녹슨 금속 조각들',
-            icon: '🔧',
-        },
-    ];
+    useEffect(() => {
+        const fetchCollectionData = async () => {
+            if (!user?.email) return;
+
+            try {
+                setIsLoading(true);
+                const response = await getCollectionCompletion(user.email);
+                if (response.data) {
+                    setCollectionData(response.data as CollectionData);
+                }
+            } catch (error) {
+                console.error('도감 데이터 로딩 실패:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCollectionData();
+    }, [user?.email]);
+
+    const handleCardClick = (pollution: Pollution) => {
+        setSelectedPollution(pollution);
+        setIsModalOpen(true);
+    };
+
+    if (isLoading) {
+        return (
+            <div className='flex items-center justify-center min-h-screen'>
+                <LoadingSpinner />
+            </div>
+        );
+    }
+
+    if (!collectionData) {
+        return (
+            <div className='flex items-center justify-center min-h-screen'>
+                <p className='text-gray-500'>데이터를 불러올 수 없습니다.</p>
+            </div>
+        );
+    }
 
     return (
-        <Container>
-            <Title>컬렉션</Title>
-            <CollectionGrid>
-                {collections.map((item) => (
-                    <CollectionCard key={item.id}>
-                        <ItemImage>{item.icon}</ItemImage>
-                        <ItemName>{item.name}</ItemName>
-                        <ItemDescription>{item.description}</ItemDescription>
-                    </CollectionCard>
+        <div className='container mx-auto px-4 py-8'>
+            <CollectionHeader
+                totalCount={collectionData.totalCount}
+                collectedCount={collectionData.collectedCount}
+                completionRate={collectionData.completionRate}
+            />
+
+            <div className='mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+                {collectionData.pollutions.map((pollution) => (
+                    <PollutionCard key={pollution.polIdx} pollution={pollution} onClick={() => handleCardClick(pollution)} />
                 ))}
-            </CollectionGrid>
-            <ButtonGroup>
-                <Button
-                    $variant='secondary'
-                    onClick={() => navigate('/main')}
-                >
-                    메인으로
-                </Button>
-            </ButtonGroup>
-        </Container>
+            </div>
+
+            {isModalOpen && selectedPollution && (
+                <PollutionDetailModal pollution={selectedPollution} onClose={() => setIsModalOpen(false)} />
+            )}
+        </div>
     );
 };
 
