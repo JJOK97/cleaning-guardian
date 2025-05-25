@@ -49,12 +49,8 @@ public class GameSkinController {
 	}
 
 	@GetMapping("/slice/user")
-	public UserSkinDTO getUserSliceSkins(@RequestParam String email) {
-		List<UserSkinVO> userSkins = skinService.getUserSliceSkins(email);
-		return UserSkinDTO.builder()
-				.userSkinList(userSkins)
-				.success(true)
-				.build();
+	public List<UserSkinVO> getUserSliceSkins(@RequestParam String email) {
+		return skinService.getUserSliceSkins(email);
 	}
 
 	@GetMapping("/slice/user/{skinIdx}")
@@ -79,12 +75,8 @@ public class GameSkinController {
 	}
 
 	@GetMapping("/tap/user")
-	public UserSkinDTO getUserTapSkins(@RequestParam String email) {
-		List<UserSkinVO> userSkins = skinService.getUserTapSkins(email);
-		return UserSkinDTO.builder()
-				.userSkinList(userSkins)
-				.success(true)
-				.build();
+	public List<UserSkinVO> getUserTapSkins(@RequestParam String email) {
+		return skinService.getUserTapSkins(email);
 	}
 
 	@GetMapping("/tap/user/{skinIdx}")
