@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.CollectionMapper">
 
-    <select id="selectAllPollutions" resultType="com.example.demo.vo.PollutionVO">
+    <select id="selectAllPollutions" resultType="com.example.demo.vo.PollutionsVO">
         SELECT 
             "pol_idx" as polIdx,
             "game_idx" as gameIdx,
@@ -13,7 +13,7 @@
             "pol_img3" as polImg3,
             "type",
             "created_at" as createdAt
-        FROM "POLLUTION"
+        FROM "POLLUTIONS"
         ORDER BY "pol_idx"
     </select>
 
@@ -28,7 +28,7 @@
         ORDER BY "collected_at" DESC
     </select>
 
-    <select id="selectPollution" resultType="com.example.demo.vo.PollutionVO">
+    <select id="selectPollution" resultType="com.example.demo.vo.PollutionsVO">
         SELECT 
             "pol_idx" as polIdx,
             "game_idx" as gameIdx,
@@ -39,7 +39,7 @@
             "pol_img3" as polImg3,
             "type",
             "created_at" as createdAt
-        FROM "POLLUTION"
+        FROM "POLLUTIONS"
         WHERE "pol_idx" = #{polIdx}
     </select>
 
