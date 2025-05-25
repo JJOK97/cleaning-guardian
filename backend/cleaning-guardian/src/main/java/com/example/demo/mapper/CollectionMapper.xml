@@ -13,7 +13,7 @@
             "pol_img3" as polImg3,
             "type",
             "created_at" as createdAt
-        FROM "POLLUTIONS"
+        FROM "pollutions"
         ORDER BY "pol_idx"
     </select>
 
@@ -23,7 +23,7 @@
             "email",
             "pol_idx" as polIdx,
             "collected_at" as collectedAt
-        FROM "USER_COLLECTION"
+        FROM "user_collection"
         WHERE "email" = #{email}
         ORDER BY "collected_at" DESC
     </select>
@@ -39,7 +39,7 @@
             "pol_img3" as polImg3,
             "type",
             "created_at" as createdAt
-        FROM "POLLUTIONS"
+        FROM "pollutions"
         WHERE "pol_idx" = #{polIdx}
     </select>
 
@@ -49,7 +49,7 @@
             "email",
             "pol_idx" as polIdx,
             "collected_at" as collectedAt
-        FROM "USER_COLLECTION"
+        FROM "user_collection"
         WHERE "pol_idx" = #{polIdx}
     </select>
 
