@@ -58,64 +58,173 @@ const GameUI = styled.div`
     z-index: 10;
 `;
 
-const SettingsButton = styled.button`
+// 게임 상단 UI 컨테이너 (반응형)
+const TopGameUI = styled.div`
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    top: 0.7rem;
+    left: 0.7rem;
+    right: 0.7rem;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    justify-content: space-between;
+    align-items: flex-start;
     z-index: 100;
+    gap: 0.5rem;
 
-    &:hover {
-        background: rgba(255, 255, 255, 0.3);
+    @media (max-width: 768px) {
+        top: 0.5rem;
+        left: 0.5rem;
+        right: 0.5rem;
+        gap: 0.5rem;
     }
 `;
 
-const Score = styled.div`
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
+const LeftSection = styled.div`
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-start;
 `;
 
-const Timer = styled.div`
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    color: ${({ theme }) => theme.colors.text.primary};
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
+const CenterSection = styled.div`
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
 `;
 
-const Lives = styled.div`
+const RightSection = styled.div`
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end;
+`;
+
+const GameInfoCard = styled.div`
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    padding: 0.8rem 1.2rem;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    min-width: fit-content;
+
+    @media (max-width: 768px) {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+        border-radius: 12px;
+        gap: 0.4rem;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.8rem;
+        border-radius: 10px;
+        gap: 0.3rem;
+    }
+`;
+
+const Timer = styled(GameInfoCard)`
+    color: #4caf50;
+`;
+
+const Score = styled(GameInfoCard)`
+    color: #ffd700;
+`;
+
+const Lives = styled(GameInfoCard)`
+    color: #ff6b6b;
+`;
+
+// 중앙 알림 영역
+const CenterNotificationArea = styled.div`
     position: absolute;
-    top: 1rem;
+    top: 4rem;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 0.5rem;
-    color: ${({ theme }) => theme.colors.error.main};
-    font-size: 1.5rem;
-    background: rgba(0, 0, 0, 0.3);
+    z-index: 200;
+    pointer-events: none;
+
+    @media (max-width: 768px) {
+        top: 3rem;
+        gap: 0.3rem;
+    }
+
+    @media (max-width: 480px) {
+        top: 2.5rem;
+    }
+`;
+
+const ComboNotification = styled.div`
+    background: rgba(76, 175, 80, 0.95);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
     padding: 0.5rem 1rem;
     border-radius: 20px;
+    border: 2px solid #4caf50;
+    animation: pulse 0.6s ease-in-out;
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @media (max-width: 768px) {
+        font-size: 1rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 0.9rem;
+        padding: 0.3rem 0.6rem;
+    }
+`;
+
+const KillNotification = styled.div`
+    background: rgba(0, 0, 0, 0.9);
+    color: #ffd700;
+    font-size: 1rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    padding: 0.6rem 1.2rem;
+    border-radius: 15px;
+    border: 2px solid #ffd700;
+    animation: fadeInOut 3s ease-in-out;
+    text-align: center;
+
+    @media (max-width: 768px) {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+`;
+
+const ScoreText = styled.div`
+    color: #4caf50;
+    font-size: 0.9em;
+    margin-top: 0.2rem;
 `;
 
 // ===== 게임 로직 개선을 위한 새로운 인터페이스 =====
@@ -506,7 +615,10 @@ const InGameScreen: React.FC = () => {
 
     // ===== 게임 로직 개선: 오염물질 처치 로직 =====
     const handlePollutantSlice = useCallback(() => {
-        if (!pollutant || gameEnded) return;
+        if (!pollutant || gameEnded) {
+            console.log('🚫 처치 차단:', { pollutant: !!pollutant, gameEnded });
+            return;
+        }
 
         // 1. 개선된 점수 계산 (아이템 효과 적용)
         const comboMultiplier = 1 + combo * 0.1; // 콤보당 10% 추가
@@ -592,37 +704,99 @@ const InGameScreen: React.FC = () => {
 
         setTimeout(() => {
             if (!gameEnded) {
+                console.log('⏭️ 다음 오염물질로 이동 (처치됨)');
                 setCurrentIndex((idx) => idx + 1);
+            } else {
+                console.log('🚫 게임 종료됨, 다음 오염물질 생성 차단');
             }
         }, 100);
     }, [pollutant, gameEnded, combo, itemEffects]);
 
     // ===== 게임 로직 개선: 게임 종료 및 데이터 저장 =====
+    const endGameRef = useRef(false); // 중복 호출 방지용 ref
+
     const endGame = useCallback(async () => {
-        if (!user?.email || !gameData.stageIdx || gameEnded) return;
+        if (!user?.email || !gameData.stageIdx || gameEnded || endGameRef.current) {
+            console.log('🚫 게임 종료 차단:', {
+                hasUser: !!user?.email,
+                hasStageIdx: !!gameData.stageIdx,
+                gameEnded,
+                alreadyEnding: endGameRef.current,
+            });
+            return;
+        }
+
+        console.log('🏁 게임 종료 시작');
+        endGameRef.current = true; // 중복 호출 방지 플래그 설정
         setGameEnded(true);
+
+        // 즉시 모든 애니메이션과 물리 엔진 정리
+        if (animationRef.current) {
+            cancelAnimationFrame(animationRef.current);
+            animationRef.current = null;
+        }
+        if (bodyRef.current && engineRef.current) {
+            Matter.World.remove(engineRef.current.world, bodyRef.current);
+            bodyRef.current = null;
+        }
+        if (engineRef.current) {
+            Matter.Engine.clear(engineRef.current);
+            engineRef.current = null;
+        }
+        setPollutant(null);
+
         const isSuccess = lives > 0 && time > 0 && currentIndex >= pollutantQueue.length;
         const successYn = isSuccess ? 'Y' : 'N';
+
+        console.log('🎯 게임 종료 상태:', {
+            isSuccess,
+            successYn,
+            lives,
+            time,
+            currentIndex,
+            pollutantQueueLength: pollutantQueue.length,
+        });
 
         try {
             // 1. 기존 게임 클리어 처리
             let retryCount = 0;
             let clearResponse;
 
+            console.log('📡 게임 클리어 API 호출 시작:', {
+                stageIdx: gameData.stageIdx,
+                email: user.email,
+                successYn,
+            });
+
             while (retryCount < 3) {
                 try {
                     clearResponse = await completeGame(gameData.stageIdx, user.email, successYn);
-                    if (clearResponse.success) break;
+                    console.log('📡 게임 클리어 API 응답:', clearResponse);
+                    if (clearResponse && clearResponse.success) break;
                 } catch (error) {
                     console.error(`게임 종료 처리 시도 ${retryCount + 1} 실패:`, error);
                     retryCount++;
-                    if (retryCount === 3) throw error;
+                    if (retryCount === 3) {
+                        console.error('🚨 게임 클리어 API 최종 실패, 강제 진행');
+                        // API 실패해도 게임 결과 화면으로 이동
+                        clearResponse = {
+                            success: false,
+                            message: 'API 호출 실패',
+                            successYn: successYn,
+                        };
+                        break;
+                    }
                     await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
                 }
             }
 
             if (!clearResponse) {
-                throw new Error('게임 종료 처리 실패');
+                console.error('🚨 clearResponse가 null, 기본값 설정');
+                clearResponse = {
+                    success: false,
+                    message: '응답 없음',
+                    successYn: successYn,
+                };
             }
 
             // 2. 게임 로직 개선: 수집 데이터 저장 (API 없으면 스킵)
@@ -673,13 +847,19 @@ const InGameScreen: React.FC = () => {
             }
 
             console.log('🏁 게임 종료:', result);
+            console.log('🚀 결과 화면으로 이동 준비 완료');
 
             setTimeout(() => {
+                console.log('🚀 결과 화면으로 이동 시작');
+                endGameRef.current = false; // 플래그 리셋
                 navigate('/result', { state: result });
             }, 1000);
         } catch (error) {
-            console.error('게임 종료 처리 중 오류 발생:', error);
+            console.error('🚨 게임 종료 처리 중 치명적 오류 발생:', error);
+            console.log('🚀 에러 발생으로 인한 강제 결과 화면 이동');
+
             // 에러 발생 시에도 결과 화면으로 이동
+            endGameRef.current = false; // 플래그 리셋
             navigate('/result', {
                 state: {
                     score,
@@ -869,7 +1049,7 @@ const InGameScreen: React.FC = () => {
 
         // 애니메이션 루프
         const animate = () => {
-            if (!bodyRef.current) return;
+            if (!bodyRef.current || gameEnded) return;
             Matter.Engine.update(engine, 1000 / 60);
             setPollutant((prev) =>
                 prev && bodyRef.current
@@ -898,7 +1078,10 @@ const InGameScreen: React.FC = () => {
                 bodyRef.current = null;
                 setTimeout(() => {
                     if (!gameEnded) {
+                        console.log('⏭️ 다음 오염물질로 이동 (화면 밖으로 떨어짐)');
                         setCurrentIndex((idx) => idx + 1);
+                    } else {
+                        console.log('🚫 게임 종료됨, 다음 오염물질 생성 차단');
                     }
                 }, 800); // 다음 오염물질 등장 시간 증가
                 return;
@@ -916,7 +1099,9 @@ const InGameScreen: React.FC = () => {
                 });
             }
 
-            animationRef.current = requestAnimationFrame(animate);
+            if (!gameEnded) {
+                animationRef.current = requestAnimationFrame(animate);
+            }
         };
         animationRef.current = requestAnimationFrame(animate);
 
@@ -927,11 +1112,12 @@ const InGameScreen: React.FC = () => {
     }, [pollutantQueue, currentIndex, stageSize.height, showPreparation, gameEnded, gameStarted]); // gameStarted 의존성 추가
 
     useEffect(() => {
-        if (
-            (lives === 0 || time === 0 || (currentIndex >= pollutantQueue.length && pollutantQueue.length > 0)) &&
-            !gameEnded &&
-            gameStarted
-        ) {
+        // 게임 종료 조건: 생명력 0 또는 시간 0
+        if ((lives === 0 || time === 0) && !gameEnded && gameStarted) {
+            endGame();
+        }
+        // 모든 오염물질 처치 시 성공
+        else if (currentIndex >= pollutantQueue.length && pollutantQueue.length > 0 && !gameEnded && gameStarted) {
             endGame();
         }
     }, [lives, time, currentIndex, pollutantQueue.length, gameEnded, endGame, gameStarted]);
@@ -968,141 +1154,41 @@ const InGameScreen: React.FC = () => {
         <Container>
             <GameBackground backgroundImage={getStageBackground(stageId || '1')} />
             <GameUI>
-                <SettingsButton
-                    onClick={() => {
-                        // TODO: 설정 모달 구현
-                        console.log('설정 버튼 클릭');
-                    }}
-                >
-                    <img
-                        src='/src/assets/icons/settings.svg'
-                        alt='설정'
-                    />
-                </SettingsButton>
-                <Score>점수: {score}</Score>
-                <Timer>시간: {time}</Timer>
-                <Lives>
-                    {Array.from({ length: lives }).map((_, index) => (
-                        <span key={index}>❤️</span>
-                    ))}
-                </Lives>
-                {combo > 1 && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: '4rem',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            color: '#4CAF50',
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                            textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                            background: 'rgba(0, 0, 0, 0.3)',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '20px',
-                        }}
-                    >
-                        {combo}콤보!
-                    </div>
-                )}
+                <TopGameUI>
+                    <LeftSection>
+                        <Timer>
+                            <span>⏰</span>
+                            {time}초
+                        </Timer>
+                    </LeftSection>
 
-                {/* 처치 알림 */}
-                {killNotification.show && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: '6rem',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            color: '#FFD700',
-                            fontSize: '1.2rem',
-                            fontWeight: 'bold',
-                            textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
-                            background: 'rgba(0, 0, 0, 0.8)',
-                            padding: '0.8rem 1.5rem',
-                            borderRadius: '15px',
-                            border: '2px solid #FFD700',
-                            animation: 'fadeInOut 3s ease-in-out',
-                            zIndex: 1000,
-                        }}
-                    >
-                        ✨ {killNotification.pollutionName} 처치! +{killNotification.score}점
-                    </div>
-                )}
-
-                {/* 게임 로직 개선: 확장된 게임 정보 표시 */}
-                <div
-                    style={{
-                        position: 'absolute',
-                        bottom: '1rem',
-                        left: '1rem',
-                        color: 'white',
-                        fontSize: '0.8rem',
-                        background: 'rgba(0, 0, 0, 0.7)',
-                        padding: '0.8rem',
-                        borderRadius: '8px',
-                        minWidth: '200px',
-                    }}
-                >
-                    <div>
-                        🎯 오염물질: {currentIndex + 1}/{pollutantQueue.length || 0}
-                    </div>
-                    <div>📊 수집된 종류: {collectionTracker.destroyedPollutants.size}개</div>
-                    <div>
-                        🏆 총 처치:{' '}
-                        {Array.from(collectionTracker.destroyedPollutants.values()).reduce((a, b) => a + b, 0)}개
-                    </div>
-
-                    {/* 현재 오염물질 정보 표시 */}
-                    {pollutant && (pollutant as any)?.pollutionData && (
-                        <div style={{ color: '#4CAF50', fontSize: '0.9rem', marginTop: '0.3rem' }}>
-                            🎯 현재: {(pollutant as any).pollutionData.polName}
-                        </div>
-                    )}
-                    {itemEffects.filter((e) => e.isActive).length > 0 && (
-                        <div>⚡ 활성 효과: {itemEffects.filter((e) => e.isActive).length}개</div>
-                    )}
-                    {stageConfig && (
-                        <div>
-                            ⚙️ 설정: {stageConfig.timeLimit}초/{stageConfig.initialLives}생명
-                        </div>
-                    )}
-                </div>
-
-                {/* 아이템 효과 표시 */}
-                {itemEffects.filter((e) => e.isActive).length > 0 && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            bottom: '1rem',
-                            right: '1rem',
-                            color: 'white',
-                            fontSize: '0.8rem',
-                            background: 'rgba(76, 175, 80, 0.8)',
-                            padding: '0.8rem',
-                            borderRadius: '8px',
-                            minWidth: '150px',
-                        }}
-                    >
-                        <div style={{ fontWeight: 'bold', marginBottom: '0.3rem' }}>⚡ 활성 효과</div>
-                        {itemEffects
-                            .filter((e) => e.isActive)
-                            .map((effect, index) => (
-                                <div
-                                    key={index}
-                                    style={{ fontSize: '0.7rem' }}
-                                >
-                                    {effect.effectType === 'SCORE_BOOST' &&
-                                        `🎯 점수 ${(effect.effectValue * 100).toFixed(0)}%`}
-                                    {effect.effectType === 'TIME_EXTEND' && `⏰ 시간 +${effect.effectValue}초`}
-                                    {effect.effectType === 'LIFE_BOOST' && `❤️ 생명 +${effect.effectValue}개`}
-                                    {effect.effectType === 'COMBO_BOOST' &&
-                                        `🔥 콤보 ${(effect.effectValue * 100).toFixed(0)}%`}
-                                    {effect.effectType === 'SLOW_TIME' && `🐌 슬로우 ${effect.effectValue}초`}
-                                </div>
+                    <CenterSection>
+                        <Lives>
+                            {Array.from({ length: lives }).map((_, index) => (
+                                <span key={index}>❤️</span>
                             ))}
-                    </div>
-                )}
+                        </Lives>
+                    </CenterSection>
+
+                    <RightSection>
+                        <Score>
+                            <span>🏆</span>
+                            {score.toLocaleString()}
+                        </Score>
+                    </RightSection>
+                </TopGameUI>
+
+                {/* 중앙 알림 영역 */}
+                <CenterNotificationArea>
+                    {combo > 1 && <ComboNotification>🔥 {combo}콤보!</ComboNotification>}
+
+                    {killNotification.show && (
+                        <KillNotification>
+                            ✨ {killNotification.pollutionName} 처치!
+                            <ScoreText>+{killNotification.score}점</ScoreText>
+                        </KillNotification>
+                    )}
+                </CenterNotificationArea>
             </GameUI>
             {showPreparation && (
                 <GamePreparationModal
