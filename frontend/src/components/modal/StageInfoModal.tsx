@@ -3,16 +3,30 @@ import styled, { keyframes } from 'styled-components';
 import { ProcessedStageInfo } from '@/types/map';
 import { PollutionData } from '@/api/stages';
 import { UserSkinData } from '@/api/skins';
-import { GameItem, getUserItems, useItem, getEquippedItems } from '@/api/game';
+import { GameItem, getUserItems, useItem, getEquippedItems, getStageConfig, getGameItemEffects } from '@/api/game';
 import { UserItem } from '@/types/inventory';
 import { pollutionNameToFile } from '@/utils/assetMapping';
 import { useAuth } from '@/hooks/useAuth';
+
+/**
+ * 스테이지 정보 모달 컴포넌트
+ *
+ * 게임 로직 개선 관련 기능:
+ * 1. 오염물질 정보 표시 - DB 데이터 기반으로 실제 오염물질 정보 표시
+ * 2. 장착된 아이템 표시 - 게임 내 효과가 적용될 아이템들 확인
+ * 3. 스킨 정보 표시 - 게임 플레이에 영향을 주는 스킨 정보
+ *
+ * TODO: 게임 로직 개선 후 추가 기능
+ * - 스테이지별 게임 설정 정보 표시 (제한시간, 생명력 등)
+ * - 아이템 효과 미리보기
+ * - 예상 점수 배율 표시
+ */
 
 interface StageInfoModalProps {
     isOpen: boolean;
     onClose: () => void;
     stageInfo: ProcessedStageInfo;
-    pollutions: PollutionData[];
+    pollutions: PollutionData[]; // DB에서 가져온 실제 오염물질 데이터 배열
     equippedSkins: {
         slice: UserSkinData | null;
         tap: UserSkinData | null;
@@ -340,17 +354,21 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
     isOpen,
     onClose,
     stageInfo,
-    pollutions,
+    pollutions, // 스테이지별 오염물질 리스트 (현재 배열로 전달됨)
     equippedSkins,
     onChangeSkin,
     onStartGame,
 }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [userItems, setUserItems] = useState<UserItem[]>([]);
-    const [equippedItems, setEquippedItems] = useState<UserItem[]>([]);
+    const [equippedItems, setEquippedItems] = useState<UserItem[]>([]); // 게임 내 효과가 적용될 아이템들
     const { user } = useAuth();
 
     useEffect(() => {
+        /**
+         * 사용자 아이템 조회
+         * TODO: 게임 로직 개선 후 아이템 효과 정보도 함께 표시
+         */
         const fetchUserItems = async () => {
             if (!user?.email) return;
             try {
@@ -363,6 +381,10 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
             }
         };
 
+        /**
+         * 장착된 아이템 조회
+         * 게임 로직 개선: 이 아이템들이 게임 내에서 실제 효과를 발휘함
+         */
         const fetchEquippedItems = async () => {
             if (!user?.email) return;
             try {
@@ -424,6 +446,12 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                         <p style={{ color: '#fff', margin: 0, fontSize: '0.9rem' }}>{stageInfo.stageMission.mission}</p>
                     </Section>
 
+                    {/* 
+                        오염물질 정보 섹션
+                        게임 로직 개선: DB 데이터 기반으로 실제 오염물질 정보 표시
+                        - 현재: 스테이지별 오염물질 배열 표시
+                        - 개선 후: 각 오염물질의 속성 정보도 표시 (점수, 속도, 크기 등)
+                    */}
                     <Section>
                         <SectionTitle>오염물 정보</SectionTitle>
                         <PollutionList>
@@ -437,11 +465,23 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                                         }}
                                     />
                                     <PollutionName>{pollution.polName}</PollutionName>
+                                    {/* TODO: 게임 로직 개선 후 추가 정보 표시
+                                    <PollutionStats>
+                                        점수: {pollution.baseScore}
+                                        속도: {pollution.moveSpeed}
+                                    </PollutionStats>
+                                    */}
                                 </PollutionItem>
                             ))}
                         </PollutionList>
                     </Section>
 
+                    {/* 
+                        장착된 아이템 섹션
+                        게임 로직 개선: 이 아이템들이 게임 내에서 실제 효과를 발휘
+                        - 현재: 아이템 이름과 슬롯 번호만 표시
+                        - 개선 후: 아이템 효과 정보도 표시 (점수 증가, 시간 연장 등)
+                    */}
                     <ItemSection>
                         <SectionTitle>장착된 아이템</SectionTitle>
                         <ItemList>
@@ -453,6 +493,11 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                                     />
                                     <ItemName>{equippedItem.item.itemName}</ItemName>
                                     <ItemDesc>슬롯 {equippedItem.equippedSlot}</ItemDesc>
+                                    {/* TODO: 게임 로직 개선 후 아이템 효과 표시
+                                    <ItemEffect>
+                                        효과: {getItemEffectDescription(equippedItem)}
+                                    </ItemEffect>
+                                    */}
                                 </ItemCard>
                             ))}
                             {equippedItems.length === 0 && (
@@ -463,6 +508,10 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                         </ItemList>
                     </ItemSection>
 
+                    {/* 
+                        장착된 스킨 섹션
+                        게임 로직 개선: 스킨도 게임 플레이에 영향을 줄 수 있음
+                    */}
                     <Section>
                         <SectionTitle>장착된 스킨</SectionTitle>
                         <SkinSection>
@@ -500,7 +549,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                     <Button
                         $primary
                         onClick={() => {
-                            onStartGame();
+                            onStartGame(); // 게임 시작 시 아이템 효과와 오염물질 정보가 InGameScreen으로 전달됨
                         }}
                     >
                         게임 시작

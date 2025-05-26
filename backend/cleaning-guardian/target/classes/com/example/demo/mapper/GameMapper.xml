@@ -15,23 +15,72 @@
 	)
     </insert>
     
-    <!-- 게임 시작시 해당 stage의 오염물 가져오기 -->
+    <!-- 게임 시작시 해당 stage의 오염물 가져오기 (게임 속성 포함) -->
     <select id="getStagePollutions" parameterType="long" resultType="com.example.demo.vo.PollutionsVO">
-    SELECT "pollutions"."pol_idx", "pollutions"."game_idx", "pollutions"."pol_name",
-     		DBMS_LOB.SUBSTR("pollutions"."pol_desc", 4000, 1) AS "pol_desc",
-     		"pollutions"."pol_img1", "pollutions"."pol_img2", "pollutions"."pol_img3", "pollutions"."type", "pollutions"."created_at"
+    SELECT "pollutions"."pol_idx" as polIdx, 
+           "pollutions"."game_idx" as gameIdx, 
+           "pollutions"."pol_name" as polName,
+           DBMS_LOB.SUBSTR("pollutions"."pol_desc", 4000, 1) AS polDesc,
+           "pollutions"."pol_img1" as polImg1, 
+           "pollutions"."pol_img2" as polImg2, 
+           "pollutions"."pol_img3" as polImg3, 
+           "pollutions"."type" as type, 
+           "pollutions"."created_at" as createdAt,
+           NVL("pollutions"."base_score", 100) as baseScore,
+           NVL("pollutions"."move_speed", 1.0) as moveSpeed,
+           NVL("pollutions"."size_multiplier", 1.0) as sizeMultiplier,
+           NVL("pollutions"."spawn_weight", 1) as spawnWeight
     FROM "pollutions"
     JOIN "stage_pollutions" ON "stage_pollutions"."pol_idx" = "pollutions"."pol_idx"
     WHERE "stage_pollutions"."stage_idx" = #{stageIdx}
     </select>
     
-    <!-- 전체 스테이지 오염물 조회 -->
+    <!-- 전체 스테이지 오염물 조회 (게임 속성 포함) -->
     <select id="getAllPollutions" resultType="com.example.demo.vo.PollutionsVO">
-    SELECT "pol_idx", "game_idx", "pol_name", 
-    DBMS_LOB.SUBSTR("pollutions"."pol_desc", 4000, 1) AS "pol_desc", 
-    "pol_img1", "pol_img2", "pol_img3", "type", "created_at"
+    SELECT "pol_idx" as polIdx, 
+           "game_idx" as gameIdx, 
+           "pol_name" as polName, 
+           DBMS_LOB.SUBSTR("pollutions"."pol_desc", 4000, 1) AS polDesc, 
+           "pol_img1" as polImg1, 
+           "pol_img2" as polImg2, 
+           "pol_img3" as polImg3, 
+           "type" as type, 
+           "created_at" as createdAt,
+           NVL("base_score", 100) as baseScore,
+           NVL("move_speed", 1.0) as moveSpeed,
+           NVL("size_multiplier", 1.0) as sizeMultiplier,
+           NVL("spawn_weight", 1) as spawnWeight
     FROM "pollutions"
     </select>
-    
+
+    <!-- 게임 결과 저장 - 처치한 오염물질 데이터를 user_collection에 기록 -->
+    <insert id="saveCollectionData">
+        INSERT INTO "user_collection" ("email", "pol_idx", "collected_at")
+        SELECT #{email}, #{polIdx}, SYSDATE
+        FROM DUAL
+        WHERE NOT EXISTS (
+            SELECT 1 FROM "user_collection" 
+            WHERE "email" = #{email} AND "pol_idx" = #{polIdx}
+        )
+    </insert>
+
+    <!-- 게임 결과 저장 - 여러 오염물질 데이터를 한 번에 기록 -->
+    <insert id="saveMultipleCollectionData">
+        INSERT INTO "user_collection" ("email", "pol_idx", "collected_at")
+        <foreach collection="collectionList" item="item" separator="UNION ALL">
+            SELECT #{item.email}, #{item.polIdx}, SYSDATE FROM DUAL
+            WHERE NOT EXISTS (
+                SELECT 1 FROM "user_collection" 
+                WHERE "email" = #{item.email} AND "pol_idx" = #{item.polIdx}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 사용자가 해당 오염물질을 이미 수집했는지 확인 -->
+    <select id="hasCollectedPollution" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM "user_collection"
+        WHERE "email" = #{email} AND "pol_idx" = #{polIdx}
+    </select>
     
 </mapper>

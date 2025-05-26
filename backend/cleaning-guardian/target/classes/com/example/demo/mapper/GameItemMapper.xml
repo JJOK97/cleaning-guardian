@@ -19,10 +19,14 @@
 			<result property="itemPrice" column="item_itemPrice"/>
 			<result property="priceType" column="item_priceType"/>
 			<result property="createdAt" column="item_createdAt"/>
+			<!-- 게임 로직 개선: 아이템 효과 정보 추가 -->
+			<result property="effectType" column="item_effectType"/>
+			<result property="effectValue" column="item_effectValue"/>
+			<result property="effectDuration" column="item_effectDuration"/>
 		</association>
 	</resultMap>
 	
-	<!-- 모든 게임 아이템 목록 조회 -->
+	<!-- 모든 게임 아이템 목록 조회 (효과 정보 포함) -->
 	<select id="getAllItems" resultType="com.example.demo.vo.GameItemVO">
 		SELECT 
 			"item_idx" as itemIdx,
@@ -32,12 +36,15 @@
 			"item_img" as itemImg,
 			"item_price" as itemPrice,
 			TRIM("price_type") as priceType,
-			"created_at" as createdAt
+			"created_at" as createdAt,
+			"effect_type" as effectType,
+			"effect_value" as effectValue,
+			"effect_duration" as effectDuration
 		FROM "game_items"
 		ORDER BY "item_idx"
 	</select>
 	
-	<!-- 특정 아이템 상세 정보 조회 -->
+	<!-- 특정 아이템 상세 정보 조회 (효과 정보 포함) -->
 	<select id="getItem" parameterType="long" resultType="com.example.demo.vo.GameItemVO">
 		SELECT 
 			"item_idx" as itemIdx,
@@ -47,12 +54,15 @@
 			"item_img" as itemImg,
 			"item_price" as itemPrice,
 			TRIM("price_type") as priceType,
-			"created_at" as createdAt
+			"created_at" as createdAt,
+			"effect_type" as effectType,
+			"effect_value" as effectValue,
+			"effect_duration" as effectDuration
 		FROM "game_items"
 		WHERE "item_idx" = #{itemIdx}
 	</select>
 	
-	<!-- 사용자가 보유한 아이템 목록 조회 -->
+	<!-- 사용자가 보유한 아이템 목록 조회 (효과 정보 포함) -->
 	<select id="getUserItems" parameterType="string" resultMap="userItemResultMap">
 		SELECT 
 			ui."user_item_idx" as userItemIdx,
@@ -69,7 +79,10 @@
 			gi."item_img" as item_itemImg,
 			gi."item_price" as item_itemPrice,
 			TRIM(gi."price_type") as item_priceType,
-			gi."created_at" as item_createdAt
+			gi."created_at" as item_createdAt,
+			gi."effect_type" as item_effectType,
+			gi."effect_value" as item_effectValue,
+			gi."effect_duration" as item_effectDuration
 		FROM "user_items" ui
 		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
 		WHERE ui."email" = #{email}
@@ -215,7 +228,7 @@
 		AND "item_idx" = #{itemIdx}
 	</update>
 
-	<!-- 장착된 아이템 목록 조회 -->
+	<!-- 장착된 아이템 목록 조회 (효과 정보 포함) -->
 	<select id="getEquippedItems" resultMap="userItemResultMap">
 		SELECT 
 			ui."user_item_idx" as userItemIdx,
@@ -234,7 +247,10 @@
 			gi."item_img" as item_itemImg,
 			gi."item_price" as item_itemPrice,
 			TRIM(gi."price_type") as item_priceType,
-			gi."created_at" as item_createdAt
+			gi."created_at" as item_createdAt,
+			gi."effect_type" as item_effectType,
+			gi."effect_value" as item_effectValue,
+			gi."effect_duration" as item_effectDuration
 		FROM "user_items" ui
 		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
 		WHERE ui."email" = #{email}
@@ -258,5 +274,46 @@
 			1
 		)
 	</insert>
+
+	<!-- 특정 효과 타입의 장착된 아이템 조회 -->
+	<select id="getEquippedItemsByEffect" resultMap="userItemResultMap">
+		SELECT 
+			ui."user_item_idx" as userItemIdx,
+			ui."email" as email,
+			ui."item_idx" as itemIdx,
+			ui."item_type" as itemType,
+			ui."is_used" as isUsed,
+			ui."created_at" as createdAt,
+			ui."count" as count,
+			ui."equipped_slot" as equippedSlot,
+			ui."is_equipped" as isEquipped,
+			gi."item_idx" as item_itemIdx,
+			gi."game_idx" as item_gameIdx,
+			gi."item_name" as item_itemName,
+			gi."item_desc" as item_itemDesc,
+			gi."item_img" as item_itemImg,
+			gi."item_price" as item_itemPrice,
+			TRIM(gi."price_type") as item_priceType,
+			gi."created_at" as item_createdAt,
+			gi."effect_type" as item_effectType,
+			gi."effect_value" as item_effectValue,
+			gi."effect_duration" as item_effectDuration
+		FROM "user_items" ui
+		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
+		WHERE ui."email" = #{email}
+		AND ui."is_equipped" = 'Y'
+		AND gi."effect_type" = #{effectType}
+		ORDER BY ui."equipped_slot"
+	</select>
+
+	<!-- 사용자의 모든 아이템 효과 합계 조회 -->
+	<select id="getTotalItemEffect" resultType="double">
+		SELECT NVL(SUM(gi."effect_value"), 0)
+		FROM "user_items" ui
+		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
+		WHERE ui."email" = #{email}
+		AND ui."is_equipped" = 'Y'
+		AND gi."effect_type" = #{effectType}
+	</select>
 
 </mapper> 

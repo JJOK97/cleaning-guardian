@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,14 @@ import com.example.demo.vo.UserVO;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 게임 아이템 관련 Service 구현체
+ * 
+ * 게임 로직 개선을 위해 확장된 기능:
+ * - 아이템 효과 정보 포함 조회
+ * - 장착된 아이템의 효과 계산
+ * - 게임 내 아이템 효과 적용
+ */
 @Slf4j
 @Service
 public class GameItemServiceImpl implements GameItemService {
@@ -384,6 +394,125 @@ public class GameItemServiceImpl implements GameItemService {
 				.success(false)
 				.message("아이템 지급 중 오류가 발생했습니다: " + e.getMessage())
 				.build();
+		}
+	}
+
+	// ========== 게임 로직 개선: 아이템 효과 관련 메서드들 ==========
+
+	@Override
+	public List<UserItemVO> getEquippedItemsByEffect(String email, String effectType) {
+		try {
+			return gameItemMapper.getEquippedItemsByEffect(email, effectType);
+		} catch (Exception e) {
+			log.error("장착된 아이템 효과 조회 실패: {}", e.getMessage());
+			return List.of();
+		}
+	}
+
+	@Override
+	public Double getTotalItemEffect(String email, String effectType) {
+		try {
+			Double totalEffect = gameItemMapper.getTotalItemEffect(email, effectType);
+			return totalEffect != null ? totalEffect : 0.0;
+		} catch (Exception e) {
+			log.error("아이템 효과 합계 조회 실패: {}", e.getMessage());
+			return 0.0;
+		}
+	}
+
+	@Override
+	public Map<String, Double> getGameItemEffects(String email) {
+		Map<String, Double> effects = new HashMap<>();
+		
+		try {
+			// 모든 효과 타입에 대해 합계 조회
+			effects.put("SCORE_BOOST", getTotalItemEffect(email, "SCORE_BOOST"));
+			effects.put("TIME_EXTEND", getTotalItemEffect(email, "TIME_EXTEND"));
+			effects.put("LIFE_BOOST", getTotalItemEffect(email, "LIFE_BOOST"));
+			effects.put("COMBO_BOOST", getTotalItemEffect(email, "COMBO_BOOST"));
+			effects.put("SLOW_TIME", getTotalItemEffect(email, "SLOW_TIME"));
+			
+			return effects;
+		} catch (Exception e) {
+			log.error("게임 아이템 효과 조회 실패: {}", e.getMessage());
+			return effects;
+		}
+	}
+
+	@Override
+	public Long calculateBoostedScore(String email, Long baseScore) {
+		try {
+			Double scoreBoost = getTotalItemEffect(email, "SCORE_BOOST");
+			
+			// 점수 부스트는 배수로 적용 (1.0 = 100%, 1.5 = 150%)
+			if (scoreBoost > 0) {
+				return Math.round(baseScore * (1.0 + scoreBoost));
+			}
+			
+			return baseScore;
+		} catch (Exception e) {
+			log.error("점수 부스트 계산 실패: {}", e.getMessage());
+			return baseScore;
+		}
+	}
+
+	@Override
+	public Integer calculateExtendedTime(String email, Integer baseTime) {
+		try {
+			Double timeExtend = getTotalItemEffect(email, "TIME_EXTEND");
+			
+			// 시간 연장은 초 단위로 추가
+			if (timeExtend > 0) {
+				return baseTime + timeExtend.intValue();
+			}
+			
+			return baseTime;
+		} catch (Exception e) {
+			log.error("시간 연장 계산 실패: {}", e.getMessage());
+			return baseTime;
+		}
+	}
+
+	@Override
+	public Integer calculateBoostedLives(String email, Integer baseLives) {
+		try {
+			Double lifeBoost = getTotalItemEffect(email, "LIFE_BOOST");
+			
+			// 생명력 부스트는 개수로 추가
+			if (lifeBoost > 0) {
+				return baseLives + lifeBoost.intValue();
+			}
+			
+			return baseLives;
+		} catch (Exception e) {
+			log.error("생명력 부스트 계산 실패: {}", e.getMessage());
+			return baseLives;
+		}
+	}
+
+	@Override
+	public Double getComboBoostMultiplier(String email) {
+		try {
+			Double comboBoost = getTotalItemEffect(email, "COMBO_BOOST");
+			
+			// 콤보 부스트는 배수로 적용 (기본 1.0에서 추가)
+			return 1.0 + (comboBoost != null ? comboBoost : 0.0);
+		} catch (Exception e) {
+			log.error("콤보 부스트 배수 조회 실패: {}", e.getMessage());
+			return 1.0;
+		}
+	}
+
+	@Override
+	public Integer getSlowTimeEffect(String email) {
+		try {
+			Double slowTime = getTotalItemEffect(email, "SLOW_TIME");
+			
+			// 슬로우 타임은 지속시간(초)으로 적용
+			return slowTime != null ? slowTime.intValue() : 0;
+		} catch (Exception e) {
+			log.error("슬로우 타임 효과 조회 실패: {}", e.getMessage());
+			return 0;
 		}
 	}
 }

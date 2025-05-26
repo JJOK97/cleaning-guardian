@@ -1,7 +1,46 @@
+/* 
+ * 오염물질 그리드 컴포넌트 스타일
+ * 
+ * 게임 로직 개선 관련 스타일:
+ * 1. 반응형 그리드 레이아웃 - 다양한 화면 크기에서 오염물질 카드 최적 배치
+ * 2. 수집 상태별 정렬 지원
+ * 
+ * TODO: 게임 로직 개선 후 추가 기능
+ * - 가상 스크롤링 (대량 데이터 처리)
+ * - 애니메이션 효과 (새로 수집된 아이템 강조)
+ * - 필터링 상태에 따른 레이아웃 조정
+ */
+
 .pollution-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); /* 최소 96px, 반응형 컬럼 */
+    gap: 16px; /* 카드 간 간격 */
     padding: 16px;
     width: 100%;
 }
+
+/* TODO: 게임 로직 개선 후 추가 스타일
+.pollution-grid.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.pollution-grid.filtered {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.pollution-grid.compact {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+}
+
+.pollution-grid.detailed {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 20px;
+}
+*/

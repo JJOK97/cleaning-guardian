@@ -3,10 +3,18 @@ package com.example.demo.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.example.demo.vo.GameItemVO;
 import com.example.demo.vo.UserItemVO;
 
+/**
+ * 게임 아이템 관련 Mapper
+ * 
+ * 게임 로직 개선을 위해 확장된 기능:
+ * - 아이템 효과 정보 포함 조회 (effectType, effectValue, effectDuration)
+ * - 장착된 아이템의 효과 정보 제공
+ */
 @Mapper
 public interface GameItemMapper {
 	
@@ -108,4 +116,20 @@ public interface GameItemMapper {
 	 * @return 처리 결과
 	 */
 	int giveItem(String email, Long itemIdx);
+
+	/**
+	 * 특정 효과 타입의 장착된 아이템 조회
+	 * @param email 사용자 이메일
+	 * @param effectType 효과 타입 (SCORE_BOOST, TIME_EXTEND 등)
+	 * @return 해당 효과를 가진 장착된 아이템 목록
+	 */
+	List<UserItemVO> getEquippedItemsByEffect(@Param("email") String email, @Param("effectType") String effectType);
+
+	/**
+	 * 사용자의 모든 아이템 효과 합계 조회
+	 * @param email 사용자 이메일
+	 * @param effectType 효과 타입
+	 * @return 효과 수치 합계
+	 */
+	Double getTotalItemEffect(@Param("email") String email, @Param("effectType") String effectType);
 }

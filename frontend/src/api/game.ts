@@ -277,3 +277,74 @@ export const purchaseItem = async (email: string, itemIdx: number): Promise<Game
         throw error;
     }
 };
+
+// ===== 게임 로직 개선: 새로운 API 함수들 =====
+
+/**
+ * 스테이지별 게임 설정 조회
+ */
+export const getStageConfig = async (stageIdx: number) => {
+    try {
+        const response = await api.get(`/stages/${stageIdx}/config`);
+        return response.data;
+    } catch (error) {
+        console.error('스테이지 설정 조회 실패:', error);
+        throw error;
+    }
+};
+
+/**
+ * 게임 시작 시 아이템 효과 정보 조회
+ */
+export const getGameItemEffects = async (email: string) => {
+    try {
+        const response = await api.get('/items/effects/game-start', {
+            headers: { email },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('아이템 효과 조회 실패:', error);
+        throw error;
+    }
+};
+
+/**
+ * 게임 결과 저장 (처치한 오염물질 데이터)
+ */
+export const saveGameResult = async (email: string, gameResult: any) => {
+    try {
+        const response = await api.post('/game-results', gameResult, {
+            params: { email },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('게임 결과 저장 실패:', error);
+        throw error;
+    }
+};
+
+/**
+ * 사용자 수집 통계 조회
+ */
+export const getUserCollectionStats = async (email: string) => {
+    try {
+        const response = await api.get(`/users/${email}/collection-stats`);
+        return response.data;
+    } catch (error) {
+        console.error('수집 통계 조회 실패:', error);
+        throw error;
+    }
+};
+
+/**
+ * 게임 완료 후 통합 처리
+ */
+export const processGameCompletion = async (email: string, defeatedPollutants: any[]) => {
+    try {
+        const response = await api.post(`/users/${email}/game-completion`, defeatedPollutants);
+        return response.data;
+    } catch (error) {
+        console.error('게임 완료 처리 실패:', error);
+        throw error;
+    }
+};

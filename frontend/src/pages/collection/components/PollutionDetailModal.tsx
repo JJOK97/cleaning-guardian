@@ -2,6 +2,20 @@ import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { Pollution } from '@/types/collection';
 
+/**
+ * 오염물질 상세 정보 모달 컴포넌트
+ *
+ * 게임 로직 개선 관련 기능:
+ * 1. 상세 오염물질 정보 표시 - DB 기반 실제 오염물질 데이터
+ * 2. 수집 통계 표시 - 게임에서의 처치 횟수 등
+ *
+ * TODO: 게임 로직 개선 후 추가 기능
+ * - 게임 내 속성 정보 표시 (점수, 속도, 크기 등)
+ * - 처치 히스토리 표시
+ * - 관련 스테이지 정보 표시
+ * - 획득 가능한 보상 정보 표시
+ */
+
 const fadeIn = keyframes`
     from {
         opacity: 0;
@@ -197,7 +211,7 @@ const CloseButton = styled.button`
 `;
 
 interface PollutionDetailModalProps {
-    pollution: Pollution;
+    pollution: Pollution; // DB pollutions 테이블 기반 오염물질 정보
     onClose: () => void;
 }
 
@@ -221,6 +235,10 @@ const PollutionDetailModal: React.FC<PollutionDetailModalProps> = ({ pollution, 
                 onClick={(e) => e.stopPropagation()}
                 $isClosing={isClosing}
             >
+                {/* 
+                    오염물질 이미지 섹션
+                    게임 로직 개선: DB의 polImg1을 사용하여 실제 오염물질 이미지 표시
+                */}
                 <ImageContainer>
                     <Image
                         src={`/assets/img/pollution/${pollution.polImg1}`}
@@ -229,16 +247,59 @@ const PollutionDetailModal: React.FC<PollutionDetailModalProps> = ({ pollution, 
                 </ImageContainer>
 
                 <ContentSection>
+                    {/* 
+                        오염물질 기본 정보
+                        게임 로직 개선: DB 기반 실제 오염물질 이름과 설명
+                    */}
                     <Title>{pollution.polName}</Title>
                     <DetailBox>
                         <DetailSection>
                             <DetailTitle>설명</DetailTitle>
                             <DetailText>{pollution.polDesc}</DetailText>
                         </DetailSection>
+
+                        {/* 
+                            수집 통계 섹션
+                            게임 로직 개선: 게임에서의 실제 처치 횟수 표시
+                        */}
                         <DetailSection>
                             <DetailTitle>수집 횟수</DetailTitle>
                             <DetailText>{pollution.collectionCount}회</DetailText>
+                            {/* TODO: 게임 로직 개선 후 추가 통계 정보
+                            <DetailText>
+                                총 획득 점수: {pollution.totalScore || 0}점
+                                평균 점수: {pollution.averageScore || 0}점
+                                최고 콤보: {pollution.maxCombo || 0}
+                            </DetailText>
+                            */}
                         </DetailSection>
+
+                        {/* TODO: 게임 로직 개선 후 추가 섹션들
+                        <DetailSection>
+                            <DetailTitle>게임 속성</DetailTitle>
+                            <DetailText>
+                                기본 점수: {pollution.baseScore}점
+                                이동 속도: {pollution.moveSpeed}
+                                크기 배수: {pollution.sizeMultiplier}x
+                                출현 확률: {pollution.spawnWeight}%
+                            </DetailText>
+                        </DetailSection>
+
+                        <DetailSection>
+                            <DetailTitle>출현 스테이지</DetailTitle>
+                            <DetailText>
+                                {pollution.stages?.map(stage => stage.stageName).join(', ')}
+                            </DetailText>
+                        </DetailSection>
+
+                        <DetailSection>
+                            <DetailTitle>처치 히스토리</DetailTitle>
+                            <DetailText>
+                                최근 처치: {pollution.lastDefeatedAt}
+                                첫 처치: {pollution.firstDefeatedAt}
+                            </DetailText>
+                        </DetailSection>
+                        */}
                     </DetailBox>
                 </ContentSection>
                 <CloseButton onClick={handleClose}>닫기</CloseButton>
