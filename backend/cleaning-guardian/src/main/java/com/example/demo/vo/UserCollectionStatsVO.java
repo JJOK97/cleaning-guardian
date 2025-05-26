@@ -79,4 +79,19 @@ public class UserCollectionStatsVO {
      */
     private LocalDateTime updatedAt;
     
+    /**
+     * 오염물질 이름 (조인된 정보)
+     */
+    private String pollutionName;
+    
+    /**
+     * 오염물질 이미지 (조인된 정보)
+     */
+    private String pollutionImage;
+    
+    /**
+     * 오염물질 타입 (조인된 정보)
+     */
+    private String pollutionType;
+    
 } 

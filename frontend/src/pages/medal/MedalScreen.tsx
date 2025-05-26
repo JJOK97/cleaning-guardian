@@ -13,18 +13,15 @@ interface UserCollectionStats {
     statsIdx: number;
     email: string;
     polIdx: number;
-    defeatedCount: number;
+    totalDefeated: number;
     totalScore: number;
     maxCombo: number;
     maxScore: number;
     createdAt: string;
     updatedAt: string;
-    pollution?: {
-        polIdx: number;
-        polName: string;
-        polImg1: string;
-        type: string;
-    };
+    pollutionName?: string;
+    pollutionImage?: string;
+    pollutionType?: string;
 }
 
 /**
@@ -329,7 +326,10 @@ const MedalScreen: React.FC = () => {
     /**
      * 숫자를 천 단위로 포맷
      */
-    const formatNumber = (num: number): string => {
+    const formatNumber = (num: number | undefined | null): string => {
+        if (num === undefined || num === null || isNaN(num)) {
+            return '0';
+        }
         return num.toLocaleString();
     };
 
@@ -434,20 +434,18 @@ const MedalScreen: React.FC = () => {
                                 {collectionStats.map((stat) => (
                                     <CollectionItem key={stat.statsIdx}>
                                         <PollutionImage
-                                            src={`/assets/img/pollution/${stat.pollution?.polImg1 || 'default.png'}`}
-                                            alt={stat.pollution?.polName || '오염물질'}
+                                            src={`/assets/img/pollution/${stat.pollutionImage || 'default.png'}`}
+                                            alt={stat.pollutionName || '오염물질'}
                                             onError={(e) => {
                                                 e.currentTarget.src = '/assets/img/pollution/pet.png';
                                             }}
                                         />
-                                        <PollutionName>
-                                            {stat.pollution?.polName || `오염물질 ${stat.polIdx}`}
-                                        </PollutionName>
+                                        <PollutionName>{stat.pollutionName || `오염물질 ${stat.polIdx}`}</PollutionName>
                                         <CollectionStats>
                                             <CollectionStat>
                                                 <CollectionStatLabel>처치 횟수</CollectionStatLabel>
                                                 <CollectionStatValue>
-                                                    {formatNumber(stat.defeatedCount)}개
+                                                    {formatNumber(stat.totalDefeated)}개
                                                 </CollectionStatValue>
                                             </CollectionStat>
                                             <CollectionStat>

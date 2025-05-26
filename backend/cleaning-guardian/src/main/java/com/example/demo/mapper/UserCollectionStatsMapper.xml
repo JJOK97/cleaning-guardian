@@ -35,7 +35,10 @@
             "first_defeated_at" as firstDefeatedAt,
             "last_defeated_at" as lastDefeatedAt,
             "created_at" as createdAt,
-            "updated_at" as updatedAt
+            "updated_at" as updatedAt,
+            "pollution_name" as pollutionName,
+            "pollution_image" as pollutionImage,
+            "pollution_type" as pollutionType
         FROM "user_collection_stats"
         WHERE "email" = #{email}
         ORDER BY "total_defeated" DESC, "total_score" DESC
@@ -111,21 +114,21 @@
 
     <!-- 사용자의 총 처치 횟수 조회 -->
     <select id="getUserTotalDefeated" resultType="int">
-        SELECT NVL(SUM("total_defeated"), 0)
+        SELECT NVL(SUM("total_defeated"), 0) as totalDefeated
         FROM "user_collection_stats"
         WHERE "email" = #{email}
     </select>
 
     <!-- 사용자의 총 획득 점수 조회 -->
     <select id="getUserTotalScore" resultType="long">
-        SELECT NVL(SUM("total_score"), 0)
+        SELECT NVL(SUM("total_score"), 0) as totalScore
         FROM "user_collection_stats"
         WHERE "email" = #{email}
     </select>
 
     <!-- 사용자의 최고 콤보 조회 -->
     <select id="getUserMaxCombo" resultType="int">
-        SELECT NVL(MAX("max_combo"), 0)
+        SELECT NVL(MAX("max_combo"), 0) as maxCombo
         FROM "user_collection_stats"
         WHERE "email" = #{email}
     </select>

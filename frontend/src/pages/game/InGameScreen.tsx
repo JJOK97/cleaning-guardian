@@ -230,6 +230,7 @@ const InGameScreen: React.FC = () => {
     });
     const [stageConfig, setStageConfig] = useState<StageGameConfig | null>(null);
     const [enhancedPollutantQueue, setEnhancedPollutantQueue] = useState<EnhancedPollutantBody[]>([]);
+    const [gameStarted, setGameStarted] = useState(false); // 게임 실제 시작 여부
 
     // 처치 알림 상태
     const [killNotification, setKillNotification] = useState<{
@@ -768,6 +769,13 @@ const InGameScreen: React.FC = () => {
         }
     }, [user, authLoading, stageId, mapId, navigate]);
 
+    // 컴포넌트 마운트 시 게임 데이터 미리 로딩
+    useEffect(() => {
+        if (user?.email && stageId && !gameData.stageIdx) {
+            initializeGame();
+        }
+    }, [user?.email, stageId, gameData.stageIdx]);
+
     useEffect(() => {
         updateStageSize();
         window.addEventListener('resize', updateStageSize);
@@ -775,7 +783,7 @@ const InGameScreen: React.FC = () => {
     }, [updateStageSize]);
 
     useEffect(() => {
-        if (showPreparation) return;
+        if (showPreparation || !gameStarted) return; // gameStarted 조건 추가
 
         // ===== 게임 로직 개선: 실제 오염물질 데이터 기반 생성 =====
         // 오염물질 데이터가 로딩될 때까지 대기
@@ -825,10 +833,11 @@ const InGameScreen: React.FC = () => {
         setPollutantQueue(queue);
         setCurrentIndex(0);
         console.log('✅ 오염물질 큐 생성 완료:', queue.length);
-    }, [stageSize, showPreparation, gameData.pollutions]);
+        console.log('🎮 게임 상태:', { gameStarted, showPreparation, gameEnded });
+    }, [stageSize, showPreparation, gameStarted, gameData.pollutions]); // gameStarted 의존성 추가
 
     useEffect(() => {
-        if (showPreparation || gameEnded) return;
+        if (showPreparation || gameEnded || !gameStarted) return; // gameStarted 조건 추가
         if (!pollutantQueue.length) return;
         // 게임 종료 확인
         if (currentIndex >= pollutantQueue.length) {
@@ -915,17 +924,22 @@ const InGameScreen: React.FC = () => {
             if (animationRef.current) cancelAnimationFrame(animationRef.current);
             if (engineRef.current) Matter.Engine.clear(engineRef.current);
         };
-    }, [pollutantQueue, currentIndex, stageSize.height, showPreparation, gameEnded]);
+    }, [pollutantQueue, currentIndex, stageSize.height, showPreparation, gameEnded, gameStarted]); // gameStarted 의존성 추가
 
     useEffect(() => {
-        if ((lives === 0 || time === 0 || currentIndex >= pollutantQueue.length) && !gameEnded) {
+        if (
+            (lives === 0 || time === 0 || (currentIndex >= pollutantQueue.length && pollutantQueue.length > 0)) &&
+            !gameEnded &&
+            gameStarted
+        ) {
             endGame();
         }
-    }, [lives, time, currentIndex, pollutantQueue.length, gameEnded, endGame]);
+    }, [lives, time, currentIndex, pollutantQueue.length, gameEnded, endGame, gameStarted]);
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
-        if (!showPreparation && !gameEnded) {
+        if (!showPreparation && !gameEnded && gameStarted) {
+            // gameStarted 조건 추가
             timer = setInterval(() => {
                 setTime((prev) => {
                     if (prev <= 0) {
@@ -937,7 +951,7 @@ const InGameScreen: React.FC = () => {
             }, 1000);
         }
         return () => clearInterval(timer);
-    }, [showPreparation, gameEnded]);
+    }, [showPreparation, gameEnded, gameStarted]); // gameStarted 의존성 추가
 
     // 로딩 중이거나 사용자 정보가 없으면 로딩 화면 표시
     if (authLoading || !user) {
@@ -1094,12 +1108,11 @@ const InGameScreen: React.FC = () => {
                 <GamePreparationModal
                     isOpen={showPreparation}
                     onClose={() => setShowPreparation(false)}
-                    onStart={async () => {
+                    onStart={() => {
                         startTime.current = Date.now();
-                        // 먼저 게임 데이터 초기화
-                        await initializeGame();
-                        // 그 다음 게임 시작
+                        // 게임 시작 (데이터는 이미 로딩됨)
                         setShowPreparation(false);
+                        setGameStarted(true); // 실제 게임 시작
                     }}
                     stageInfo={{
                         name: '스테이지 시작',
@@ -1114,7 +1127,7 @@ const InGameScreen: React.FC = () => {
                 height={stageSize.height}
                 style={{ width: '100%', height: '100%', touchAction: 'none' }}
                 onMouseDown={(e) => {
-                    if (gameEnded || showPreparation) return;
+                    if (gameEnded || showPreparation || !gameStarted) return; // gameStarted 조건 추가
                     e.evt.preventDefault();
                     const stage = e.target.getStage();
                     if (!stage) return;
@@ -1124,7 +1137,7 @@ const InGameScreen: React.FC = () => {
                     setSlicePoints([point.x, point.y]);
                 }}
                 onMouseMove={(e) => {
-                    if (gameEnded || showPreparation || !isSlicing) return;
+                    if (gameEnded || showPreparation || !gameStarted || !isSlicing) return; // gameStarted 조건 추가
                     e.evt.preventDefault();
                     const stage = e.target.getStage();
                     if (!stage) return;
@@ -1158,7 +1171,7 @@ const InGameScreen: React.FC = () => {
                     }
                 }}
                 onMouseUp={(e) => {
-                    if (gameEnded || showPreparation) return;
+                    if (gameEnded || showPreparation || !gameStarted) return; // gameStarted 조건 추가
                     e.evt.preventDefault();
                     if (!isSlicing) return;
                     setIsSlicing(false);
@@ -1182,7 +1195,7 @@ const InGameScreen: React.FC = () => {
                     }, 200);
                 }}
                 onTouchStart={(e) => {
-                    if (gameEnded || showPreparation) return;
+                    if (gameEnded || showPreparation || !gameStarted) return; // gameStarted 조건 추가
                     e.evt.preventDefault();
                     const stage = e.target.getStage();
                     if (!stage) return;
@@ -1192,7 +1205,7 @@ const InGameScreen: React.FC = () => {
                     setSlicePoints([point.x, point.y]);
                 }}
                 onTouchMove={(e) => {
-                    if (gameEnded || showPreparation || !isSlicing) return;
+                    if (gameEnded || showPreparation || !gameStarted || !isSlicing) return; // gameStarted 조건 추가
                     e.evt.preventDefault();
                     const stage = e.target.getStage();
                     if (!stage) return;
@@ -1226,7 +1239,7 @@ const InGameScreen: React.FC = () => {
                     }
                 }}
                 onTouchEnd={(e) => {
-                    if (gameEnded || showPreparation) return;
+                    if (gameEnded || showPreparation || !gameStarted) return; // gameStarted 조건 추가
                     e.evt.preventDefault();
                     if (!isSlicing) return;
                     setIsSlicing(false);
