@@ -44,7 +44,7 @@ export default defineConfig({
     build: {
         outDir: 'build',
     },
-
+    publicDir: 'public',
     server: {
         proxy: {
             '/api': {
