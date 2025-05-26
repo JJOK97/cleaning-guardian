@@ -55,13 +55,25 @@
 
     <!-- 게임 결과 저장 - 처치한 오염물질 데이터를 user_collection에 기록 -->
     <insert id="saveCollectionData">
-        INSERT INTO "user_collection" ("email", "pol_idx", "collected_at")
-        SELECT #{email}, #{polIdx}, SYSDATE
-        FROM DUAL
-        WHERE NOT EXISTS (
-            SELECT 1 FROM "user_collection" 
-            WHERE "email" = #{email} AND "pol_idx" = #{polIdx}
-        )
+        MERGE INTO "user_collection" uc
+        USING (
+            SELECT #{email} as email, #{polIdx} as pol_idx, 
+                   #{defeatedCount} as defeated_count, #{scoreGained} as score_gained, 
+                   #{maxCombo} as max_combo FROM DUAL
+        ) src
+        ON (uc."email" = src.email AND uc."pol_idx" = src.pol_idx)
+        WHEN MATCHED THEN
+            UPDATE SET 
+                "defeated_count" = "defeated_count" + src.defeated_count,
+                "total_score" = "total_score" + src.score_gained,
+                "max_score" = GREATEST("max_score", src.score_gained),
+                "max_combo" = GREATEST("max_combo", src.max_combo),
+                "last_defeated_at" = SYSDATE
+        WHEN NOT MATCHED THEN
+            INSERT ("email", "pol_idx", "defeated_count", "total_score", 
+                    "max_score", "max_combo", "collected_at", "last_defeated_at")
+            VALUES (src.email, src.pol_idx, src.defeated_count, src.score_gained,
+                    src.score_gained, src.max_combo, SYSDATE, SYSDATE)
     </insert>
 
     <!-- 게임 결과 저장 - 여러 오염물질 데이터를 한 번에 기록 -->

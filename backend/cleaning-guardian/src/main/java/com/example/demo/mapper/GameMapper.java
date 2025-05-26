@@ -43,9 +43,16 @@ public interface GameMapper {
 	 * 게임 결과 저장 - 처치한 오염물질 데이터를 user_collection에 기록
 	 * @param email 사용자 이메일
 	 * @param polIdx 오염물질 인덱스
+	 * @param defeatedCount 처치 횟수
+	 * @param scoreGained 획득 점수
+	 * @param maxCombo 최고 콤보
 	 * @return 처리 결과
 	 */
-	int saveCollectionData(@Param("email") String email, @Param("polIdx") Long polIdx);
+	int saveCollectionData(@Param("email") String email, 
+	                      @Param("polIdx") Long polIdx,
+	                      @Param("defeatedCount") Integer defeatedCount,
+	                      @Param("scoreGained") Long scoreGained,
+	                      @Param("maxCombo") Integer maxCombo);
 
 	/**
 	 * 게임 결과 저장 - 여러 오염물질 데이터를 한 번에 기록

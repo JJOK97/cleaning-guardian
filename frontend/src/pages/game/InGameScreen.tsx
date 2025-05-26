@@ -258,27 +258,44 @@ const InGameScreen: React.FC = () => {
 
                 // 아이템 효과 적용된 설정 업데이트
                 if (config && user?.email) {
-                    const effects = (await getGameItemEffects(user.email)) as any;
+                    try {
+                        const effects = (await getGameItemEffects(user.email)) as any;
 
-                    // 시간 연장 효과 적용
-                    if (effects?.TIME_EXTEND) {
-                        setTime((config.timeLimit || 60) + effects.TIME_EXTEND);
-                    } else {
+                        // 시간 연장 효과 적용
+                        if (effects?.TIME_EXTEND) {
+                            setTime((config.timeLimit || 60) + effects.TIME_EXTEND);
+                        } else {
+                            setTime(config.timeLimit || 60);
+                        }
+
+                        // 생명력 부스트 효과 적용
+                        if (effects?.LIFE_BOOST) {
+                            setLives((config.initialLives || 3) + effects.LIFE_BOOST);
+                        } else {
+                            setLives(config.initialLives || 3);
+                        }
+                    } catch (effectError) {
+                        console.warn('아이템 효과 로딩 실패, 기본 설정 사용:', effectError);
                         setTime(config.timeLimit || 60);
-                    }
-
-                    // 생명력 부스트 효과 적용
-                    if (effects?.LIFE_BOOST) {
-                        setLives((config.initialLives || 3) + effects.LIFE_BOOST);
-                    } else {
                         setLives(config.initialLives || 3);
                     }
+                } else {
+                    setTime(60);
+                    setLives(3);
                 }
             } catch (error) {
-                console.error('스테이지 설정 로딩 실패:', error);
+                console.warn('스테이지 설정 로딩 실패, 기본값 사용:', error);
                 // 기본값 설정
                 setTime(60);
                 setLives(3);
+                setStageConfig({
+                    stageIdx,
+                    timeLimit: 60,
+                    initialLives: 3,
+                    pollutantSpawnRate: 2,
+                    maxPollutants: 5,
+                    difficultyMultiplier: 1,
+                });
             }
         },
         [user?.email],
@@ -607,7 +624,7 @@ const InGameScreen: React.FC = () => {
                 throw new Error('게임 종료 처리 실패');
             }
 
-            // 2. 게임 로직 개선: 수집 데이터 저장
+            // 2. 게임 로직 개선: 수집 데이터 저장 (API 없으면 스킵)
             try {
                 const defeatedPollutants: any[] = [];
                 collectionTracker.destroyedPollutants.forEach((count, polIdx) => {
@@ -626,7 +643,7 @@ const InGameScreen: React.FC = () => {
                     console.log('📊 수집 데이터 저장 완료:', defeatedPollutants);
                 }
             } catch (error) {
-                console.error('수집 데이터 저장 실패:', error);
+                console.warn('수집 데이터 저장 실패 (API 미구현), 게임 계속 진행:', error);
                 // 수집 데이터 저장 실패해도 게임은 계속 진행
             }
 

@@ -105,39 +105,19 @@ public class GameServiceImpl implements GameService {
 		}
 	}
 
-	// 게임 결과 저장 - 처치한 오염물질 데이터 기록
+	// 게임 결과 저장 - 처치한 오염물질 데이터 기록 (user_collection 활용)
 	@Override
 	@Transactional
 	public boolean saveGameResult(String email, List<Map<String, Object>> defeatedPollutants) {
 		try {
-			// 1. 수집 데이터 저장 (중복 방지)
-			List<Map<String, Object>> collectionData = new ArrayList<>();
-			
 			for (Map<String, Object> pollutant : defeatedPollutants) {
 				Long polIdx = Long.valueOf(pollutant.get("polIdx").toString());
+				Integer defeatedCount = Integer.valueOf(pollutant.get("defeatedCount").toString());
+				Long scoreGained = Long.valueOf(pollutant.get("scoreGained").toString());
+				Integer maxCombo = Integer.valueOf(pollutant.get("maxCombo").toString());
 				
-				// 이미 수집한 오염물질인지 확인
-				if (!gameMapper.hasCollectedPollution(email, polIdx)) {
-					Map<String, Object> data = new HashMap<>();
-					data.put("email", email);
-					data.put("polIdx", polIdx);
-					collectionData.add(data);
-				}
-			}
-			
-			// 새로 수집한 오염물질이 있으면 저장
-			if (!collectionData.isEmpty()) {
-				gameMapper.saveMultipleCollectionData(collectionData);
-			}
-			
-			// 2. 통계 데이터 업데이트
-			for (Map<String, Object> pollutant : defeatedPollutants) {
-				Long polIdx = Long.valueOf(pollutant.get("polIdx").toString());
-				Integer count = Integer.valueOf(pollutant.get("count").toString());
-				Long score = Long.valueOf(pollutant.get("score").toString());
-				Integer combo = Integer.valueOf(pollutant.get("combo").toString());
-				
-				updatePollutionStats(email, polIdx, count, score, combo);
+				// user_collection에 통계와 함께 기록 (MERGE 사용으로 중복 처리)
+				gameMapper.saveCollectionData(email, polIdx, defeatedCount, scoreGained, maxCombo);
 			}
 			
 			return true;
