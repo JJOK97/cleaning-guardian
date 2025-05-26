@@ -11,17 +11,17 @@ const SliceTrail: React.FC<SliceTrailProps> = ({ points }) => {
 
     return (
         <>
-            {/* 메인 슬라이스 트레일 */}
+            {/* 메인 슬라이스 트레일 - 베는 범위와 일치하도록 두껍게 */}
             <Line
                 points={points}
                 stroke='#FFFFFF'
-                strokeWidth={8}
+                strokeWidth={20}
                 lineCap='round'
                 lineJoin='round'
-                opacity={0.5}
+                opacity={0.4}
                 shadowColor='#4CAF50'
-                shadowBlur={15}
-                shadowOpacity={0.8}
+                shadowBlur={20}
+                shadowOpacity={0.6}
                 shadowOffset={{ x: 0, y: 0 }}
             />
 
@@ -29,10 +29,10 @@ const SliceTrail: React.FC<SliceTrailProps> = ({ points }) => {
             <Line
                 points={points}
                 stroke='#4CAF50'
-                strokeWidth={4}
+                strokeWidth={12}
                 lineCap='round'
                 lineJoin='round'
-                opacity={0.7}
+                opacity={0.6}
                 dash={dashPattern}
             />
 
@@ -40,10 +40,10 @@ const SliceTrail: React.FC<SliceTrailProps> = ({ points }) => {
             <Line
                 points={points}
                 stroke='#FFFFFF'
-                strokeWidth={2}
+                strokeWidth={6}
                 lineCap='round'
                 lineJoin='round'
-                opacity={0.9}
+                opacity={0.8}
             />
         </>
     );

@@ -23,11 +23,15 @@ const ResultContainer = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
+    height: 100vh;
     background: linear-gradient(135deg, rgb(226, 118, 41) 0%, rgb(194, 116, 61) 50%, #cd853f 100%);
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
+    padding: 20px;
 `;
 
 const ResultCardContainer = styled.div`
@@ -35,6 +39,9 @@ const ResultCardContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 100%;
+    width: 100%;
+    max-width: 420px;
 `;
 
 const ResultIcon = styled.img`
@@ -45,6 +52,7 @@ const ResultIcon = styled.img`
     z-index: 10;
     position: relative;
     filter: drop-shadow(0 4px 8px rgba(139, 69, 19, 0.3));
+    flex-shrink: 0;
 `;
 
 const ResultCard = styled.div`
@@ -52,16 +60,16 @@ const ResultCard = styled.div`
         radial-gradient(circle at 30% 30%, rgba(139, 69, 19, 0.05) 0%, transparent 50%);
     backdrop-filter: blur(10px);
     border-radius: 20px;
-    padding: 40px 20px 24px 20px;
     box-shadow: 0 15px 30px rgba(139, 69, 19, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8),
         inset 0 -1px 0 rgba(139, 69, 19, 0.1);
     text-align: center;
-    max-width: 420px;
-    width: 90%;
+    width: 100%;
     border: 2px solid rgba(139, 69, 19, 0.3);
-    max-height: 85vh;
-    overflow-y: auto;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 80%;
+    overflow: hidden;
 
     &::before {
         content: '';
@@ -82,6 +90,12 @@ const ResultCard = styled.div`
     }
 `;
 
+const ResultHeader = styled.div`
+    padding: 1rem 1rem 1.5rem 1rem;
+    flex-shrink: 0;
+    text-align: center;
+`;
+
 const ResultTitle = styled.h1`
     font-size: clamp(24px, 4vw, 28px);
     margin-bottom: 6px;
@@ -94,7 +108,7 @@ const ResultTitle = styled.h1`
 
 const ResultSubtitle = styled.p`
     font-size: clamp(16px, 2.5vw, 18px);
-    margin-bottom: 20px;
+    margin-bottom: 0;
     color: #a0522d;
     font-weight: 600;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -102,11 +116,36 @@ const ResultSubtitle = styled.p`
     z-index: 1;
 `;
 
+const ScrollableContent = styled.div`
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    width: 100%;
+
+    /* 스크롤바 스타일링 */
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: rgba(139, 69, 19, 0.1);
+        border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(139, 69, 19, 0.3);
+        border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: rgba(139, 69, 19, 0.5);
+    }
+`;
+
 const RewardsContainer = styled.div`
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    margin: 20px 0;
     width: 100%;
 
     @media (min-width: 400px) {
@@ -166,12 +205,15 @@ const RewardValue = styled.div`
 const ButtonContainer = styled.div`
     display: flex;
     gap: 12px;
-    margin-top: 20px;
+    padding: 20px;
     justify-content: center;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(139, 69, 19, 0.1);
+    background: rgba(255, 255, 255, 0.1);
 `;
 
 const Button = styled.button`
-    padding: 10px 20px;
+    padding: 20px 30px;
     font-size: 0.75rem;
     font-weight: 600;
     border: none;
@@ -200,6 +242,7 @@ const ResultScreen: React.FC = () => {
     const [gameResult, setGameResult] = useState<GameResult | null>(null);
     const [rewards, setRewards] = useState<Reward[]>([]);
     const [isRewardComplete, setIsRewardComplete] = useState(false);
+    const [rewardProcessed, setRewardProcessed] = useState(false); // 중복 방지 플래그
 
     useEffect(() => {
         const locationState = location.state;
@@ -211,12 +254,13 @@ const ResultScreen: React.FC = () => {
         const result = typeof locationState === 'string' ? JSON.parse(locationState) : locationState;
         setGameResult(result);
 
-        // 게임 성공 시 보상 설정
-        if (result.success && result.successYn === 'Y') {
+        // 게임 성공 시 보상 설정 (중복 방지)
+        if (result.success && result.successYn === 'Y' && !rewardProcessed) {
             const stageReward = stageRewards[result.stageIdx];
             if (stageReward) {
                 console.log('🎁 스테이지 보상 설정:', stageReward);
                 setRewards(stageReward);
+                setRewardProcessed(true); // 플래그 설정
 
                 // 보상 지급 API 호출
                 giveRewards(result.email, stageReward);
@@ -226,7 +270,7 @@ const ResultScreen: React.FC = () => {
         } else {
             console.log('❌ 게임 실패로 보상 없음');
         }
-    }, [location, navigate]);
+    }, [location, navigate, rewardProcessed]);
 
     const giveRewards = async (email: string, rewards: Reward[]) => {
         try {
@@ -298,40 +342,44 @@ const ResultScreen: React.FC = () => {
                     alt={gameResult.success && gameResult.successYn === 'Y' ? '승리' : '패배'}
                 />
                 <ResultCard>
-                    <ResultTitle>
-                        {gameResult.success && gameResult.successYn === 'Y' ? '미션 완료!' : '미션 실패'}
-                    </ResultTitle>
-                    <ResultSubtitle>스테이지 {gameResult.stageIdx}</ResultSubtitle>
+                    <ResultHeader>
+                        <ResultTitle>
+                            {gameResult.success && gameResult.successYn === 'Y' ? '미션 완료!' : '미션 실패'}
+                        </ResultTitle>
+                        <ResultSubtitle>스테이지 {gameResult.stageIdx}</ResultSubtitle>
+                    </ResultHeader>
 
-                    {rewards.length > 0 && (
-                        <RewardsContainer>
-                            {rewards.map((reward, idx) => (
-                                <RewardCard key={idx}>
-                                    <RewardIcon
-                                        src={
-                                            reward.type === 'POINT'
-                                                ? '/assets/img/header/point.png'
-                                                : reward.type === 'CASH'
-                                                ? '/assets/img/header/cash.png'
-                                                : reward.itemImg
-                                                ? `/assets/img/items/${reward.itemImg}.png`
-                                                : '/assets/img/items/default.png'
-                                        }
-                                        alt={reward.itemName || reward.type}
-                                    />
-                                    <RewardName>
-                                        {reward.itemName ||
-                                            (reward.type === 'POINT'
-                                                ? '클리닝 포인트'
-                                                : reward.type === 'CASH'
-                                                ? '클리닝 캐시'
-                                                : '아이템')}
-                                    </RewardName>
-                                    <RewardValue>+{reward.value}</RewardValue>
-                                </RewardCard>
-                            ))}
-                        </RewardsContainer>
-                    )}
+                    <ScrollableContent>
+                        {rewards.length > 0 && (
+                            <RewardsContainer>
+                                {rewards.map((reward, idx) => (
+                                    <RewardCard key={idx}>
+                                        <RewardIcon
+                                            src={
+                                                reward.type === 'POINT'
+                                                    ? '/assets/img/header/point.png'
+                                                    : reward.type === 'CASH'
+                                                    ? '/assets/img/header/cash.png'
+                                                    : reward.itemImg
+                                                    ? `/assets/img/items/${reward.itemImg}.png`
+                                                    : '/assets/img/items/default.png'
+                                            }
+                                            alt={reward.itemName || reward.type}
+                                        />
+                                        <RewardName>
+                                            {reward.itemName ||
+                                                (reward.type === 'POINT'
+                                                    ? '클리닝 포인트'
+                                                    : reward.type === 'CASH'
+                                                    ? '클리닝 캐시'
+                                                    : '아이템')}
+                                        </RewardName>
+                                        <RewardValue>+{reward.value}</RewardValue>
+                                    </RewardCard>
+                                ))}
+                            </RewardsContainer>
+                        )}
+                    </ScrollableContent>
 
                     <ButtonContainer>
                         {gameResult?.success && gameResult?.successYn === 'Y' ? (
