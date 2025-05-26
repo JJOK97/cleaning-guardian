@@ -123,7 +123,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({ item, onClose, onPurchase
         <ModalOverlay onClick={onClose}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
                 <ItemImage
-                    src={`/src/assets/img/items/${item.itemImg}.png`}
+                    src={`/assets/img/items/${item.itemImg}.png`}
                     alt={item.itemName}
                 />
                 <ItemName>{item.itemName}</ItemName>

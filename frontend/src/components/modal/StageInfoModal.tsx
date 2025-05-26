@@ -430,10 +430,10 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                             {pollutions.map((pollution) => (
                                 <PollutionItem key={pollution.polIdx}>
                                     <PollutionImage
-                                        src={`/src/assets/img/pollution/${pollution.polImg1}`}
+                                        src={`/assets/img/pollution/${pollution.polImg1}`}
                                         alt={pollution.polName}
                                         onError={(e) => {
-                                            e.currentTarget.src = '/src/assets/img/pollution/pet.png';
+                                            e.currentTarget.src = '/assets/img/pollution/pet.png';
                                         }}
                                     />
                                     <PollutionName>{pollution.polName}</PollutionName>
@@ -448,7 +448,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                             {equippedItems.map((equippedItem) => (
                                 <ItemCard key={equippedItem.userItemIdx}>
                                     <ItemImage
-                                        src={`/src/assets/img/items/${equippedItem.item.itemImg}.png`}
+                                        src={`/assets/img/items/${equippedItem.item.itemImg}.png`}
                                         alt={equippedItem.item.itemName}
                                     />
                                     <ItemName>{equippedItem.item.itemName}</ItemName>
@@ -470,7 +470,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                                 <SkinItem>
                                     <SkinInfo>
                                         <SkinImage
-                                            src={`/src/assets/img/skins/${equippedSkins.slice.skin.skinImg}`}
+                                            src={`/assets/img/skins/${equippedSkins.slice.skin.skinImg}`}
                                             alt={equippedSkins.slice.skin.skinName || '슬라이스 스킨'}
                                         />
                                         <SkinName>{equippedSkins.slice.skin.skinName || '기본 슬라이스 스킨'}</SkinName>
@@ -484,7 +484,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                                     <SkinItem>
                                         <SkinInfo>
                                             <SkinImage
-                                                src={`/src/assets/img/skins/${equippedSkins.tap.skin.skinImg}`}
+                                                src={`/assets/img/skins/${equippedSkins.tap.skin.skinImg}`}
                                                 alt={equippedSkins.tap.skin.skinName || '탭 스킨'}
                                             />
                                             <SkinName>{equippedSkins.tap.skin.skinName || '기본 탭 스킨'}</SkinName>

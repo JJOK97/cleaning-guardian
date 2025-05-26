@@ -223,7 +223,7 @@ const PollutionDetailModal: React.FC<PollutionDetailModalProps> = ({ pollution, 
             >
                 <ImageContainer>
                     <Image
-                        src={`/src/assets/img/pollution/${pollution.polImg1}`}
+                        src={`/assets/img/pollution/${pollution.polImg1}`}
                         alt={pollution.polName}
                     />
                 </ImageContainer>

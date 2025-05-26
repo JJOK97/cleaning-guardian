@@ -65,9 +65,9 @@ const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 <ItemImage
                     src={
                         isItem
-                            ? `/src/assets/img/items/${(item as UserItem).item.itemImg}.png`
-                            : `/src/assets/img/skins/${(item as UserSkinData).skin?.skinImg}` ||
-                              '/src/assets/img/skins/default.png'
+                            ? `/assets/img/items/${(item as UserItem).item.itemImg}.png`
+                            : `/assets/img/skins/${(item as UserSkinData).skin?.skinImg}` ||
+                              '/assets/img/skins/default.png'
                     }
                     alt={isItem ? (item as UserItem).item.itemName : (item as UserSkinData).skin?.skinName || '스킨'}
                 />

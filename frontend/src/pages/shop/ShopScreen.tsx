@@ -221,7 +221,7 @@ const ShopScreen: React.FC = () => {
                               onClick={() => setSelectedSkin(skin)}
                           >
                               <ItemImage
-                                  src={`/src/assets/img/skins/${skin.skinImg}`}
+                                  src={`/assets/img/skins/${skin.skinImg}`}
                                   alt={skin.skinName}
                               />
                               <ItemName>{skin.skinName}</ItemName>
@@ -236,7 +236,7 @@ const ShopScreen: React.FC = () => {
                               onClick={() => setSelectedItem(item)}
                           >
                               <ItemImage
-                                  src={`/src/assets/img/items/${item.itemImg}.png`}
+                                  src={`/assets/img/items/${item.itemImg}.png`}
                                   alt={item.itemName}
                               />
                               <ItemName>{item.itemName}</ItemName>

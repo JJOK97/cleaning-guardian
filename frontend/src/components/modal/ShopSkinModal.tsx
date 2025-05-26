@@ -96,7 +96,7 @@ const ShopSkinModal: React.FC<ShopSkinModalProps> = ({ skin, onClose, onPurchase
         <ModalOverlay onClick={onClose}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
                 <SkinImage
-                    src={`/src/assets/img/skins/${skin.skinImg}`}
+                    src={`/assets/img/skins/${skin.skinImg}`}
                     alt={skin.skinName}
                 />
                 <SkinName>{skin.skinName}</SkinName>

@@ -446,7 +446,7 @@ const InGameScreen: React.FC = () => {
 
     // 스테이지별 배경 이미지 경로 생성
     const getStageBackground = (stageId: string) => {
-        return `/src/assets/img/ingame/stage${stageId}.png`;
+        return `/assets/img/ingame/stage${stageId}.png`;
     };
 
     // 나머지 렌더링 로직
