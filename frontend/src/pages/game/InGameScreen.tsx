@@ -800,6 +800,7 @@ const InGameScreen: React.FC = () => {
             }
 
             // 2. 게임 로직 개선: 수집 데이터 저장 (API 없으면 스킵)
+            console.log('📊 수집 데이터 저장 시작...');
             try {
                 const defeatedPollutants: any[] = [];
                 collectionTracker.destroyedPollutants.forEach((count, polIdx) => {
@@ -814,13 +815,32 @@ const InGameScreen: React.FC = () => {
                 });
 
                 if (defeatedPollutants.length > 0) {
-                    await processGameCompletion(user.email, defeatedPollutants);
-                    console.log('📊 수집 데이터 저장 완료:', defeatedPollutants);
+                    console.log('📊 수집 데이터 API 호출 중... (2초 타임아웃)');
+                    // 타임아웃 설정으로 무한 대기 방지 (2초로 단축)
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('API 타임아웃')), 2000),
+                    );
+
+                    // 백그라운드에서 처리하고 즉시 진행하는 옵션
+                    const savePromise = Promise.race([
+                        processGameCompletion(user.email, defeatedPollutants),
+                        timeoutPromise,
+                    ]);
+
+                    // 빠른 전환을 위해 백그라운드 처리 (await 제거)
+                    savePromise
+                        .then(() => console.log('📊 수집 데이터 저장 완료:', defeatedPollutants))
+                        .catch((error) => console.warn('📊 백그라운드 수집 데이터 저장 실패:', error));
+
+                    console.log('📊 수집 데이터 백그라운드 처리 시작, 즉시 진행');
+                } else {
+                    console.log('📊 수집 데이터 없음, 건너뛰기');
                 }
             } catch (error) {
-                console.warn('수집 데이터 저장 실패 (API 미구현), 게임 계속 진행:', error);
+                console.warn('📊 수집 데이터 저장 실패, 게임 계속 진행:', error);
                 // 수집 데이터 저장 실패해도 게임은 계속 진행
             }
+            console.log('📊 수집 데이터 처리 완료 (2초 타임아웃)');
 
             const result = {
                 score,
@@ -849,11 +869,10 @@ const InGameScreen: React.FC = () => {
             console.log('🏁 게임 종료:', result);
             console.log('🚀 결과 화면으로 이동 준비 완료');
 
-            setTimeout(() => {
-                console.log('🚀 결과 화면으로 이동 시작');
-                endGameRef.current = false; // 플래그 리셋
-                navigate('/result', { state: result });
-            }, 1000);
+            // 즉시 결과 화면으로 이동 (setTimeout 제거)
+            console.log('🚀 결과 화면으로 이동 시작');
+            endGameRef.current = false; // 플래그 리셋
+            navigate('/result', { state: result });
         } catch (error) {
             console.error('🚨 게임 종료 처리 중 치명적 오류 발생:', error);
             console.log('🚀 에러 발생으로 인한 강제 결과 화면 이동');
@@ -974,8 +993,32 @@ const InGameScreen: React.FC = () => {
 
         console.log('🎮 오염물질 큐 생성 시작:', gameData.pollutions);
 
+        // 스테이지별 오염물질 개수 계산 (4배 더 많이!)
+        const currentStage = parseInt(stageId || '1');
+        const mapNumber = parseInt(mapId || '1');
+
+        // 기본 개수: 스테이지 번호 × 4
+        let totalPollutants = currentStage * 4;
+
+        // 맵별 추가 보너스 (더 많이!)
+        if (mapNumber === 2) {
+            totalPollutants += 8; // 맵 2는 +8개
+        } else if (mapNumber === 3) {
+            totalPollutants += 16; // 맵 3는 +16개
+        }
+
+        // 최소 1개, 최대 20개로 제한
+        totalPollutants = Math.max(1, Math.min(totalPollutants, 20));
+
+        console.log('🎯 오염물질 개수 결정:', {
+            stageId,
+            mapId,
+            currentStage,
+            mapNumber,
+            finalCount: totalPollutants,
+        });
+
         const { width, height } = stageSize;
-        const totalPollutants = Math.floor((width * height) / 50000);
         const queue: PollutantBody[] = [];
 
         for (let i = 0; i < totalPollutants; i++) {
@@ -1156,18 +1199,18 @@ const InGameScreen: React.FC = () => {
             <GameUI>
                 <TopGameUI>
                     <LeftSection>
-                        <Timer>
-                            <span>⏰</span>
-                            {time}초
-                        </Timer>
-                    </LeftSection>
-
-                    <CenterSection>
                         <Lives>
                             {Array.from({ length: lives }).map((_, index) => (
                                 <span key={index}>❤️</span>
                             ))}
                         </Lives>
+                    </LeftSection>
+
+                    <CenterSection>
+                        <Timer>
+                            <span>⏰</span>
+                            {time}초
+                        </Timer>
                     </CenterSection>
 
                     <RightSection>
@@ -1180,8 +1223,6 @@ const InGameScreen: React.FC = () => {
 
                 {/* 중앙 알림 영역 */}
                 <CenterNotificationArea>
-                    {combo > 1 && <ComboNotification>🔥 {combo}콤보!</ComboNotification>}
-
                     {killNotification.show && (
                         <KillNotification>
                             ✨ {killNotification.pollutionName} 처치!
@@ -1371,14 +1412,7 @@ const InGameScreen: React.FC = () => {
                         />
                     )}
 
-                    {/* 스테이지 경계선 표시 (디버깅용) */}
-                    {/* 디버그 표시 - 항상 보이도록 수정 */}
-                    <Circle
-                        x={stageSize.width / 2}
-                        y={stageSize.height / 2}
-                        radius={5}
-                        fill='red'
-                    />
+                    {/* 디버그 표시 제거 */}
                 </Layer>
             </Stage>
             <TransitionWrapper $isVisible={true}>

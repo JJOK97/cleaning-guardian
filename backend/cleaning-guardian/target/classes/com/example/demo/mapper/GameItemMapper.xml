@@ -308,7 +308,7 @@
 
 	<!-- 사용자의 모든 아이템 효과 합계 조회 -->
 	<select id="getTotalItemEffect" resultType="double">
-		SELECT NVL(SUM(gi."effect_value"), 0)
+		SELECT NVL(SUM(gi."effect_value"), 0) as totalEffect
 		FROM "user_items" ui
 		JOIN "game_items" gi ON ui."item_idx" = gi."item_idx"
 		WHERE ui."email" = #{email}

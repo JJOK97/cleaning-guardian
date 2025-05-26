@@ -7,9 +7,7 @@ import { checkStageClear } from '@/api/stages';
 import { stageRewards } from '@/constants/stageRewards';
 import { Reward } from '@/types/reward';
 
-// 이미지 import
-import pointImg from '@/assets/img/rewards/point.png';
-import cashImg from '@/assets/img/rewards/cash.png';
+// 이미지는 직접 경로로 사용 (다른 컴포넌트들과 일관성 유지)
 
 interface GameResult {
     success: boolean;
@@ -27,39 +25,172 @@ const ResultContainer = styled.div`
     justify-content: center;
     min-height: 100vh;
     padding: 20px;
-    background: #f5f5f5;
+    background: linear-gradient(135deg, rgb(226, 118, 41) 0%, rgb(194, 116, 61) 50%, #cd853f 100%);
+    position: relative;
+    overflow: hidden;
+`;
+
+const ResultCardContainer = styled.div`
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
+const ResultIcon = styled.img`
+    width: 8rem;
+    height: 8rem;
+    object-fit: contain;
+    margin-bottom: -1rem;
+    z-index: 10;
+    position: relative;
+    filter: drop-shadow(0 4px 8px rgba(139, 69, 19, 0.3));
+`;
+
+const ResultCard = styled.div`
+    background: linear-gradient(145deg, #f5f5dc 0%, #fff8dc 50%, #fffacd 100%),
+        radial-gradient(circle at 30% 30%, rgba(139, 69, 19, 0.05) 0%, transparent 50%);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px 20px 24px 20px;
+    box-shadow: 0 15px 30px rgba(139, 69, 19, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 0 rgba(139, 69, 19, 0.1);
+    text-align: center;
+    max-width: 420px;
+    width: 90%;
+    border: 2px solid rgba(139, 69, 19, 0.3);
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 2px,
+            rgba(139, 69, 19, 0.02) 2px,
+            rgba(139, 69, 19, 0.02) 4px
+        );
+        border-radius: 18px;
+        pointer-events: none;
+    }
 `;
 
 const ResultTitle = styled.h1`
-    font-size: 32px;
-    margin-bottom: 20px;
-    color: #333;
+    font-size: clamp(24px, 4vw, 28px);
+    margin-bottom: 6px;
+    color: #8b4513;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(139, 69, 19, 0.3), 0 1px 0 rgba(255, 255, 255, 0.8);
+    position: relative;
+    z-index: 1;
 `;
 
-const ResultMessage = styled.p`
-    font-size: 24px;
-    margin-bottom: 30px;
-    color: #666;
+const ResultSubtitle = styled.p`
+    font-size: clamp(16px, 2.5vw, 18px);
+    margin-bottom: 20px;
+    color: #a0522d;
+    font-weight: 600;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+    position: relative;
+    z-index: 1;
+`;
+
+const RewardsContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+    width: 100%;
+
+    @media (min-width: 400px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+`;
+
+const RewardCard = styled.div`
+    background: url('/assets/img/items/background.png') center/cover no-repeat;
+    background-size: 100% 100%;
+    border-radius: 0;
+    padding: 2rem 2rem;
+    border: none;
+    box-shadow: none;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 120px;
+    justify-content: center;
+    position: relative;
+
+    &:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+`;
+
+const RewardIcon = styled.img`
+    width: 2.5rem;
+    height: 2.5rem;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+`;
+
+const RewardName = styled.div`
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #8b4513;
+    text-align: center;
+    line-height: 1.2;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: keep-all;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+`;
+
+const RewardValue = styled.div`
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #228b22;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.6);
 `;
 
 const ButtonContainer = styled.div`
     display: flex;
-    gap: 20px;
-    margin-top: 30px;
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: center;
 `;
 
 const Button = styled.button`
-    padding: 15px 30px;
-    font-size: 18px;
+    padding: 10px 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
     border: none;
-    border-radius: 8px;
-    background: #4caf50;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
     color: white;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
+    min-width: 110px;
 
     &:hover {
-        background: #45a049;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        background: linear-gradient(135deg, #45a049 0%, #4caf50 100%);
+    }
+
+    &:active {
+        transform: translateY(0);
     }
 `;
 
@@ -79,6 +210,22 @@ const ResultScreen: React.FC = () => {
 
         const result = typeof locationState === 'string' ? JSON.parse(locationState) : locationState;
         setGameResult(result);
+
+        // 게임 성공 시 보상 설정
+        if (result.success && result.successYn === 'Y') {
+            const stageReward = stageRewards[result.stageIdx];
+            if (stageReward) {
+                console.log('🎁 스테이지 보상 설정:', stageReward);
+                setRewards(stageReward);
+
+                // 보상 지급 API 호출
+                giveRewards(result.email, stageReward);
+            } else {
+                console.warn('⚠️ 스테이지 보상 정보 없음:', result.stageIdx);
+            }
+        } else {
+            console.log('❌ 게임 실패로 보상 없음');
+        }
     }, [location, navigate]);
 
     const giveRewards = async (email: string, rewards: Reward[]) => {
@@ -119,13 +266,16 @@ const ResultScreen: React.FC = () => {
 
     const handleRetry = () => {
         if (gameResult) {
-            navigate(`/game/${gameResult.stageIdx}`);
+            // 같은 맵, 같은 스테이지로 다시 이동
+            navigate(`/game/${gameResult.mapIdx}/${gameResult.stageIdx}`);
         }
     };
 
     const handleStageSelect = () => {
-        const currentMapIdx = localStorage.getItem('currentMapIdx') || '1';
-        navigate(`/stage-select/${currentMapIdx}`);
+        if (gameResult) {
+            // 현재 게임하던 맵의 스테이지 선택 화면으로 이동
+            navigate(`/stage-select/${gameResult.mapIdx}`);
+        }
     };
 
     const handleMainMenu = () => {
@@ -138,77 +288,61 @@ const ResultScreen: React.FC = () => {
 
     return (
         <ResultContainer>
-            <ResultTitle>
-                {gameResult.success && gameResult.successYn === 'Y' ? '스테이지 클리어!' : '스테이지 실패'}
-            </ResultTitle>
-            <ResultMessage>스테이지 {gameResult.stageIdx}</ResultMessage>
+            <ResultCardContainer>
+                <ResultIcon
+                    src={
+                        gameResult.success && gameResult.successYn === 'Y'
+                            ? '/assets/img/profile/win.png'
+                            : '/assets/img/profile/defeat.png'
+                    }
+                    alt={gameResult.success && gameResult.successYn === 'Y' ? '승리' : '패배'}
+                />
+                <ResultCard>
+                    <ResultTitle>
+                        {gameResult.success && gameResult.successYn === 'Y' ? '미션 완료!' : '미션 실패'}
+                    </ResultTitle>
+                    <ResultSubtitle>스테이지 {gameResult.stageIdx}</ResultSubtitle>
 
-            {rewards.length > 0 && (
-                <div
-                    style={{
-                        width: '100%',
-                        maxWidth: 900,
-                        margin: '40px auto',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '24px',
-                    }}
-                >
-                    {rewards.map((reward, idx) => (
-                        <div
-                            key={idx}
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                fontSize: 'clamp(1.1rem, 2vw, 2rem)',
-                                background: '#fff',
-                                borderRadius: '16px',
-                                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                                padding: '16px 18px',
-                                minWidth: 90,
-                                maxWidth: 140,
-                                width: '22vw',
-                                boxSizing: 'border-box',
-                            }}
-                        >
-                            <img
-                                src={
-                                    reward.type === 'POINT'
-                                        ? pointImg
-                                        : reward.type === 'CASH'
-                                        ? cashImg
-                                        : reward.itemImg
-                                        ? reward.itemImg
-                                        : ''
-                                }
-                                alt={reward.itemName || reward.type}
-                                style={{
-                                    width: 'clamp(40px, 8vw, 64px)',
-                                    height: 'clamp(40px, 8vw, 64px)',
-                                    marginBottom: 10,
-                                    objectFit: 'contain',
-                                }}
-                            />
-                            <div style={{ fontWeight: 'bold', marginBottom: 6, textAlign: 'center' }}>
-                                {reward.itemName ||
-                                    (reward.type === 'POINT' ? '포인트' : reward.type === 'CASH' ? '캐시' : '아이템')}
-                            </div>
-                            <div style={{ color: '#4caf50' }}>+{reward.value}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
-            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-                {gameResult?.success && gameResult?.successYn === 'Y' ? (
-                    <Button onClick={handleNextStage}>다음 스테이지</Button>
-                ) : (
-                    <Button onClick={handleRetry}>다시하기</Button>
-                )}
-                <Button onClick={handleStageSelect}>스테이지 선택</Button>
-            </div>
+                    {rewards.length > 0 && (
+                        <RewardsContainer>
+                            {rewards.map((reward, idx) => (
+                                <RewardCard key={idx}>
+                                    <RewardIcon
+                                        src={
+                                            reward.type === 'POINT'
+                                                ? '/assets/img/header/point.png'
+                                                : reward.type === 'CASH'
+                                                ? '/assets/img/header/cash.png'
+                                                : reward.itemImg
+                                                ? `/assets/img/items/${reward.itemImg}.png`
+                                                : '/assets/img/items/default.png'
+                                        }
+                                        alt={reward.itemName || reward.type}
+                                    />
+                                    <RewardName>
+                                        {reward.itemName ||
+                                            (reward.type === 'POINT'
+                                                ? '클리닝 포인트'
+                                                : reward.type === 'CASH'
+                                                ? '클리닝 캐시'
+                                                : '아이템')}
+                                    </RewardName>
+                                    <RewardValue>+{reward.value}</RewardValue>
+                                </RewardCard>
+                            ))}
+                        </RewardsContainer>
+                    )}
+
+                    <ButtonContainer>
+                        {gameResult?.success && gameResult?.successYn === 'Y' ? (
+                            <Button onClick={handleNextStage}>다음 스테이지</Button>
+                        ) : (
+                            <Button onClick={handleRetry}>다시하기</Button>
+                        )}
+                        <Button onClick={handleStageSelect}>스테이지 선택</Button>
+                    </ButtonContainer>
+                </ResultCard>
+            </ResultCardContainer>
         </ResultContainer>
     );
 };
