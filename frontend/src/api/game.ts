@@ -1,6 +1,5 @@
 import api from './index';
 import { Reward } from '@/types/reward';
-import axios from 'axios';
 import { UserItem } from '@/types/inventory';
 
 const BASE_URL = 'http://54.180.101.153:8088/api/v1';
@@ -107,11 +106,9 @@ export const getStagePollutions = async (stageIdx: number) => {
 // 아이템 목록 조회
 export const getUserItems = async (email: string) => {
     try {
-        const response = await axios.get(`${BASE_URL}/items/user`, {
+        const response = await api.get(`/items/user`, {
             headers: { email },
         });
-        console.log('getUserItems 요청:', { email });
-        console.log('getUserItems 응답:', response.data);
         return response.data;
     } catch (error) {
         console.error('getUserItems 에러:', error);
@@ -138,8 +135,6 @@ export const equipItem = async (email: string, itemIdx: number, slot: number) =>
             headers: { email },
             params: { slot },
         });
-        console.log('equipItem 요청:', { email, itemIdx, slot });
-        console.log('equipItem 응답:', response.data);
         return response.data;
     } catch (error) {
         console.error('equipItem 에러:', error);
@@ -153,8 +148,6 @@ export const unequipItem = async (email: string, itemIdx: number) => {
         const response = await api.post(`/items/unequip/${itemIdx}`, null, {
             headers: { email },
         });
-        console.log('unequipItem 요청:', { email, itemIdx });
-        console.log('unequipItem 응답:', response.data);
         return response.data;
     } catch (error) {
         console.error('unequipItem 에러:', error);
@@ -165,11 +158,9 @@ export const unequipItem = async (email: string, itemIdx: number) => {
 // 장착된 아이템 조회
 export const getEquippedItems = async (email: string) => {
     try {
-        const response = await axios.get(`${BASE_URL}/items/equipped`, {
+        const response = await api.get(`/items/equipped`, {
             headers: { email },
         });
-        console.log('getEquippedItems 요청:', { email });
-        console.log('getEquippedItems 응답:', response.data);
         return response.data;
     } catch (error) {
         console.error('getEquippedItems 에러:', error);
@@ -218,7 +209,7 @@ export const postReward = async (email: string, rewards: Reward[]) => {
 // 스킨 목록 조회
 export const getUserSkins = async (email: string) => {
     try {
-        const response = await axios.get(`${BASE_URL}/skins/user`, {
+        const response = await api.get(`/skins/user`, {
             headers: { email },
         });
         console.log('getUserSkins 요청:', { email });
@@ -233,7 +224,7 @@ export const getUserSkins = async (email: string) => {
 // 장착된 스킨 조회
 export const getEquippedSkins = async (email: string) => {
     try {
-        const response = await axios.get(`${BASE_URL}/skins/equipped`, {
+        const response = await api.get(`/skins/equipped`, {
             headers: { email },
         });
         console.log('getEquippedSkins 요청:', { email });
@@ -248,7 +239,7 @@ export const getEquippedSkins = async (email: string) => {
 // 스킨 장착
 export const equipSkin = async (email: string, skinIdx: number) => {
     try {
-        const response = await axios.post(`${BASE_URL}/skins/equip/${skinIdx}`, null, {
+        const response = await api.post(`/skins/equip/${skinIdx}`, null, {
             headers: { email },
         });
         console.log('equipSkin 요청:', { email, skinIdx });
@@ -263,7 +254,7 @@ export const equipSkin = async (email: string, skinIdx: number) => {
 // 스킨 해제
 export const unequipSkin = async (email: string, skinIdx: number) => {
     try {
-        const response = await axios.post(`${BASE_URL}/skins/unequip/${skinIdx}`, null, {
+        const response = await api.post(`/skins/unequip/${skinIdx}`, null, {
             headers: { email },
         });
         console.log('unequipSkin 요청:', { email, skinIdx });

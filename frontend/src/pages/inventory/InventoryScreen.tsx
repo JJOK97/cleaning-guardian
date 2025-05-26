@@ -37,10 +37,8 @@ const InventoryScreen: React.FC = () => {
 
         try {
             setIsLoading(true);
-            console.log('Fetching items for email:', user.email);
 
             const response = await getUserItems(user.email);
-            console.log('Items response:', response);
 
             if (response.success) {
                 setItems(response.items || []);
@@ -61,22 +59,17 @@ const InventoryScreen: React.FC = () => {
 
         try {
             setIsLoading(true);
-            console.log('Fetching skins for email:', user.email);
 
-            const [tapSkins, sliceSkins] = await Promise.all([getUserTapSkins(user.email), getUserSliceSkins(user.email)]);
-
-            console.log('Raw tap skins response:', tapSkins);
-            console.log('Raw slice skins response:', sliceSkins);
+            const [tapSkins, sliceSkins] = await Promise.all([
+                getUserTapSkins(user.email),
+                getUserSliceSkins(user.email),
+            ]);
 
             // 스킨 데이터 처리
             const processedTapSkins = tapSkins || [];
             const processedSliceSkins = sliceSkins || [];
 
-            console.log('Processed tap skins:', processedTapSkins);
-            console.log('Processed slice skins:', processedSliceSkins);
-
             const allSkins = [...processedTapSkins, ...processedSliceSkins];
-            console.log('Combined skins:', allSkins);
             setSkins(allSkins);
         } catch (error) {
             console.error('Error fetching skins:', error);
@@ -91,10 +84,7 @@ const InventoryScreen: React.FC = () => {
         if (!user?.email) return;
 
         try {
-            console.log('Fetching equipped items for email:', user.email);
-
             const response = await getEquippedItems(user.email);
-            console.log('Equipped items response:', response);
 
             if (response.success) {
                 setEquippedItems(response.items || []);
@@ -112,15 +102,10 @@ const InventoryScreen: React.FC = () => {
         if (!user?.email) return;
 
         try {
-            console.log('Fetching equipped skins for email:', user.email);
-
             const [equippedTapSkin, equippedSliceSkin] = await Promise.all([
                 getEquippedTapSkin(user.email),
                 getEquippedSliceSkin(user.email),
             ]);
-
-            console.log('Equipped tap skin response:', equippedTapSkin);
-            console.log('Equipped slice skin response:', equippedSliceSkin);
 
             setEquippedSkins({
                 tap: equippedTapSkin,
@@ -138,7 +123,6 @@ const InventoryScreen: React.FC = () => {
                 fetchItems();
                 fetchEquippedItems();
             } else {
-                console.log('Tab changed to skins, fetching data...');
                 fetchSkins();
                 fetchEquippedSkin();
             }
@@ -246,8 +230,10 @@ const InventoryScreen: React.FC = () => {
         } else {
             const skinA = a as UserSkinData;
             const skinB = b as UserSkinData;
-            const isAEquipped = equippedSkins.tap?.skinIdx === skinA.skinIdx || equippedSkins.slice?.skinIdx === skinA.skinIdx;
-            const isBEquipped = equippedSkins.tap?.skinIdx === skinB.skinIdx || equippedSkins.slice?.skinIdx === skinB.skinIdx;
+            const isAEquipped =
+                equippedSkins.tap?.skinIdx === skinA.skinIdx || equippedSkins.slice?.skinIdx === skinA.skinIdx;
+            const isBEquipped =
+                equippedSkins.tap?.skinIdx === skinB.skinIdx || equippedSkins.slice?.skinIdx === skinB.skinIdx;
             if (isAEquipped && !isBEquipped) return -1;
             if (!isAEquipped && isBEquipped) return 1;
         }
@@ -260,10 +246,16 @@ const InventoryScreen: React.FC = () => {
                 <Title>인벤토리</Title>
 
                 <TabContainer>
-                    <TabButton $active={activeTab === 'items'} onClick={() => setActiveTab('items')}>
+                    <TabButton
+                        $active={activeTab === 'items'}
+                        onClick={() => setActiveTab('items')}
+                    >
                         아이템
                     </TabButton>
-                    <TabButton $active={activeTab === 'skins'} onClick={() => setActiveTab('skins')}>
+                    <TabButton
+                        $active={activeTab === 'skins'}
+                        onClick={() => setActiveTab('skins')}
+                    >
                         스킨
                     </TabButton>
                 </TabContainer>
@@ -277,13 +269,18 @@ const InventoryScreen: React.FC = () => {
                               sortedItems.map((item) => (
                                   <ItemCard
                                       key={(item as UserItem).userItemIdx}
-                                      $isEquipped={equippedItems.some((eq) => eq.itemIdx === (item as UserItem).itemIdx)}
+                                      $isEquipped={equippedItems.some(
+                                          (eq) => eq.itemIdx === (item as UserItem).itemIdx,
+                                      )}
                                       onClick={() => {
                                           setSelectedItem(item);
                                           setIsModalOpen(true);
                                       }}
                                   >
-                                      <ItemIcon src={(item as UserItem).item.itemImg} alt={(item as UserItem).item.itemName} />
+                                      <ItemIcon
+                                          src={(item as UserItem).item.itemImg}
+                                          alt={(item as UserItem).item.itemName}
+                                      />
                                       <ItemName>{(item as UserItem).item.itemName}</ItemName>
                                       <ItemCount>보유 수량: {(item as UserItem).count}</ItemCount>
                                       {equippedItems.some((eq) => eq.itemIdx === (item as UserItem).itemIdx) && (
@@ -310,7 +307,10 @@ const InventoryScreen: React.FC = () => {
                                               setIsModalOpen(true);
                                           }}
                                       >
-                                          <ItemIcon src={displayImg} alt={displayName} />
+                                          <ItemIcon
+                                              src={displayImg}
+                                              alt={displayName}
+                                          />
                                           <ItemName>{displayName}</ItemName>
                                           <ItemCount>보유</ItemCount>
                                           {(() => {

@@ -42,7 +42,8 @@ const Tab = styled.button<{ $active: boolean }>`
     transition: all 0.2s ease;
 
     &:hover {
-        background-color: ${({ $active, theme }) => ($active ? theme.colors.primary.dark : theme.colors.background.hover)};
+        background-color: ${({ $active, theme }) =>
+            $active ? theme.colors.primary.dark : theme.colors.background.hover};
     }
 `;
 
@@ -100,7 +101,6 @@ const ShopScreen: React.FC = () => {
         const fetchData = async () => {
             try {
                 if (user?.email) {
-                    console.log('상점 데이터 로딩 시작');
                     const [itemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] = await Promise.all([
                         getUserItems(user.email),
                         getAllSliceSkins(user.email),
@@ -109,12 +109,6 @@ const ShopScreen: React.FC = () => {
                         getUserTapSkins(user.email),
                     ]);
 
-                    console.log('아이템 데이터:', itemsData);
-                    console.log('슬라이스 스킨 데이터:', sliceSkinsData);
-                    console.log('탭 스킨 데이터:', tapSkinsData);
-                    console.log('보유한 슬라이스 스킨:', userSliceSkins);
-                    console.log('보유한 탭 스킨:', userTapSkins);
-
                     // 아이템 데이터 구조 수정
                     const processedItems =
                         itemsData.items?.map((userItem) => ({
@@ -122,8 +116,6 @@ const ShopScreen: React.FC = () => {
                             userItemIdx: userItem.userItemIdx,
                             isUsed: userItem.isUsed,
                         })) || [];
-
-                    console.log('가공된 아이템 데이터:', processedItems);
 
                     // 보유한 스킨 인덱스 목록 생성
                     const ownedSkinIndices = new Set([
@@ -135,8 +127,6 @@ const ShopScreen: React.FC = () => {
                     const processedSkins = [...(sliceSkinsData || []), ...(tapSkinsData || [])]
                         .filter((skin) => skin && skin.skinIdx) // null 값 제거
                         .filter((skin) => !ownedSkinIndices.has(skin.skinIdx));
-
-                    console.log('가공된 스킨 데이터:', processedSkins);
 
                     setItems(processedItems);
                     setSkins(processedSkins);
@@ -209,10 +199,16 @@ const ShopScreen: React.FC = () => {
             <Title>상점</Title>
 
             <TabContainer>
-                <Tab $active={activeTab === 'items'} onClick={() => setActiveTab('items')}>
+                <Tab
+                    $active={activeTab === 'items'}
+                    onClick={() => setActiveTab('items')}
+                >
                     아이템
                 </Tab>
-                <Tab $active={activeTab === 'skins'} onClick={() => setActiveTab('skins')}>
+                <Tab
+                    $active={activeTab === 'skins'}
+                    onClick={() => setActiveTab('skins')}
+                >
                     스킨
                 </Tab>
             </TabContainer>
@@ -220,8 +216,14 @@ const ShopScreen: React.FC = () => {
             <ItemGrid>
                 {activeTab === 'skins'
                     ? skins.map((skin) => (
-                          <ItemCard key={skin.skinIdx} onClick={() => setSelectedSkin(skin)}>
-                              <ItemImage src={skin.skinImg} alt={skin.skinName} />
+                          <ItemCard
+                              key={skin.skinIdx}
+                              onClick={() => setSelectedSkin(skin)}
+                          >
+                              <ItemImage
+                                  src={skin.skinImg}
+                                  alt={skin.skinName}
+                              />
                               <ItemName>{skin.skinName}</ItemName>
                               <ItemPrice>
                                   {skin.priceType === 'P' ? '포인트' : '캐시'} {skin.skinPrice}
@@ -229,8 +231,14 @@ const ShopScreen: React.FC = () => {
                           </ItemCard>
                       ))
                     : items.map((item) => (
-                          <ItemCard key={item.itemIdx} onClick={() => setSelectedItem(item)}>
-                              <ItemImage src={item.itemImg} alt={item.itemName} />
+                          <ItemCard
+                              key={item.itemIdx}
+                              onClick={() => setSelectedItem(item)}
+                          >
+                              <ItemImage
+                                  src={item.itemImg}
+                                  alt={item.itemName}
+                              />
                               <ItemName>{item.itemName}</ItemName>
                               <ItemPrice>
                                   {item.priceType === 'P' ? '포인트' : '캐시'} {item.itemPrice}
@@ -239,8 +247,20 @@ const ShopScreen: React.FC = () => {
                       ))}
             </ItemGrid>
 
-            {selectedItem && <ShopItemModal item={selectedItem} onClose={() => setSelectedItem(null)} onPurchase={handlePurchase} />}
-            {selectedSkin && <ShopSkinModal skin={selectedSkin} onClose={() => setSelectedSkin(null)} onPurchase={handlePurchase} />}
+            {selectedItem && (
+                <ShopItemModal
+                    item={selectedItem}
+                    onClose={() => setSelectedItem(null)}
+                    onPurchase={handlePurchase}
+                />
+            )}
+            {selectedSkin && (
+                <ShopSkinModal
+                    skin={selectedSkin}
+                    onClose={() => setSelectedSkin(null)}
+                    onPurchase={handlePurchase}
+                />
+            )}
         </Container>
     );
 };

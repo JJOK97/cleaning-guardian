@@ -8,10 +8,11 @@ interface PollutionCardProps {
 }
 
 const PollutionCard: React.FC<PollutionCardProps> = ({ pollution, onClick }) => {
-    console.log('PollutionCard 렌더링:', pollution);
-
     return (
-        <div className={`pollution-card ${!pollution.collected ? 'not-collected' : ''}`} onClick={onClick}>
+        <div
+            className={`pollution-card ${!pollution.collected ? 'not-collected' : ''}`}
+            onClick={onClick}
+        >
             <div className='image-container'>
                 <img
                     src='/src/assets/img/pollution/pet.png'

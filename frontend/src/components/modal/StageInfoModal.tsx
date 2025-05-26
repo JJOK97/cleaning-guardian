@@ -263,13 +263,15 @@ const Button = styled.button<{ $primary?: boolean }>`
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: ${(props) => (props.$primary ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' : 'rgba(255, 255, 255, 0.15)')};
+    background: ${(props) =>
+        props.$primary ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' : 'rgba(255, 255, 255, 0.15)'};
     color: #fff;
     letter-spacing: 0.5px;
 
     &:hover {
         transform: translateY(-2px);
-        background: ${(props) => (props.$primary ? 'linear-gradient(135deg, #45a049 0%, #3d8b40 100%)' : 'rgba(255, 255, 255, 0.2)')};
+        background: ${(props) =>
+            props.$primary ? 'linear-gradient(135deg, #45a049 0%, #3d8b40 100%)' : 'rgba(255, 255, 255, 0.2)'};
     }
 
     &:active {
@@ -390,8 +392,14 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
     };
 
     return (
-        <ModalOverlay onClick={handleClose} $isClosing={isClosing}>
-            <ModalContent onClick={(e) => e.stopPropagation()} $isClosing={isClosing}>
+        <ModalOverlay
+            onClick={handleClose}
+            $isClosing={isClosing}
+        >
+            <ModalContent
+                onClick={(e) => e.stopPropagation()}
+                $isClosing={isClosing}
+            >
                 <CloseButton onClick={handleClose}>×</CloseButton>
                 <ContentSection>
                     <Title>{stageInfo.stageName}</Title>
@@ -406,7 +414,10 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                         <PollutionList>
                             {pollutions.map((pollution) => (
                                 <PollutionItem key={pollution.polIdx}>
-                                    <PollutionImage src={pollutionNameToFile[pollution.polName]} alt={pollution.polName} />
+                                    <PollutionImage
+                                        src={pollutionNameToFile[pollution.polName]}
+                                        alt={pollution.polName}
+                                    />
                                     <PollutionName>{pollution.polName}</PollutionName>
                                 </PollutionItem>
                             ))}
@@ -417,8 +428,14 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                         <SectionTitle>보유 아이템</SectionTitle>
                         <ItemList>
                             {userItems.map((userItem) => (
-                                <ItemCard key={userItem.uitemIdx} onClick={() => handleItemUse(userItem.item.itemIdx)}>
-                                    <ItemImage src={userItem.item.itemImg} alt={userItem.item.itemName} />
+                                <ItemCard
+                                    key={userItem.uitemIdx}
+                                    onClick={() => handleItemUse(userItem.item.itemIdx)}
+                                >
+                                    <ItemImage
+                                        src={userItem.item.itemImg}
+                                        alt={userItem.item.itemName}
+                                    />
                                     <ItemName>{userItem.item.itemName}</ItemName>
                                     <ItemDesc>{userItem.item.itemDesc}</ItemDesc>
                                 </ItemCard>
@@ -441,18 +458,20 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                                     <Button onClick={onChangeSkin}>변경</Button>
                                 </SkinItem>
                             )}
-                            {stageInfo.isFinalStage === 'Y' && equippedSkins.tap && equippedSkins.tap.skin.actionType === 'T' && (
-                                <SkinItem>
-                                    <SkinInfo>
-                                        <SkinImage
-                                            src={skinNameToFile[equippedSkins.tap.skin.skinName]}
-                                            alt={equippedSkins.tap.skin.skinName || '탭 스킨'}
-                                        />
-                                        <SkinName>{equippedSkins.tap.skin.skinName || '기본 탭 스킨'}</SkinName>
-                                    </SkinInfo>
-                                    <Button onClick={onChangeSkin}>변경</Button>
-                                </SkinItem>
-                            )}
+                            {stageInfo.isFinalStage === 'Y' &&
+                                equippedSkins.tap &&
+                                equippedSkins.tap.skin.actionType === 'T' && (
+                                    <SkinItem>
+                                        <SkinInfo>
+                                            <SkinImage
+                                                src={skinNameToFile[equippedSkins.tap.skin.skinName]}
+                                                alt={equippedSkins.tap.skin.skinName || '탭 스킨'}
+                                            />
+                                            <SkinName>{equippedSkins.tap.skin.skinName || '기본 탭 스킨'}</SkinName>
+                                        </SkinInfo>
+                                        <Button onClick={onChangeSkin}>변경</Button>
+                                    </SkinItem>
+                                )}
                         </SkinSection>
                     </Section>
                 </ContentSection>
@@ -461,11 +480,6 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                     <Button
                         $primary
                         onClick={() => {
-                            console.log('게임 시작 버튼 클릭:', {
-                                stageInfo,
-                                pollutions,
-                                equippedSkins,
-                            });
                             onStartGame();
                         }}
                     >

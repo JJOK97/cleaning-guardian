@@ -220,8 +220,6 @@ const StageSelectScreen: React.FC = () => {
                 if (email) {
                     const clearedResponse = await getClearedStages(Number(mapId), email);
                     clearedStagesList = clearedResponse.stagelist?.map((stage: StageInfo) => stage.stageIdx) || [];
-                    console.log('현재 맵 클리어된 스테이지:', clearedStagesList);
-                    console.log('현재 맵 ID:', mapId);
                     setClearedStages(clearedStagesList);
                 }
 
@@ -231,8 +229,6 @@ const StageSelectScreen: React.FC = () => {
                 if (email && prevMapId > 0) {
                     const prevMapResponse = await getClearedStages(prevMapId, email);
                     prevMapClearedStages = prevMapResponse.stagelist?.map((stage: StageInfo) => stage.stageIdx) || [];
-                    console.log('이전 맵 클리어된 스테이지:', prevMapClearedStages);
-                    console.log('이전 맵 ID:', prevMapId);
                 }
 
                 const processedStages =
@@ -243,16 +239,6 @@ const StageSelectScreen: React.FC = () => {
                             clearedStagesList.includes(stage.stageIdx - 1) ||
                             clearedStagesList.includes(stage.stageIdx) ||
                             (Number(mapId) > 1 && isFirstStageOfMap && prevMapClearedStages.length === 3); // 이전 맵의 모든 스테이지가 클리어되었을 때
-
-                        console.log(`스테이지 ${stage.stageIdx} 잠금 해제 상태:`, {
-                            stageIdx: stage.stageIdx,
-                            isFirstStageOfMap,
-                            prevStageCleared: clearedStagesList.includes(stage.stageIdx - 1),
-                            currentStageCleared: clearedStagesList.includes(stage.stageIdx),
-                            isNextMapFirstStage: Number(mapId) > 1 && isFirstStageOfMap,
-                            prevMapAllCleared: prevMapClearedStages.length === 3,
-                            isUnlocked,
-                        });
 
                         try {
                             return {
@@ -405,13 +391,26 @@ const StageSelectScreen: React.FC = () => {
                                 <StageName>{stage.stageName}</StageName>
                                 <StageDescription>{stage.stageMission.mission}</StageDescription>
                             </div>
-                            <DifficultyBadge $difficulty={difficulty} style={{ marginTop: 'auto', alignSelf: 'flex-start' }}>
-                                {diffIcon && <img src={diffIcon} alt='난이도' style={{ width: 22, height: 22, marginRight: 6 }} />}
+                            <DifficultyBadge
+                                $difficulty={difficulty}
+                                style={{ marginTop: 'auto', alignSelf: 'flex-start' }}
+                            >
+                                {diffIcon && (
+                                    <img
+                                        src={diffIcon}
+                                        alt='난이도'
+                                        style={{ width: 22, height: 22, marginRight: 6 }}
+                                    />
+                                )}
                                 {getDifficultyText(stage.stageStep)}
                             </DifficultyBadge>
                             {!stage.unlocked && (
                                 <LockedOverlay>
-                                    <img src={lockerIcon} alt='잠김' style={{ width: 48, height: 48 }} />
+                                    <img
+                                        src={lockerIcon}
+                                        alt='잠김'
+                                        style={{ width: 48, height: 48 }}
+                                    />
                                 </LockedOverlay>
                             )}
                         </StageCard>

@@ -19,17 +19,14 @@ const CollectionScreen: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             if (!user?.email) {
-                console.log('사용자 이메일이 없습니다.');
                 return;
             }
 
             try {
                 setLoading(true);
-                console.log('데이터 요청 시작');
 
                 // 사용자별 수집 목록 API만 호출
                 const collectionsData = await getUserCollections(user.email);
-                console.log('받은 데이터:', collectionsData);
 
                 if (collectionsData.success) {
                     setPollutions(collectionsData.data.pollutions);
@@ -49,7 +46,6 @@ const CollectionScreen: React.FC = () => {
     }, [user?.email]);
 
     const handleCardClick = (pollution: Pollution) => {
-        console.log('오염물질 카드 클릭:', pollution);
         setSelectedPollution(pollution);
         setIsModalOpen(true);
     };
@@ -78,7 +74,11 @@ const CollectionScreen: React.FC = () => {
                     <h2>수집 완료</h2>
                     <div className='pollution-grid'>
                         {collectedPollutions.map((pollution) => (
-                            <PollutionCard key={pollution.polIdx} pollution={pollution} onClick={() => handleCardClick(pollution)} />
+                            <PollutionCard
+                                key={pollution.polIdx}
+                                pollution={pollution}
+                                onClick={() => handleCardClick(pollution)}
+                            />
                         ))}
                     </div>
                 </div>
@@ -87,14 +87,21 @@ const CollectionScreen: React.FC = () => {
                     <h2>미수집</h2>
                     <div className='pollution-grid'>
                         {notCollectedPollutions.map((pollution) => (
-                            <PollutionCard key={pollution.polIdx} pollution={pollution} onClick={() => handleCardClick(pollution)} />
+                            <PollutionCard
+                                key={pollution.polIdx}
+                                pollution={pollution}
+                                onClick={() => handleCardClick(pollution)}
+                            />
                         ))}
                     </div>
                 </div>
             </div>
 
             {isModalOpen && selectedPollution && (
-                <PollutionDetailModal pollution={selectedPollution} onClose={() => setIsModalOpen(false)} />
+                <PollutionDetailModal
+                    pollution={selectedPollution}
+                    onClose={() => setIsModalOpen(false)}
+                />
             )}
         </div>
     );

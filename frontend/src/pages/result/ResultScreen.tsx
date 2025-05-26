@@ -99,16 +99,13 @@ const ResultScreen: React.FC = () => {
 
         try {
             const response = await checkStageClear(gameResult.stageIdx, gameResult.email);
-            console.log('Stage clear check response:', response);
 
             if (response.is_final_stage === 'Y') {
                 // 다음 맵의 스테이지 선택 화면으로 이동
                 const nextMapIdx = Number(gameResult.mapIdx) + 1;
-                console.log('Moving to main screen with next map:', nextMapIdx);
                 navigate('/main', { state: { selectedMap: nextMapIdx } });
             } else {
                 const nextStageIdx = gameResult.stageIdx + 1;
-                console.log('Moving to next stage:', nextStageIdx, 'with mapId:', gameResult.mapIdx);
                 navigate(`/game/${gameResult.mapIdx}/${nextStageIdx}`);
             }
         } catch (error) {
@@ -141,7 +138,9 @@ const ResultScreen: React.FC = () => {
 
     return (
         <ResultContainer>
-            <ResultTitle>{gameResult.success && gameResult.successYn === 'Y' ? '스테이지 클리어!' : '스테이지 실패'}</ResultTitle>
+            <ResultTitle>
+                {gameResult.success && gameResult.successYn === 'Y' ? '스테이지 클리어!' : '스테이지 실패'}
+            </ResultTitle>
             <ResultMessage>스테이지 {gameResult.stageIdx}</ResultMessage>
 
             {rewards.length > 0 && (
@@ -194,7 +193,8 @@ const ResultScreen: React.FC = () => {
                                 }}
                             />
                             <div style={{ fontWeight: 'bold', marginBottom: 6, textAlign: 'center' }}>
-                                {reward.itemName || (reward.type === 'POINT' ? '포인트' : reward.type === 'CASH' ? '캐시' : '아이템')}
+                                {reward.itemName ||
+                                    (reward.type === 'POINT' ? '포인트' : reward.type === 'CASH' ? '캐시' : '아이템')}
                             </div>
                             <div style={{ color: '#4caf50' }}>+{reward.value}</div>
                         </div>
