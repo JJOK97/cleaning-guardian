@@ -65,24 +65,35 @@ const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 <ItemImage
                     src={
                         isItem
-                            ? (item as UserItem).item.itemImg
-                            : (item as UserSkinData).skin?.skinImg || '/src/assets/img/skins/default.png'
+                            ? `/src/assets/img/items/${(item as UserItem).item.itemImg}.png`
+                            : `/src/assets/img/skins/${(item as UserSkinData).skin?.skinImg}` ||
+                              '/src/assets/img/skins/default.png'
                     }
                     alt={isItem ? (item as UserItem).item.itemName : (item as UserSkinData).skin?.skinName || '스킨'}
                 />
-                <ItemName>{isItem ? (item as UserItem).item.itemName : (item as UserSkinData).skin?.skinName || '스킨'}</ItemName>
+                <ItemName>
+                    {isItem ? (item as UserItem).item.itemName : (item as UserSkinData).skin?.skinName || '스킨'}
+                </ItemName>
                 <ItemDescription>
                     {isItem ? (item as UserItem).item.itemDesc : (item as UserSkinData).skin?.skinDesc || '스킨 설명'}
                 </ItemDescription>
                 <ItemCount>
-                    {isItem ? `보유 수량: ${(item as UserItem).count}` : isEquipped ? `보유 (${equippedType} 장착됨)` : '보유'}
+                    {isItem
+                        ? `보유 수량: ${(item as UserItem).count}`
+                        : isEquipped
+                        ? `보유 (${equippedType} 장착됨)`
+                        : '보유'}
                 </ItemCount>
                 {isItem && !isEquipped && (
                     <SlotContainer>
                         <SlotLabel>장착 슬롯 선택:</SlotLabel>
                         <SlotButtons>
                             {[1, 2, 3].map((slot) => (
-                                <SlotButton key={slot} $selected={selectedSlot === slot} onClick={() => setSelectedSlot(slot)}>
+                                <SlotButton
+                                    key={slot}
+                                    $selected={selectedSlot === slot}
+                                    onClick={() => setSelectedSlot(slot)}
+                                >
                                     {slot}
                                 </SlotButton>
                             ))}
@@ -91,9 +102,13 @@ const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 )}
                 <ButtonContainer>
                     {isEquipped ? (
-                        <UnequipButton onClick={onUnequip}>{isItem ? '장착 해제' : `${equippedType} 장착 해제`}</UnequipButton>
+                        <UnequipButton onClick={onUnequip}>
+                            {isItem ? '장착 해제' : `${equippedType} 장착 해제`}
+                        </UnequipButton>
                     ) : (
-                        <EquipButton onClick={() => onEquip(selectedSlot)}>{isItem ? '장착하기' : '장착하기'}</EquipButton>
+                        <EquipButton onClick={() => onEquip(selectedSlot)}>
+                            {isItem ? '장착하기' : '장착하기'}
+                        </EquipButton>
                     )}
                 </ButtonContainer>
             </ModalContent>

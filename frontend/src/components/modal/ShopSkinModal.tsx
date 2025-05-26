@@ -95,7 +95,10 @@ const ShopSkinModal: React.FC<ShopSkinModalProps> = ({ skin, onClose, onPurchase
     return (
         <ModalOverlay onClick={onClose}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
-                <SkinImage src={skin.skinImg} alt={skin.skinName} />
+                <SkinImage
+                    src={`/src/assets/img/skins/${skin.skinImg}`}
+                    alt={skin.skinName}
+                />
                 <SkinName>{skin.skinName}</SkinName>
                 <SkinDescription>
                     {skin.actionType === 'S' ? '슬라이스' : '탭'} 스킨입니다.
@@ -106,15 +109,24 @@ const ShopSkinModal: React.FC<ShopSkinModalProps> = ({ skin, onClose, onPurchase
                 </SkinPrice>
                 <ButtonGroup>
                     {!skin.isOwned ? (
-                        <Button $variant='primary' onClick={handlePurchase}>
+                        <Button
+                            $variant='primary'
+                            onClick={handlePurchase}
+                        >
                             구매하기
                         </Button>
                     ) : (
-                        <Button $variant='secondary' onClick={onClose}>
+                        <Button
+                            $variant='secondary'
+                            onClick={onClose}
+                        >
                             보유중
                         </Button>
                     )}
-                    <Button $variant='secondary' onClick={onClose}>
+                    <Button
+                        $variant='secondary'
+                        onClick={onClose}
+                    >
                         닫기
                     </Button>
                 </ButtonGroup>

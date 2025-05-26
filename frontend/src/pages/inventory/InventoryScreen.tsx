@@ -278,7 +278,7 @@ const InventoryScreen: React.FC = () => {
                                       }}
                                   >
                                       <ItemIcon
-                                          src={(item as UserItem).item.itemImg}
+                                          src={`/src/assets/img/items/${(item as UserItem).item.itemImg}.png`}
                                           alt={(item as UserItem).item.itemName}
                                       />
                                       <ItemName>{(item as UserItem).item.itemName}</ItemName>
@@ -308,7 +308,7 @@ const InventoryScreen: React.FC = () => {
                                           }}
                                       >
                                           <ItemIcon
-                                              src={displayImg}
+                                              src={`/src/assets/img/skins/${displayImg}`}
                                               alt={displayName}
                                           />
                                           <ItemName>{displayName}</ItemName>

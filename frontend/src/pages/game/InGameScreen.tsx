@@ -241,7 +241,19 @@ const InGameScreen: React.FC = () => {
                 },
             });
         }
-    }, [gameData.stageIdx, lives, time, score, currentIndex, maxCombo, navigate, user?.email, pollutantQueue.length, mapId, gameEnded]);
+    }, [
+        gameData.stageIdx,
+        lives,
+        time,
+        score,
+        currentIndex,
+        maxCombo,
+        navigate,
+        user?.email,
+        pollutantQueue.length,
+        mapId,
+        gameEnded,
+    ]);
 
     // 게임 초기화 함수
     const initializeGame = async () => {
@@ -384,7 +396,10 @@ const InGameScreen: React.FC = () => {
             }
 
             // 화면 밖으로 너무 멀리 나가는 경우 방지
-            if (bodyRef.current.position.x < -p.radius * 2 || bodyRef.current.position.x > stageSize.width + p.radius * 2) {
+            if (
+                bodyRef.current.position.x < -p.radius * 2 ||
+                bodyRef.current.position.x > stageSize.width + p.radius * 2
+            ) {
                 // 화면 안으로 다시 들어오도록 힘을 가함
                 Matter.Body.applyForce(bodyRef.current, bodyRef.current.position, {
                     x: bodyRef.current.position.x < 0 ? 0.005 : -0.005,
@@ -429,10 +444,15 @@ const InGameScreen: React.FC = () => {
         return <LoadingScreen />;
     }
 
+    // 스테이지별 배경 이미지 경로 생성
+    const getStageBackground = (stageId: string) => {
+        return `/src/assets/img/ingame/stage${stageId}.png`;
+    };
+
     // 나머지 렌더링 로직
     return (
         <Container>
-            <GameBackground />
+            <GameBackground backgroundImage={getStageBackground(stageId || '1')} />
             <GameUI>
                 <SettingsButton
                     onClick={() => {
@@ -440,7 +460,10 @@ const InGameScreen: React.FC = () => {
                         console.log('설정 버튼 클릭');
                     }}
                 >
-                    <img src='/src/assets/icons/settings.svg' alt='설정' />
+                    <img
+                        src='/src/assets/icons/settings.svg'
+                        alt='설정'
+                    />
                 </SettingsButton>
                 <Score>점수: {score}</Score>
                 <Timer>시간: {time}</Timer>
@@ -665,7 +688,12 @@ const InGameScreen: React.FC = () => {
 
                     {/* 스테이지 경계선 표시 (디버깅용) */}
                     {/* 디버그 표시 - 항상 보이도록 수정 */}
-                    <Circle x={stageSize.width / 2} y={stageSize.height / 2} radius={5} fill='red' />
+                    <Circle
+                        x={stageSize.width / 2}
+                        y={stageSize.height / 2}
+                        radius={5}
+                        fill='red'
+                    />
                 </Layer>
             </Stage>
             <TransitionWrapper $isVisible={true}>

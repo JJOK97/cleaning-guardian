@@ -122,28 +122,45 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({ item, onClose, onPurchase
     return (
         <ModalOverlay onClick={onClose}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
-                <ItemImage src={item.itemImg} alt={item.itemName} />
+                <ItemImage
+                    src={`/src/assets/img/items/${item.itemImg}.png`}
+                    alt={item.itemName}
+                />
                 <ItemName>{item.itemName}</ItemName>
-                <ItemDescription>{item.priceType === 'P' ? '포인트' : '캐시'}로 구매할 수 있는 아이템입니다.</ItemDescription>
+                <ItemDescription>
+                    {item.priceType === 'P' ? '포인트' : '캐시'}로 구매할 수 있는 아이템입니다.
+                </ItemDescription>
                 <ItemPrice>
                     {item.priceType === 'P' ? '포인트' : '캐시'} {item.itemPrice}
                 </ItemPrice>
                 <ButtonGroup>
                     {!item.isOwned ? (
-                        <Button $variant='primary' onClick={handlePurchase}>
+                        <Button
+                            $variant='primary'
+                            onClick={handlePurchase}
+                        >
                             구매하기
                         </Button>
                     ) : (
                         <>
-                            <Button $variant='primary' onClick={handleUse}>
+                            <Button
+                                $variant='primary'
+                                onClick={handleUse}
+                            >
                                 사용하기
                             </Button>
-                            <Button $variant={item.isEquipped ? 'secondary' : 'primary'} onClick={handleEquip}>
+                            <Button
+                                $variant={item.isEquipped ? 'secondary' : 'primary'}
+                                onClick={handleEquip}
+                            >
                                 {item.isEquipped ? '해제하기' : '장착하기'}
                             </Button>
                         </>
                     )}
-                    <Button $variant='secondary' onClick={onClose}>
+                    <Button
+                        $variant='secondary'
+                        onClick={onClose}
+                    >
                         닫기
                     </Button>
                 </ButtonGroup>

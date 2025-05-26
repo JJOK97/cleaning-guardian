@@ -3,8 +3,9 @@ import styled, { keyframes } from 'styled-components';
 import { ProcessedStageInfo } from '@/types/map';
 import { PollutionData } from '@/api/stages';
 import { UserSkinData } from '@/api/skins';
-import { GameItem, UserItem, getUserItems, useItem } from '@/api/game';
-import { pollutionNameToFile, skinNameToFile } from '@/utils/assetMapping';
+import { GameItem, getUserItems, useItem, getEquippedItems } from '@/api/game';
+import { UserItem } from '@/types/inventory';
+import { pollutionNameToFile } from '@/utils/assetMapping';
 import { useAuth } from '@/hooks/useAuth';
 
 interface StageInfoModalProps {
@@ -346,6 +347,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
 }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [userItems, setUserItems] = useState<UserItem[]>([]);
+    const [equippedItems, setEquippedItems] = useState<UserItem[]>([]);
     const { user } = useAuth();
 
     useEffect(() => {
@@ -353,16 +355,29 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
             if (!user?.email) return;
             try {
                 const response = await getUserItems(user.email);
-                if (response.success && response.uitemlist) {
+                if (response && response.success && response.uitemlist) {
                     setUserItems(response.uitemlist);
                 }
             } catch (error) {
-                // 에러 처리
+                console.error('아이템 조회 에러:', error);
+            }
+        };
+
+        const fetchEquippedItems = async () => {
+            if (!user?.email) return;
+            try {
+                const response = await getEquippedItems(user.email);
+                if (response && response.success && response.items) {
+                    setEquippedItems(response.items);
+                }
+            } catch (error) {
+                console.error('장착된 아이템 조회 에러:', error);
             }
         };
 
         if (isOpen) {
             fetchUserItems();
+            fetchEquippedItems();
         }
     }, [isOpen, user?.email]);
 
@@ -370,14 +385,14 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
         if (!user?.email) return;
         try {
             const response = await useItem(user.email, itemIdx);
-            if (response.success) {
+            if (response && response.success) {
                 const updatedItems = await getUserItems(user.email);
-                if (updatedItems.success && updatedItems.uitemlist) {
+                if (updatedItems && updatedItems.success && updatedItems.uitemlist) {
                     setUserItems(updatedItems.uitemlist);
                 }
             }
         } catch (error) {
-            // 에러 처리
+            console.error('아이템 사용 에러:', error);
         }
     };
 
@@ -415,8 +430,11 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                             {pollutions.map((pollution) => (
                                 <PollutionItem key={pollution.polIdx}>
                                     <PollutionImage
-                                        src={pollutionNameToFile[pollution.polName]}
+                                        src={`/src/assets/img/pollution/${pollution.polImg1}`}
                                         alt={pollution.polName}
+                                        onError={(e) => {
+                                            e.currentTarget.src = '/src/assets/img/pollution/pet.png';
+                                        }}
                                     />
                                     <PollutionName>{pollution.polName}</PollutionName>
                                 </PollutionItem>
@@ -425,21 +443,23 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                     </Section>
 
                     <ItemSection>
-                        <SectionTitle>보유 아이템</SectionTitle>
+                        <SectionTitle>장착된 아이템</SectionTitle>
                         <ItemList>
-                            {userItems.map((userItem) => (
-                                <ItemCard
-                                    key={userItem.uitemIdx}
-                                    onClick={() => handleItemUse(userItem.item.itemIdx)}
-                                >
+                            {equippedItems.map((equippedItem) => (
+                                <ItemCard key={equippedItem.userItemIdx}>
                                     <ItemImage
-                                        src={userItem.item.itemImg}
-                                        alt={userItem.item.itemName}
+                                        src={`/src/assets/img/items/${equippedItem.item.itemImg}.png`}
+                                        alt={equippedItem.item.itemName}
                                     />
-                                    <ItemName>{userItem.item.itemName}</ItemName>
-                                    <ItemDesc>{userItem.item.itemDesc}</ItemDesc>
+                                    <ItemName>{equippedItem.item.itemName}</ItemName>
+                                    <ItemDesc>슬롯 {equippedItem.equippedSlot}</ItemDesc>
                                 </ItemCard>
                             ))}
+                            {equippedItems.length === 0 && (
+                                <div style={{ color: '#ccc', textAlign: 'center', padding: '1rem' }}>
+                                    장착된 아이템이 없습니다
+                                </div>
+                            )}
                         </ItemList>
                     </ItemSection>
 
@@ -450,7 +470,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                                 <SkinItem>
                                     <SkinInfo>
                                         <SkinImage
-                                            src={skinNameToFile[equippedSkins.slice.skin.skinName]}
+                                            src={`/src/assets/img/skins/${equippedSkins.slice.skin.skinImg}`}
                                             alt={equippedSkins.slice.skin.skinName || '슬라이스 스킨'}
                                         />
                                         <SkinName>{equippedSkins.slice.skin.skinName || '기본 슬라이스 스킨'}</SkinName>
@@ -464,7 +484,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                                     <SkinItem>
                                         <SkinInfo>
                                             <SkinImage
-                                                src={skinNameToFile[equippedSkins.tap.skin.skinName]}
+                                                src={`/src/assets/img/skins/${equippedSkins.tap.skin.skinImg}`}
                                                 alt={equippedSkins.tap.skin.skinName || '탭 스킨'}
                                             />
                                             <SkinName>{equippedSkins.tap.skin.skinName || '기본 탭 스킨'}</SkinName>

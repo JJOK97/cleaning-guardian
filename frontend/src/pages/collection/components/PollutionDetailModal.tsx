@@ -213,10 +213,19 @@ const PollutionDetailModal: React.FC<PollutionDetailModalProps> = ({ pollution, 
     };
 
     return (
-        <ModalOverlay onClick={handleClose} $isClosing={isClosing}>
-            <ModalContent onClick={(e) => e.stopPropagation()} $isClosing={isClosing}>
+        <ModalOverlay
+            onClick={handleClose}
+            $isClosing={isClosing}
+        >
+            <ModalContent
+                onClick={(e) => e.stopPropagation()}
+                $isClosing={isClosing}
+            >
                 <ImageContainer>
-                    <Image src={pollution.polImg1} alt={pollution.polName} />
+                    <Image
+                        src={`/src/assets/img/pollution/${pollution.polImg1}`}
+                        alt={pollution.polName}
+                    />
                 </ImageContainer>
 
                 <ContentSection>

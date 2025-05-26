@@ -73,7 +73,7 @@ const ItemCard = styled.div`
 const ItemImage = styled.img`
     width: 100px;
     height: 100px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 8px;
 `;
 
@@ -221,7 +221,7 @@ const ShopScreen: React.FC = () => {
                               onClick={() => setSelectedSkin(skin)}
                           >
                               <ItemImage
-                                  src={skin.skinImg}
+                                  src={`/src/assets/img/skins/${skin.skinImg}`}
                                   alt={skin.skinName}
                               />
                               <ItemName>{skin.skinName}</ItemName>
@@ -236,7 +236,7 @@ const ShopScreen: React.FC = () => {
                               onClick={() => setSelectedItem(item)}
                           >
                               <ItemImage
-                                  src={item.itemImg}
+                                  src={`/src/assets/img/items/${item.itemImg}.png`}
                                   alt={item.itemName}
                               />
                               <ItemName>{item.itemName}</ItemName>

@@ -15,10 +15,10 @@ const PollutionCard: React.FC<PollutionCardProps> = ({ pollution, onClick }) => 
         >
             <div className='image-container'>
                 <img
-                    src='/src/assets/img/pollution/pet.png'
+                    src={`/src/assets/img/pollution/${pollution.polImg1}`}
                     alt={pollution.polName}
                     onError={(e) => {
-                        console.error('이미지 로드 실패: pet.png');
+                        console.error(`이미지 로드 실패: ${pollution.polImg1}`);
                         e.currentTarget.src = '/src/assets/img/pollution/pet.png';
                     }}
                 />
