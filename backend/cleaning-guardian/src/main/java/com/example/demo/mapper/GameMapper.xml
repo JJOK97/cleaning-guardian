@@ -52,7 +52,7 @@
            NVL("spawn_weight", 1) as spawnWeight
     FROM "pollutions"
     </select>
-
+    
     <!-- 게임 결과 저장 - 처치한 오염물질 데이터를 user_collection에 기록 -->
     <insert id="saveCollectionData">
         MERGE INTO "user_collection" uc
