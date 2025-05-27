@@ -34,7 +34,7 @@ const ResultContainer = styled.div`
     padding: 20px;
 `;
 
-const ResultCardContainer = styled.div`
+const ResultCardContainer = styled.div<{ $hasRewards: boolean }>`
     position: relative;
     display: flex;
     flex-direction: column;
@@ -42,6 +42,12 @@ const ResultCardContainer = styled.div`
     height: 100%;
     width: 100%;
     max-width: 420px;
+    ${(props) =>
+        !props.$hasRewards &&
+        `
+        justify-content: center;
+        margin-bottom: 5rem;
+    `}
 `;
 
 const ResultIcon = styled.img`
@@ -55,7 +61,7 @@ const ResultIcon = styled.img`
     flex-shrink: 0;
 `;
 
-const ResultCard = styled.div`
+const ResultCard = styled.div<{ $hasRewards: boolean }>`
     background: linear-gradient(145deg, #f5f5dc 0%, #fff8dc 50%, #fffacd 100%),
         radial-gradient(circle at 30% 30%, rgba(139, 69, 19, 0.05) 0%, transparent 50%);
     backdrop-filter: blur(10px);
@@ -68,7 +74,14 @@ const ResultCard = styled.div`
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 80%;
+    height: ${(props) => (props.$hasRewards ? '80%' : 'auto')};
+    ${(props) =>
+        !props.$hasRewards &&
+        `
+        justify-content: center;
+        min-height: 250px;
+        max-height: 330px;
+    `}
     overflow: hidden;
 
     &::before {
@@ -332,7 +345,7 @@ const ResultScreen: React.FC = () => {
 
     return (
         <ResultContainer>
-            <ResultCardContainer>
+            <ResultCardContainer $hasRewards={rewards.length > 0}>
                 <ResultIcon
                     src={
                         gameResult.success && gameResult.successYn === 'Y'
@@ -341,7 +354,7 @@ const ResultScreen: React.FC = () => {
                     }
                     alt={gameResult.success && gameResult.successYn === 'Y' ? '승리' : '패배'}
                 />
-                <ResultCard>
+                <ResultCard $hasRewards={rewards.length > 0}>
                     <ResultHeader>
                         <ResultTitle>
                             {gameResult.success && gameResult.successYn === 'Y' ? '미션 완료!' : '미션 실패'}
@@ -349,8 +362,8 @@ const ResultScreen: React.FC = () => {
                         <ResultSubtitle>스테이지 {gameResult.stageIdx}</ResultSubtitle>
                     </ResultHeader>
 
-                    <ScrollableContent>
-                        {rewards.length > 0 && (
+                    {rewards.length > 0 && (
+                        <ScrollableContent>
                             <RewardsContainer>
                                 {rewards.map((reward, idx) => (
                                     <RewardCard key={idx}>
@@ -378,8 +391,8 @@ const ResultScreen: React.FC = () => {
                                     </RewardCard>
                                 ))}
                             </RewardsContainer>
-                        )}
-                    </ScrollableContent>
+                        </ScrollableContent>
+                    )}
 
                     <ButtonContainer>
                         {gameResult?.success && gameResult?.successYn === 'Y' ? (

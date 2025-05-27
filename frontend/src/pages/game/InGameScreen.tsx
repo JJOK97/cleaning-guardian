@@ -662,7 +662,7 @@ const InGameScreen: React.FC = () => {
 
         // 물리 엔진 생성 (중력 더 증가)
         const engine = Matter.Engine.create({
-            gravity: { x: 0, y: 0.5 }, // 0.18 → 0.22로 더 빠르게
+            gravity: { x: 0, y: 0.4 }, // 0.18 → 0.22로 더 빠르게
             enableSleeping: false,
         });
 
@@ -683,7 +683,7 @@ const InGameScreen: React.FC = () => {
                 restitution: 0.1,
                 friction: 0.01,
                 density: 0.001,
-                frictionAir: 0.002, // 공기 저항 약간 증가로 부드러운 움직임
+                frictionAir: 0.003, // 공기 저항 약간 증가로 부드러운 움직임
                 isSleeping: false,
                 sleepThreshold: Infinity,
                 // 🎯 오염물질들끼리 충돌하지 않도록 설정
@@ -699,7 +699,7 @@ const InGameScreen: React.FC = () => {
 
             const velocity = {
                 x: (Math.random() - 0.5) * 0.4, // 좌우 움직임 더 증가 (0.36 → 0.4)
-                y: 0.6 + Math.random() * 0.4, // 떨어지는 속도 더 증가 (0.48~0.72 → 0.6~0.9)
+                y: 0.6 + Math.random() * 0.35, // 떨어지는 속도 더 증가 (0.48~0.72 → 0.6~0.9)
             };
             Matter.Body.setVelocity(body, velocity);
             Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.3);
