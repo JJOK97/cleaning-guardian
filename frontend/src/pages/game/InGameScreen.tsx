@@ -6,6 +6,7 @@ import SliceTrail from '@/components/game/SliceTrail';
 import Pollutant from '@/components/game/Pollutant';
 import GameBackground from '@/components/game/GameBackground';
 import GamePreparationModal from '@/components/game/GamePreparationModal';
+import GameEndTransition from '@/components/game/GameEndTransition';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import TransitionWrapper from '@/components/common/TransitionWrapper';
 import Matter from 'matter-js';
@@ -247,6 +248,7 @@ const InGameScreen: React.FC = () => {
     const [gameEnded, setGameEnded] = useState(false);
     const [gameStarted, setGameStarted] = useState(false);
     const [showPreparation, setShowPreparation] = useState(true);
+    const [showEndTransition, setShowEndTransition] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [screenShake, setScreenShake] = useState(false);
 
@@ -505,7 +507,15 @@ const InGameScreen: React.FC = () => {
             // API 실패해도 계속 진행
         }
 
-        // 결과 화면으로 이동
+        // 전환 화면 표시
+        setShowEndTransition(true);
+    }, [gameEnded, user?.email, gameData.stageIdx, defeatedCount, targetDefeatCount, pollutionLevel, activeBodies]);
+
+    // 결과 화면으로 이동하는 함수
+    const navigateToResult = useCallback(() => {
+        const isSuccess = defeatedCount >= targetDefeatCount && pollutionLevel < 100;
+        const successYn = isSuccess ? 'Y' : 'N';
+
         const result = {
             score,
             stageIdx: gameData.stageIdx,
@@ -515,23 +525,12 @@ const InGameScreen: React.FC = () => {
             success: isSuccess,
             message: isSuccess ? '성공!' : '실패!',
             successYn,
-            email: user.email,
+            email: user?.email,
             mapIdx: Number(mapId) || 1,
         };
 
         navigate('/result', { state: result });
-    }, [
-        gameEnded,
-        user?.email,
-        gameData.stageIdx,
-        defeatedCount,
-        targetDefeatCount,
-        pollutionLevel,
-        score,
-        mapId,
-        navigate,
-        activeBodies,
-    ]);
+    }, [score, gameData.stageIdx, defeatedCount, targetDefeatCount, pollutionLevel, user?.email, mapId, navigate]);
 
     // 게임 초기화
     const initializeGame = useCallback(async () => {
@@ -569,6 +568,21 @@ const InGameScreen: React.FC = () => {
         }
     }, [user?.email, stageId]);
 
+    // 목표 개수 미리 계산
+    useEffect(() => {
+        if (stageId && mapId) {
+            const currentStage = parseInt(stageId || '1');
+            const mapNumber = parseInt(mapId || '1');
+
+            // 목표 개수 설정 (더 적게)
+            let targetCount = currentStage * 3 + 5; // 스테이지 × 3 + 5 (7스테이지 = 26개)
+            if (mapNumber === 2) targetCount += 3;
+            else if (mapNumber === 3) targetCount += 5;
+            targetCount = Math.max(10, Math.min(targetCount, 50)); // 최소 10개, 최대 50개
+            setTargetDefeatCount(targetCount);
+        }
+    }, [stageId, mapId]);
+
     // 오염물질 큐 생성
     useEffect(() => {
         if (showPreparation || !gameStarted || !gameData.pollutions?.length) return;
@@ -576,15 +590,8 @@ const InGameScreen: React.FC = () => {
         const currentStage = parseInt(stageId || '1');
         const mapNumber = parseInt(mapId || '1');
 
-        // 목표 개수 설정
-        let targetCount = currentStage * 5; // 스테이지 × 5로 변경 (8스테이지 = 40개)
-        if (mapNumber === 2) targetCount += 5;
-        else if (mapNumber === 3) targetCount += 10;
-        targetCount = Math.max(15, Math.min(targetCount, 100)); // 최대 100개까지 허용
-        setTargetDefeatCount(targetCount);
-
-        // 실제 떨어지는 개수 (목표의 2배로 확실히 설정)
-        let totalPollutants = targetCount * 3; // 정확히 2배
+        // 실제 떨어지는 개수 (목표의 3배로 확실히 설정)
+        let totalPollutants = targetDefeatCount * 3;
         totalPollutants = Math.max(30, Math.min(totalPollutants, 200)); // 최소 30개, 최대 200개
 
         const { width, height } = stageSize;
@@ -647,7 +654,7 @@ const InGameScreen: React.FC = () => {
 
         setPollutantQueue(queue);
         setCurrentIndex(0);
-    }, [stageSize, showPreparation, gameStarted, gameData.pollutions, stageId, mapId]);
+    }, [stageSize, showPreparation, gameStarted, gameData.pollutions, stageId, mapId, targetDefeatCount]);
 
     // 물리 엔진 및 스폰 시스템
     useEffect(() => {
@@ -980,12 +987,26 @@ const InGameScreen: React.FC = () => {
                         setGameStarted(true); // 실제 게임 시작
                     }}
                     stageInfo={{
-                        name: '스테이지 시작',
-                        description: '준비되셨나요?',
-                        difficulty: 'easy',
+                        name: `스테이지 ${stageId}`,
+                        description: `목표: ${targetDefeatCount}개 정화\n오염도 100% 도달 시 실패`,
+                        difficulty:
+                            parseInt(stageId || '1') <= 3 ? 'easy' : parseInt(stageId || '1') <= 6 ? 'normal' : 'hard',
                     }}
                 />
             )}
+
+            {showEndTransition && (
+                <GameEndTransition
+                    isVisible={showEndTransition}
+                    isSuccess={defeatedCount >= targetDefeatCount && pollutionLevel < 100}
+                    score={score}
+                    defeatedCount={defeatedCount}
+                    targetCount={targetDefeatCount}
+                    timeSpent={Math.floor((Date.now() - startTime.current) / 1000)}
+                    onComplete={navigateToResult}
+                />
+            )}
+
             <Stage
                 ref={stageRef}
                 width={stageSize.width}
