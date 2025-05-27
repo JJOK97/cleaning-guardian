@@ -577,14 +577,14 @@ const InGameScreen: React.FC = () => {
         const mapNumber = parseInt(mapId || '1');
 
         // 목표 개수 설정
-        let targetCount = currentStage * 10; // 스테이지 × 5로 변경 (8스테이지 = 40개)
+        let targetCount = currentStage * 5; // 스테이지 × 5로 변경 (8스테이지 = 40개)
         if (mapNumber === 2) targetCount += 5;
         else if (mapNumber === 3) targetCount += 10;
         targetCount = Math.max(15, Math.min(targetCount, 100)); // 최대 100개까지 허용
         setTargetDefeatCount(targetCount);
 
         // 실제 떨어지는 개수 (목표의 2배로 확실히 설정)
-        let totalPollutants = targetCount * 4; // 정확히 2배
+        let totalPollutants = targetCount * 3; // 정확히 2배
         totalPollutants = Math.max(30, Math.min(totalPollutants, 200)); // 최소 30개, 최대 200개
 
         const { width, height } = stageSize;
@@ -655,16 +655,16 @@ const InGameScreen: React.FC = () => {
 
         // 물리 엔진 생성 (중력 더 증가)
         const engine = Matter.Engine.create({
-            gravity: { x: 0, y: 0.3 }, // 0.18 → 0.22로 더 빠르게
+            gravity: { x: 0, y: 0.5 }, // 0.18 → 0.22로 더 빠르게
             enableSleeping: false,
         });
 
         engineRef.current = engine;
 
         let spawnIndex = 0;
-        const maxActive = 10; // 동시에 나오는 개수 더 줄임 (3 → 2)
+        const maxActive = 5; // 동시에 나오는 개수 더 줄임 (3 → 2)
         let lastSpawnTime = 0;
-        const spawnInterval = 300; // 스폰 간격 대폭 늘림 (800ms → 1500ms)
+        const spawnInterval = 400; // 스폰 간격 대폭 늘림 (800ms → 1500ms)
 
         // 스폰 함수
         const spawnPollutant = () => {
@@ -692,7 +692,7 @@ const InGameScreen: React.FC = () => {
 
             const velocity = {
                 x: (Math.random() - 0.5) * 0.4, // 좌우 움직임 더 증가 (0.36 → 0.4)
-                y: 0.6 + Math.random() * 0.3, // 떨어지는 속도 더 증가 (0.48~0.72 → 0.6~0.9)
+                y: 0.6 + Math.random() * 0.4, // 떨어지는 속도 더 증가 (0.48~0.72 → 0.6~0.9)
             };
             Matter.Body.setVelocity(body, velocity);
             Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.3);
