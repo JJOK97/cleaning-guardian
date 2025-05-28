@@ -92,7 +92,7 @@ const CollectionHeader: React.FC<CollectionHeaderProps> = ({ totalCount, collect
     return (
         <HeaderContainer>
             <HeaderGradient />
-            <Title>🌍 도감</Title>
+            <Title>오염물 도감</Title>
 
             <ProgressContainer>
                 <ProgressHeader>

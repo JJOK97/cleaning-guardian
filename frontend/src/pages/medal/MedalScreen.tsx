@@ -37,16 +37,16 @@ const fadeIn = keyframes`
     }
 `;
 
-const slideAnimation = keyframes`
+const slideInFromRight = keyframes`
     0% {
         transform: translateX(100%);
         opacity: 0;
     }
-    10% {
+    8% {
         transform: translateX(0);
         opacity: 1;
     }
-    90% {
+    85% {
         transform: translateX(0);
         opacity: 1;
     }
@@ -56,215 +56,230 @@ const slideAnimation = keyframes`
     }
 `;
 
+const shimmer = keyframes`
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+`;
+
 const Container = styled.div`
     min-height: 100vh;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    max-height: 100vh;
+    background: linear-gradient(135deg, #8bc34a 0%, #9ccc65 50%, #aed581 100%);
     padding: 1rem;
-    padding-bottom: 5rem; /* Footer 공간 확보 */
+    padding-bottom: 5rem;
     animation: ${fadeIn} 0.6s ease-out;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* 스크롤 방지 */
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    margin-top: 1rem;
+    justify-content: center;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
 `;
 
 const Header = styled.div`
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 20px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 600px;
 `;
 
 const Title = styled.h1`
     color: #fff;
-    font-size: 1.8rem;
-    margin: 0 0 0.5rem 0;
+    font-size: 1.6rem;
+    margin: 0 0 0.3rem 0;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 `;
 
 const Subtitle = styled.p`
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.9rem;
+    color: rgb(42, 112, 46);
+    font-size: 0.8rem;
     margin: 0;
+    line-height: 1.4;
+`;
+
+const ContentWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: hidden;
+    width: 100%;
+    max-width: 600px;
 `;
 
 const SummaryCard = styled.div`
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 20px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     text-align: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 `;
 
 const SummaryTitle = styled.h2`
     color: #fff;
-    font-size: 1.4rem;
-    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    margin: 0 0 0.8rem 0;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 `;
 
 const SummaryStats = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+
+    @media (max-width: 480px) {
+        gap: 0.8rem;
+    }
 `;
 
 const SummaryStatItem = styled.div`
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
     padding: 1rem;
     text-align: center;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 `;
 
 const SummaryStatValue = styled.div`
-    color: #4caf50;
+    color: #fff;
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 0.3rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 `;
 
 const SummaryStatLabel = styled.div`
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.8rem;
+    line-height: 1.2;
+    font-weight: 500;
+    color: rgb(42, 112, 46);
 `;
 
 const InsightBannerContainer = styled.div`
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, #689f38 0%, #7cb342 50%, #8bc34a 100%);
     border-radius: 20px;
-    padding: 1.5rem;
+    padding: 1rem;
     margin-bottom: 1rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(139, 195, 74, 0.4);
     position: relative;
     overflow: hidden;
-    height: 200px;
+    min-height: 140px;
+    height: auto;
     flex-shrink: 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -200px;
+        width: 200px;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: ${shimmer} 3s infinite;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #7cb342, #8bc34a, #7cb342);
+        border-radius: 20px 20px 0 0;
+    }
 `;
 
 const InsightBannerTitle = styled.h3`
     color: #fff;
-    font-size: 1.2rem;
-    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    margin: 0 0 0.8rem 0;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
 `;
 
 const InsightSlide = styled.div<{ $isActive: boolean }>`
     position: absolute;
-    top: 60px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    top: 45px;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     text-align: center;
     opacity: ${(props) => (props.$isActive ? 1 : 0)};
     transform: ${(props) => (props.$isActive ? 'translateX(0)' : 'translateX(100%)')};
-    transition: all 0.5s ease-in-out;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: ${(props) => (props.$isActive ? slideInFromRight : 'none')} 16s ease-in-out;
+    min-height: 80px;
+    padding: 0.5rem 0;
 `;
 
 const InsightUserName = styled.div`
-    color: #4caf50;
-    font-size: 1.1rem;
+    color: #fff;
+    font-size: 0.9rem;
     font-weight: bold;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 `;
 
 const InsightContent = styled.div`
-    color: #fff;
-    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.8rem;
     line-height: 1.5;
-    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    padding: 0 0.5rem;
 `;
 
 const InsightHighlight = styled.span`
-    color: #4caf50;
+    color: rgb(109, 255, 117);
     font-weight: bold;
-`;
-
-const CollectionGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
-    flex: 1;
-    overflow-y: auto;
-    max-height: 300px;
-
-    &::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 3px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 3px;
-    }
-`;
-
-const CollectionItem = styled.div`
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 1rem;
-    text-align: center;
-    transition: transform 0.3s ease;
-
-    &:hover {
-        transform: translateY(-3px);
-    }
-`;
-
-const PollutionImage = styled.img`
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    margin-bottom: 0.5rem;
-    padding: 0.3rem;
-`;
-
-const PollutionName = styled.h4`
-    color: #fff;
-    font-size: 0.8rem;
-    margin: 0 0 0.5rem 0;
-`;
-
-const CollectionStats = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-`;
-
-const CollectionStat = styled.div`
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.7rem;
-`;
-
-const CollectionStatLabel = styled.span`
-    color: rgba(255, 255, 255, 0.7);
-`;
-
-const CollectionStatValue = styled.span`
-    color: #4caf50;
-    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 `;
 
 const LoadingContainer = styled.div`
@@ -339,7 +354,7 @@ const MedalScreen: React.FC = () => {
         if (insights.length > 0) {
             const interval = setInterval(() => {
                 setCurrentInsightIndex((prev) => (prev + 1) % insights.length);
-            }, 4000); // 4초마다 전환
+            }, 16000); // 16초마다 전환
 
             return () => clearInterval(interval);
         }
@@ -390,11 +405,10 @@ const MedalScreen: React.FC = () => {
         if (waterDefeated > 0) {
             const cleanWater = Math.round(waterDefeated * 0.5); // 1개당 0.5L 가정
             const childrenDays = Math.round(cleanWater / 2); // 어린이 하루 2L
-            const adultDays = Math.round(cleanWater / 2.5); // 어른 하루 2.5L
 
             insights.push({
                 type: 'water',
-                content: `${user.nickname}님은 되찾은 깨끗한 수분량 ${cleanWater}L로 어린이 ${childrenDays}명 또는 어른 ${adultDays}명이 하루 마실 수 있는 물을 정화했어요!`,
+                content: `${user.nickname}님은 되찾은 깨끗한 수분량 <highlight>${cleanWater}L</highlight>로 어린이 <highlight>${childrenDays}명</highlight>이 하루 마실 수 있는 물을 정화했어요!`,
             });
         }
 
@@ -402,23 +416,21 @@ const MedalScreen: React.FC = () => {
         if (landDefeated > 0) {
             const cleanSoil = Math.round(landDefeated * 2); // 1개당 2L 가정
             const trees = Math.round(cleanSoil / 100); // 나무 1그루당 100L
-            const rice = Math.round(cleanSoil / 50); // 쌀 1kg당 50L
 
             insights.push({
                 type: 'land',
-                content: `${user.nickname}님은 되찾은 깨끗한 토사량 ${cleanSoil}L로 나무 ${trees}그루 또는 쌀 ${rice}kg을 키워낼 만큼의 깨끗한 흙을 만들었어요!`,
+                content: `${user.nickname}님은 되찾은 깨끗한 토사량 <highlight>${cleanSoil}L</highlight>로 나무 <highlight>${trees}그루</highlight>를 키워낼 만큼의 깨끗한 흙을 만들었어요!`,
             });
         }
 
         // 대기 오염물질 인사이트
         if (airDefeated > 0) {
             const cleanAir = Math.round(airDefeated * 0.8); // 1개당 0.8㎥ 가정
-            const adultBreath = Math.round(cleanAir / 20); // 어른 하루 20㎥
             const childBreath = Math.round(cleanAir / 10); // 어린이 하루 10㎥
 
             insights.push({
                 type: 'air',
-                content: `${user.nickname}님은 되찾은 깨끗한 공기량 ${cleanAir}㎥로 어른 ${adultBreath}명 또는 어린이 ${childBreath}명이 하루 숨쉴 수 있는 공기를 정화했어요!`,
+                content: `${user.nickname}님은 되찾은 깨끗한 공기량 <highlight>${cleanAir}㎥</highlight>로 어린이 <highlight>${childBreath}명</highlight>이 하루 숨쉴 수 있는 공기를 정화했어요!`,
             });
         }
 
@@ -429,7 +441,7 @@ const MedalScreen: React.FC = () => {
 
             insights.push({
                 type: 'environment',
-                content: `${user.nickname}님의 노력으로 약 ${co2Reduction}kg의 CO2 배출을 줄였어요! 이는 나무 ${treeEquivalent}그루가 1년간 흡수하는 양과 같습니다!`,
+                content: `${user.nickname}님의 노력으로 약 <highlight>${co2Reduction}kg</highlight>의 CO2 배출을 줄였어요! 이는 나무 <highlight>${treeEquivalent}그루</highlight>가 1년간 흡수하는 양과 같습니다!`,
             });
         }
 
@@ -475,101 +487,121 @@ const MedalScreen: React.FC = () => {
         <TransitionWrapper $isVisible={true}>
             <Container>
                 <Header>
-                    <Title>🏆 환경 수호 성과</Title>
-                    <Subtitle>당신의 환경 보호 활동이 지구에 미친 긍정적 영향을 확인하세요</Subtitle>
+                    <Title>환경 수호 성과</Title>
+                    <Subtitle>실제였다면 어땠을까요?</Subtitle>
                 </Header>
 
-                {/* 총계 요약 */}
-                <SummaryCard>
-                    <SummaryTitle>🌍 전체 성과 요약</SummaryTitle>
-                    <SummaryStats>
-                        <SummaryStatItem>
-                            <SummaryStatValue>{formatNumber(totals.totalDefeated)}</SummaryStatValue>
-                            <SummaryStatLabel>총 처치 횟수</SummaryStatLabel>
-                        </SummaryStatItem>
-                        <SummaryStatItem>
-                            <SummaryStatValue>{formatNumber(totals.totalScore)}</SummaryStatValue>
-                            <SummaryStatLabel>총 획득 점수</SummaryStatLabel>
-                        </SummaryStatItem>
-                        <SummaryStatItem>
-                            <SummaryStatValue>{totals.maxCombo}</SummaryStatValue>
-                            <SummaryStatLabel>최고 콤보</SummaryStatLabel>
-                        </SummaryStatItem>
-                        <SummaryStatItem>
-                            <SummaryStatValue>{totals.uniqueTypes}</SummaryStatValue>
-                            <SummaryStatLabel>정화 영역</SummaryStatLabel>
-                        </SummaryStatItem>
-                    </SummaryStats>
-                </SummaryCard>
+                <ContentWrapper>
+                    {/* 총계 요약 */}
+                    <SummaryCard>
+                        <SummaryTitle>전체 성과 요약</SummaryTitle>
+                        <SummaryStats>
+                            <SummaryStatItem>
+                                <SummaryStatValue>{formatNumber(totals.totalDefeated)}</SummaryStatValue>
+                                <SummaryStatLabel>총 처치 횟수</SummaryStatLabel>
+                            </SummaryStatItem>
+                            <SummaryStatItem>
+                                <SummaryStatValue>{formatNumber(totals.totalScore)}</SummaryStatValue>
+                                <SummaryStatLabel>총 획득 점수</SummaryStatLabel>
+                            </SummaryStatItem>
+                        </SummaryStats>
+                        <SummaryStats>
+                            <SummaryStatItem>
+                                <SummaryStatValue>{totals.maxCombo}</SummaryStatValue>
+                                <SummaryStatLabel>최고 콤보</SummaryStatLabel>
+                            </SummaryStatItem>
+                            <SummaryStatItem>
+                                <SummaryStatValue>{totals.uniqueTypes}</SummaryStatValue>
+                                <SummaryStatLabel>정화 영역</SummaryStatLabel>
+                            </SummaryStatItem>
+                        </SummaryStats>
+                    </SummaryCard>
 
-                {/* 환경 영향 인사이트 배너 */}
-                {insights.length > 0 && (
-                    <InsightBannerContainer>
-                        <InsightBannerTitle>🌱 환경 영향 인사이트</InsightBannerTitle>
-                        {insights.map((insight, index) => (
-                            <InsightSlide
-                                key={index}
-                                $isActive={index === currentInsightIndex}
-                            >
-                                <InsightUserName>{user.nickname}님의 환경 기여도</InsightUserName>
-                                <InsightContent>
-                                    {insight.content.split(user.nickname).map((part, i) => (
-                                        <span key={i}>
-                                            {i > 0 && <InsightHighlight>{user.nickname}</InsightHighlight>}
-                                            {part}
-                                        </span>
-                                    ))}
-                                </InsightContent>
-                            </InsightSlide>
-                        ))}
-                    </InsightBannerContainer>
-                )}
+                    {/* 환경 영향 인사이트 배너 */}
+                    {insights.length > 0 && (
+                        <InsightBannerContainer>
+                            <InsightBannerTitle>환경 영향 인사이트</InsightBannerTitle>
+                            {insights.map((insight, index) => (
+                                <InsightSlide
+                                    key={index}
+                                    $isActive={index === currentInsightIndex}
+                                >
+                                    <InsightContent>
+                                        {(() => {
+                                            let content = insight.content;
 
-                {/* 수집 현황 */}
-                {collectionStats.length > 0 ? (
-                    <CollectionGrid>
-                        {collectionStats.map((stat) => (
-                            <CollectionItem key={stat.statsIdx}>
-                                <PollutionImage
-                                    src={`/assets/img/pollution/${stat.pollutionImage || 'default.png'}`}
-                                    alt={stat.pollutionName || '오염물질'}
-                                    onError={(e) => {
-                                        e.currentTarget.src = '/assets/img/pollution/pet.png';
-                                    }}
-                                />
-                                <PollutionName>{stat.pollutionName || `오염물질 ${stat.polIdx}`}</PollutionName>
-                                <CollectionStats>
-                                    <CollectionStat>
-                                        <CollectionStatLabel>처치</CollectionStatLabel>
-                                        <CollectionStatValue>{formatNumber(stat.totalDefeated)}개</CollectionStatValue>
-                                    </CollectionStat>
-                                    <CollectionStat>
-                                        <CollectionStatLabel>점수</CollectionStatLabel>
-                                        <CollectionStatValue>{formatNumber(stat.totalScore)}점</CollectionStatValue>
-                                    </CollectionStat>
-                                    <CollectionStat>
-                                        <CollectionStatLabel>콤보</CollectionStatLabel>
-                                        <CollectionStatValue>{stat.maxCombo}</CollectionStatValue>
-                                    </CollectionStat>
-                                </CollectionStats>
-                            </CollectionItem>
-                        ))}
-                    </CollectionGrid>
-                ) : (
-                    <div
-                        style={{
-                            textAlign: 'center',
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            padding: '2rem',
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            borderRadius: '16px',
-                        }}
-                    >
-                        아직 수집한 오염물질이 없습니다.
-                        <br />
-                        게임을 플레이하여 환경을 보호해보세요!
-                    </div>
-                )}
+                                            // 닉네임 강조
+                                            const parts = content.split(user.nickname);
+                                            content = parts.join('<username>' + user.nickname + '</username>');
+
+                                            // HTML 태그를 파싱하여 JSX로 변환
+                                            const parseContent = (text: string) => {
+                                                const parts = [];
+                                                let currentIndex = 0;
+
+                                                // highlight 태그 찾기
+                                                const highlightRegex = /<highlight>(.*?)<\/highlight>/g;
+                                                let match;
+
+                                                while ((match = highlightRegex.exec(text)) !== null) {
+                                                    // 태그 이전 텍스트 추가
+                                                    if (match.index > currentIndex) {
+                                                        const beforeText = text.slice(currentIndex, match.index);
+                                                        // username 태그 처리
+                                                        const usernameParts =
+                                                            beforeText.split(/<username>(.*?)<\/username>/);
+                                                        usernameParts.forEach((part, i) => {
+                                                            if (i % 2 === 0) {
+                                                                parts.push(part);
+                                                            } else {
+                                                                parts.push(
+                                                                    <InsightHighlight key={`user-${parts.length}`}>
+                                                                        {part}
+                                                                    </InsightHighlight>,
+                                                                );
+                                                            }
+                                                        });
+                                                    }
+
+                                                    // highlight 태그 내용 추가
+                                                    parts.push(
+                                                        <InsightHighlight key={`highlight-${parts.length}`}>
+                                                            {match[1]}
+                                                        </InsightHighlight>,
+                                                    );
+
+                                                    currentIndex = match.index + match[0].length;
+                                                }
+
+                                                // 남은 텍스트 추가
+                                                if (currentIndex < text.length) {
+                                                    const remainingText = text.slice(currentIndex);
+                                                    const usernameParts =
+                                                        remainingText.split(/<username>(.*?)<\/username>/);
+                                                    usernameParts.forEach((part, i) => {
+                                                        if (i % 2 === 0) {
+                                                            parts.push(part);
+                                                        } else {
+                                                            parts.push(
+                                                                <InsightHighlight key={`user-${parts.length}`}>
+                                                                    {part}
+                                                                </InsightHighlight>,
+                                                            );
+                                                        }
+                                                    });
+                                                }
+
+                                                return parts;
+                                            };
+
+                                            return parseContent(content);
+                                        })()}
+                                    </InsightContent>
+                                </InsightSlide>
+                            ))}
+                        </InsightBannerContainer>
+                    )}
+                </ContentWrapper>
             </Container>
         </TransitionWrapper>
     );

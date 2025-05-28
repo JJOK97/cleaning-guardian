@@ -124,6 +124,7 @@
     align-items: flex-start;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+    align-items: center;
 }
 
 .pollution-grid::-webkit-scrollbar {
@@ -238,8 +239,8 @@
     }
 
     .collection-section h2 {
-        font-size: 0.8rem;
-        margin-bottom: 4px;
+        font-size: 1em;
+        margin-bottom: 5px;
     }
 
     .pollution-grid {
