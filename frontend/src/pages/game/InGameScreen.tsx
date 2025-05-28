@@ -601,16 +601,7 @@ const InGameScreen: React.FC = () => {
 
         // 전환 화면 표시
         setShowEndTransition(true);
-    }, [
-        gameEnded,
-        user?.email,
-        gameData.stageIdx,
-        defeatedCount,
-        targetDefeatCount,
-        pollutionLevel,
-        activeBodies,
-        defeatedPollutants,
-    ]);
+    }, [gameEnded, user?.email, gameData.stageIdx, defeatedCount, targetDefeatCount, pollutionLevel, activeBodies, defeatedPollutants]);
 
     // 결과 화면으로 이동하는 함수
     const navigateToResult = useCallback(() => {
@@ -717,8 +708,8 @@ const InGameScreen: React.FC = () => {
         const mapNumber = parseInt(mapId || '1');
 
         // 실제 떨어지는 개수 (목표의 3배로 확실히 설정)
-        let totalPollutants = targetDefeatCount * 3;
-        totalPollutants = Math.max(30, Math.min(totalPollutants, 200)); // 최소 30개, 최대 200개
+        let totalPollutants = targetDefeatCount * 4;
+        totalPollutants = Math.max(80, Math.min(totalPollutants, 200)); // 최소 30개, 최대 200개
 
         const { width, height } = stageSize;
         const queue: PollutantBody[] = [];
@@ -856,7 +847,7 @@ const InGameScreen: React.FC = () => {
             if (!engineRef.current || gameEnded) return;
 
             // 델타 타임 계산으로 부드러운 애니메이션
-            const deltaTime = Math.min(currentTime - lastTime, 33.33); // 최대 30fps로 제한
+            const deltaTime = Math.min(currentTime - lastTime, 16.67); // 최대 60fps로 제한
             lastTime = currentTime;
 
             // 물리 엔진 업데이트를 더 부드럽게
@@ -876,9 +867,7 @@ const InGameScreen: React.FC = () => {
                 // 화면 밖 체크
                 const margin = pollutant.radius * 2;
                 const isOffScreen =
-                    body.position.y > stageSize.height + margin ||
-                    body.position.x < -margin ||
-                    body.position.x > stageSize.width + margin;
+                    body.position.y > stageSize.height + margin || body.position.x < -margin || body.position.x > stageSize.width + margin;
 
                 if (isOffScreen) {
                     // 오염도 증가 (일반 오염물질만)
@@ -1039,32 +1028,20 @@ const InGameScreen: React.FC = () => {
 
     // 나머지 렌더링 로직
     return (
-        <Container
-            data-testid='game-container'
-            $screenShake={screenShake}
-            $pollutionLevel={pollutionLevel}
-        >
+        <Container data-testid='game-container' $screenShake={screenShake} $pollutionLevel={pollutionLevel}>
             <GameBackground backgroundImage={getStageBackground(stageId || '1')} />
             <GameUI>
                 <TopGameUI>
                     <LeftSection>
                         <Timer>
-                            <img
-                                src='/assets/img/common/clock.png'
-                                alt='시간'
-                                style={{ width: '24px', height: '24px' }}
-                            />
+                            <img src='/assets/img/common/clock.png' alt='시간' style={{ width: '24px', height: '24px' }} />
                             {time}초
                         </Timer>
                     </LeftSection>
 
                     <RightSection>
                         <Score>
-                            <img
-                                src='/assets/img/common/trophy.png'
-                                alt='점수'
-                                style={{ width: '24px', height: '24px' }}
-                            />
+                            <img src='/assets/img/common/trophy.png' alt='점수' style={{ width: '24px', height: '24px' }} />
                             {score.toLocaleString()}
                         </Score>
                     </RightSection>
@@ -1079,10 +1056,7 @@ const InGameScreen: React.FC = () => {
                             style={{
                                 width: '24px',
                                 height: '24px',
-                                filter:
-                                    pollutionLevel > 60
-                                        ? `hue-rotate(${Math.min(pollutionLevel * 2, 120)}deg) saturate(1.5)`
-                                        : 'none',
+                                filter: pollutionLevel > 60 ? `hue-rotate(${Math.min(pollutionLevel * 2, 120)}deg) saturate(1.5)` : 'none',
                             }}
                         />
                     </PollutionIcon>
@@ -1109,8 +1083,7 @@ const InGameScreen: React.FC = () => {
                     stageInfo={{
                         name: `스테이지 ${stageId}`,
                         description: `목표: ${targetDefeatCount}개 정화\n오염도 100% 도달 시 실패`,
-                        difficulty:
-                            parseInt(stageId || '1') <= 3 ? 'easy' : parseInt(stageId || '1') <= 6 ? 'normal' : 'hard',
+                        difficulty: parseInt(stageId || '1') <= 3 ? 'easy' : parseInt(stageId || '1') <= 6 ? 'normal' : 'hard',
                     }}
                 />
             )}
@@ -1275,22 +1248,11 @@ const InGameScreen: React.FC = () => {
                 <Layer>
                     {/* 슬라이스 잔상 효과 */}
                     {sliceTrails.map((trail) => (
-                        <SliceTrail
-                            key={trail.id}
-                            points={trail.points}
-                            opacity={trail.opacity}
-                            isAfterimage={true}
-                        />
+                        <SliceTrail key={trail.id} points={trail.points} opacity={trail.opacity} isAfterimage={true} />
                     ))}
 
                     {/* 현재 슬라이스 트레일 */}
-                    {isSlicing && slicePoints.length >= 4 && (
-                        <SliceTrail
-                            points={slicePoints}
-                            opacity={1}
-                            isAfterimage={false}
-                        />
-                    )}
+                    {isSlicing && slicePoints.length >= 4 && <SliceTrail points={slicePoints} opacity={1} isAfterimage={false} />}
 
                     {/* 다중 오염물질 */}
                     {activePollutants
