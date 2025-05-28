@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import Button from '../common/Button';
+import { getRandomQuiz, Quiz } from '@/api/quiz';
 
 // 애니메이션 키프레임들
 const fadeIn = keyframes`
@@ -164,6 +165,28 @@ const StageDescription = styled.p`
     }
 `;
 
+const QuizContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+`;
+
+const QuizLabel = styled.div`
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+`;
+
+const QuizAnswer = styled.div`
+    color: #4fc3f7;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+`;
+
 const CountdownContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -309,9 +332,24 @@ const GamePreparationModal: React.FC<GamePreparationModalProps> = ({ isOpen, onC
     const [items, setItems] = useState<PassiveItem[]>(passiveItems);
     const [countdown, setCountdown] = useState(5); // 5초로 늘려서 배경 로딩 시간 확보
     const [isReady, setIsReady] = useState(false);
+    const [quiz, setQuiz] = useState<Quiz | null>(null);
 
     useEffect(() => {
         if (isOpen) {
+            // 퀴즈 가져오기
+            const fetchQuiz = async () => {
+                try {
+                    const response = await getRandomQuiz();
+                    if (response.success && response.quiz) {
+                        setQuiz(response.quiz);
+                    }
+                } catch (error) {
+                    console.error('퀴즈 로드 실패:', error);
+                }
+            };
+
+            fetchQuiz();
+
             // 2초 후에 준비 완료로 설정 (배경 로딩 시간 확보)
             const readyTimer = setTimeout(() => {
                 setIsReady(true);
@@ -352,7 +390,14 @@ const GamePreparationModal: React.FC<GamePreparationModalProps> = ({ isOpen, onC
 
                 <StageCard>
                     <StageTitle>{stageInfo.name}</StageTitle>
-                    <StageDescription>{stageInfo.description}</StageDescription>
+                    {quiz ? (
+                        <QuizContainer>
+                            <QuizLabel>💡 환경 상식 퀴즈</QuizLabel>
+                            <StageDescription>{quiz.quizDesc}</StageDescription>
+                        </QuizContainer>
+                    ) : (
+                        <StageDescription>{stageInfo.description}</StageDescription>
+                    )}
                 </StageCard>
 
                 {!isReady ? (

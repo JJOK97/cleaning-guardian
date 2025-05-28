@@ -711,7 +711,7 @@ const StageInfoModal: React.FC<StageInfoModalProps> = ({
                     $theme={theme}
                     onClick={onStartGame}
                 >
-                    🎮 게임 시작
+                    게임 시작
                 </StartButton>
             </ModalContent>
         </ModalOverlay>
