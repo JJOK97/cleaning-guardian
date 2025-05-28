@@ -36,21 +36,6 @@ const pulse = keyframes`
     }
 `;
 
-const sparkle = keyframes`
-    0% {
-        opacity: 0;
-        transform: scale(0) rotate(0deg);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1) rotate(180deg);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(0) rotate(360deg);
-    }
-`;
-
 const Overlay = styled.div`
     position: fixed;
     top: 0;
@@ -179,27 +164,6 @@ const StatValue = styled.span<{ $highlight?: boolean }>`
     color: ${(props) => (props.$highlight ? '#4CAF50' : 'white')};
 `;
 
-const Sparkles = styled.div`
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: hidden;
-`;
-
-const Sparkle = styled.div<{ $delay: number; $x: number; $y: number }>`
-    position: absolute;
-    left: ${(props) => props.$x}%;
-    top: ${(props) => props.$y}%;
-    width: 20px;
-    height: 20px;
-    color: #ffd700;
-    font-size: 1.5rem;
-    animation: ${sparkle} 2s ease-in-out ${(props) => props.$delay}s infinite;
-`;
-
 const CountdownText = styled.div`
     color: rgba(255, 255, 255, 0.8);
     font-size: 1rem;
@@ -247,21 +211,8 @@ const GameEndTransition: React.FC<GameEndTransitionProps> = ({
 
     if (!isVisible) return null;
 
-    const sparkleElements = Array.from({ length: isSuccess ? 12 : 0 }, (_, i) => (
-        <Sparkle
-            key={i}
-            $delay={i * 0.2}
-            $x={Math.random() * 100}
-            $y={Math.random() * 100}
-        >
-            ✨
-        </Sparkle>
-    ));
-
     return (
         <Overlay>
-            {isSuccess && <Sparkles>{sparkleElements}</Sparkles>}
-
             <Container>
                 <ResultIcon $isSuccess={isSuccess}>{isSuccess ? '🎉' : '💥'}</ResultIcon>
 

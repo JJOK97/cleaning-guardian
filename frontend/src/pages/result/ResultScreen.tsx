@@ -271,7 +271,6 @@ const ResultScreen: React.FC = () => {
         if (result.success && result.successYn === 'Y' && !rewardProcessed) {
             const stageReward = stageRewards[result.stageIdx];
             if (stageReward) {
-                console.log('🎁 스테이지 보상 설정:', stageReward);
                 setRewards(stageReward);
                 setRewardProcessed(true); // 플래그 설정
 
@@ -281,7 +280,6 @@ const ResultScreen: React.FC = () => {
                 console.warn('⚠️ 스테이지 보상 정보 없음:', result.stageIdx);
             }
         } else {
-            console.log('❌ 게임 실패로 보상 없음');
         }
     }, [location, navigate, rewardProcessed]);
 

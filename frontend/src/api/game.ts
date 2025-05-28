@@ -2,8 +2,6 @@ import api from './index';
 import { Reward } from '@/types/reward';
 import { UserItem } from '@/types/inventory';
 
-const BASE_URL = 'http://54.180.101.153:8088/api/v1';
-
 export interface UserPlayResponse {
     success: boolean;
     message: string;
@@ -193,12 +191,10 @@ export const postCashReward = async (email: string, value: number): Promise<Rewa
 };
 
 export const postReward = async (email: string, rewards: Reward[]) => {
-    console.log('Posting reward:', { email, rewards });
     try {
         const response = await api.post('/reward', rewards, {
             params: { email },
         });
-        console.log('Reward response:', response.data);
         return response;
     } catch (error) {
         console.error('Reward error:', error);
@@ -212,8 +208,6 @@ export const getUserSkins = async (email: string) => {
         const response = await api.get(`/skins/user`, {
             headers: { email },
         });
-        console.log('getUserSkins 요청:', { email });
-        console.log('getUserSkins 응답:', response.data);
         return response.data;
     } catch (error) {
         console.error('getUserSkins 에러:', error);
@@ -227,8 +221,6 @@ export const getEquippedSkins = async (email: string) => {
         const response = await api.get(`/skins/equipped`, {
             headers: { email },
         });
-        console.log('getEquippedSkins 요청:', { email });
-        console.log('getEquippedSkins 응답:', response.data);
         return response.data;
     } catch (error) {
         console.error('getEquippedSkins 에러:', error);
@@ -242,8 +234,6 @@ export const equipSkin = async (email: string, skinIdx: number) => {
         const response = await api.post(`/skins/equip/${skinIdx}`, null, {
             headers: { email },
         });
-        console.log('equipSkin 요청:', { email, skinIdx });
-        console.log('equipSkin 응답:', response.data);
         return response.data;
     } catch (error) {
         console.error('equipSkin 에러:', error);
@@ -257,8 +247,6 @@ export const unequipSkin = async (email: string, skinIdx: number) => {
         const response = await api.post(`/skins/unequip/${skinIdx}`, null, {
             headers: { email },
         });
-        console.log('unequipSkin 요청:', { email, skinIdx });
-        console.log('unequipSkin 응답:', response.data);
         return response.data;
     } catch (error) {
         console.error('unequipSkin 에러:', error);

@@ -71,15 +71,6 @@ const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
         }
     }
 
-    // 스킨 데이터 구조 확인
-    console.log('Modal item data:', item);
-    console.log('Is item:', isItem);
-    console.log('Is equipped:', isEquipped);
-    if (!isItem) {
-        console.log('Equipped type:', equippedType);
-        console.log('Skin data:', (item as UserSkinData).skin);
-    }
-
     return (
         <ModalOverlay onClick={onClose}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
