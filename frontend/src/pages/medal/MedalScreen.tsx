@@ -354,7 +354,7 @@ const MedalScreen: React.FC = () => {
         if (insights.length > 0) {
             const interval = setInterval(() => {
                 setCurrentInsightIndex((prev) => (prev + 1) % insights.length);
-            }, 16000); // 16초마다 전환
+            }, 10000); // 10초마다 전환
 
             return () => clearInterval(interval);
         }

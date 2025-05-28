@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { UserItem } from '@/types/inventory';
 import { UserSkinData } from '@/api/skins';
 
@@ -13,6 +13,28 @@ interface ItemDetailModalProps {
     equippedSkins: { tap: UserSkinData | null; slice: UserSkinData | null };
     activeTab: 'items' | 'skins';
 }
+
+const fadeIn = keyframes`
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+`;
+
+const sparkle = keyframes`
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+`;
 
 const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
     isOpen,
@@ -122,93 +144,202 @@ const ModalOverlay = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding: 1rem;
+    backdrop-filter: blur(8px);
+    animation: ${fadeIn} 0.3s ease-out;
 `;
 
 const ModalContent = styled.div`
-    background: ${({ theme }) => theme.colors.background.card};
+    background: linear-gradient(135deg, #fff 0%, #fffbeb 50%, #fef3c7 100%);
+    border-radius: 24px;
     padding: 2rem;
-    border-radius: 12px;
-    position: relative;
-    width: 90%;
     max-width: 400px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    border: 3px solid #fcd34d;
+    box-shadow: 0 20px 60px rgba(245, 158, 11, 0.3);
+    backdrop-filter: blur(20px);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #fcd34d, #f59e0b, #fcd34d);
+        border-radius: 24px 24px 0 0;
+    }
+
+    &::after {
+        content: '✨';
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        opacity: 0.7;
+        animation: ${sparkle} 2s ease-in-out infinite;
+    }
 `;
 
 const CloseButton = styled.button`
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: none;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     border: none;
-    font-size: 1.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    color: ${({ theme }) => theme.colors.text.primary};
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    z-index: 10;
+
+    &:hover {
+        transform: scale(1.1) rotate(90deg);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
 `;
 
 const ItemImage = styled.img`
     width: 120px;
     height: 120px;
     object-fit: contain;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #fff 0%, #fef3c7 100%);
+    padding: 1rem;
+    border: 4px solid #fcd34d;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+    filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.2));
+    transition: transform 0.3s ease;
+
+    &:hover {
+        transform: scale(1.05) rotate(2deg);
+    }
 `;
 
 const ItemName = styled.h2`
     font-size: 1.5rem;
-    color: ${({ theme }) => theme.colors.text.primary};
+    color: #92400e;
     text-align: center;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(146, 64, 14, 0.1);
+    margin: 0;
 `;
 
 const ItemDescription = styled.p`
-    color: ${({ theme }) => theme.colors.text.secondary};
+    color: #a16207;
     text-align: center;
     line-height: 1.5;
+    background: rgba(252, 211, 77, 0.2);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 2px solid rgba(245, 158, 11, 0.3);
+    margin: 0;
 `;
 
 const ItemCount = styled.div`
-    color: ${({ theme }) => theme.colors.text.secondary};
+    color: #a16207;
     font-size: 0.9rem;
+    background: rgba(252, 211, 77, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    font-weight: 600;
 `;
 
 const ButtonContainer = styled.div`
     display: flex;
     gap: 1rem;
     margin-top: 1rem;
+    width: 100%;
 `;
 
 const EquipButton = styled.button`
-    padding: 0.8rem 2rem;
-    border-radius: 8px;
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
     border: none;
-    background: ${({ theme }) => theme.colors.primary.main};
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: white;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    font-size: 1rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
 
     &:hover {
         transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+
+        &::before {
+            left: 100%;
+        }
+    }
+
+    &:active {
+        transform: translateY(0);
     }
 `;
 
 const UnequipButton = styled(EquipButton)`
-    background: ${({ theme }) => theme.colors.error.main};
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+
+    &:hover {
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    }
 `;
 
 const SlotContainer = styled.div`
     margin: 10px 0;
     text-align: center;
+    background: rgba(252, 211, 77, 0.1);
+    padding: 1rem;
+    border-radius: 16px;
+    border: 2px solid rgba(245, 158, 11, 0.2);
 `;
 
 const SlotLabel = styled.div`
     font-size: 14px;
-    color: #666;
-    margin-bottom: 5px;
+    color: #92400e;
+    margin-bottom: 10px;
+    font-weight: 600;
 `;
 
 const SlotButtons = styled.div`
@@ -218,19 +349,30 @@ const SlotButtons = styled.div`
 `;
 
 const SlotButton = styled.button<{ $selected: boolean }>`
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    border: 2px solid ${(props) => (props.$selected ? '#4CAF50' : '#ddd')};
-    background-color: ${(props) => (props.$selected ? '#4CAF50' : 'white')};
-    color: ${(props) => (props.$selected ? 'white' : '#666')};
+    border: 3px solid ${(props) => (props.$selected ? '#F59E0B' : '#FCD34D')};
+    background: ${(props) =>
+        props.$selected
+            ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'
+            : 'linear-gradient(135deg, #fff 0%, #FEF3C7 100%)'};
+    color: ${(props) => (props.$selected ? 'white' : '#92400E')};
     font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: ${(props) =>
+        props.$selected ? '0 4px 12px rgba(245, 158, 11, 0.4)' : '0 2px 8px rgba(245, 158, 11, 0.2)'};
 
     &:hover {
-        border-color: #4caf50;
-        color: #4caf50;
+        transform: translateY(-2px) scale(1.05);
+        border-color: #f59e0b;
+        box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3);
+    }
+
+    &:active {
+        transform: translateY(0) scale(1);
     }
 `;
 
