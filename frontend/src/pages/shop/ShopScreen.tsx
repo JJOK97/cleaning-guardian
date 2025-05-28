@@ -419,32 +419,17 @@ const ShopScreen: React.FC = () => {
         const fetchData = async () => {
             try {
                 if (user?.email) {
-                    const [allItemsData, userItemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] =
+                    const [allItemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] =
                         await Promise.all([
                             getAllItems(), // 전체 아이템 목록
-                            getUserItems(user.email), // 사용자 보유 아이템
                             getAllSliceSkins(user.email),
                             getAllTapSkins(user.email),
                             getUserSliceSkins(user.email),
                             getUserTapSkins(user.email),
                         ]);
 
-                    console.log('갱신된 전체 아이템 데이터:', allItemsData);
-                    console.log('갱신된 사용자 아이템 데이터:', userItemsData);
-                    console.log('갱신된 슬라이스 스킨 데이터:', sliceSkinsData);
-                    console.log('갱신된 탭 스킨 데이터:', tapSkinsData);
-                    console.log('갱신된 보유한 슬라이스 스킨:', userSliceSkins);
-                    console.log('갱신된 보유한 탭 스킨:', userTapSkins);
-
-                    // 사용자가 보유한 아이템 인덱스 목록 생성
-                    const ownedItemIndices = new Set(
-                        ((userItemsData as any)?.items || []).map((userItem: any) => userItem.item.itemIdx),
-                    );
-
                     // 전체 아이템에서 사용자가 보유하지 않은 아이템만 필터링
-                    const availableItems = ((allItemsData as any)?.items || []).filter(
-                        (item: any) => !ownedItemIndices.has(item.itemIdx),
-                    );
+                    const availableItems = (allItemsData as any)?.items || [];
 
                     console.log('갱신된 구매 가능 아이템 데이터:', availableItems);
 
