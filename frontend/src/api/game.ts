@@ -114,6 +114,17 @@ export const getUserItems = async (email: string) => {
     }
 };
 
+// 전체 아이템 목록 조회
+export const getAllItems = async () => {
+    try {
+        const response = await api.get(`/items`);
+        return response.data;
+    } catch (error) {
+        console.error('getAllItems 에러:', error);
+        throw error;
+    }
+};
+
 // 아이템 사용
 export const useItem = async (email: string, itemIdx: number): Promise<GameItemsResponse> => {
     try {

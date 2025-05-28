@@ -10,7 +10,8 @@ import GameEndTransition from '@/components/game/GameEndTransition';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import TransitionWrapper from '@/components/common/TransitionWrapper';
 import Matter from 'matter-js';
-import { startGame, completeGame, getStagePollutions } from '@/api/game';
+import { startGame, completeGame, getStagePollutions, processGameCompletion } from '@/api/game';
+import { getEquippedItems, useItem as consumeItem } from '@/api/game';
 import { useAuth } from '@/hooks/useAuth';
 
 const Container = styled.div<{ $screenShake?: boolean; $pollutionLevel?: number }>`
@@ -251,6 +252,8 @@ const InGameScreen: React.FC = () => {
     const [showEndTransition, setShowEndTransition] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [screenShake, setScreenShake] = useState(false);
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [isPreloading, setIsPreloading] = useState(true);
 
     // 스와이프 관련
     const [slicePoints, setSlicePoints] = useState<number[]>([]);
@@ -280,6 +283,9 @@ const InGameScreen: React.FC = () => {
         pollutions: [],
     });
 
+    // 처치한 오염물질 데이터 추적
+    const [defeatedPollutants, setDefeatedPollutants] = useState<Map<number, any>>(new Map());
+
     // 화면 크기
     const [stageSize, setStageSize] = useState({
         width: window.innerWidth,
@@ -305,6 +311,65 @@ const InGameScreen: React.FC = () => {
             setStageSize(newSize);
         }
     }, []);
+
+    // 스테이지별 배경 이미지 경로 생성
+    const getStageBackground = useCallback((stageId: string) => {
+        return `/assets/img/ingame/stage${stageId}.png`;
+    }, []);
+
+    // 이미지 프리로딩 함수
+    const preloadGameImages = useCallback(async () => {
+        try {
+            setIsPreloading(true);
+            const baseImageUrls = [
+                // 게임 배경 이미지
+                getStageBackground(stageId || '1'),
+                // UI 이미지들
+                '/assets/img/common/clock.png',
+                '/assets/img/common/trophy.png',
+                '/assets/img/common/earth.png',
+                // 폭탄 이미지
+                '/assets/img/ingame/bomb.png',
+            ];
+
+            // 오염물질 이미지 URL 생성
+            const pollutionImageUrls = (gameData.pollutions || [])
+                .map((pollution) => (pollution?.polImg1 ? `/assets/img/pollution/${pollution.polImg1}` : null))
+                .filter((url): url is string => url !== null);
+
+            const imageUrls = [...baseImageUrls, ...pollutionImageUrls];
+
+            const imagePromises = imageUrls.map((url) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        resolve(true);
+                    };
+                    img.onerror = (error) => {
+                        console.error(`이미지 로드 실패: ${url}`, error);
+                        // 이미지 로드 실패해도 계속 진행
+                        resolve(false);
+                    };
+                    img.src = url;
+                });
+            });
+
+            const results = await Promise.all(imagePromises);
+            const allLoaded = results.every((result) => result === true);
+
+            if (!allLoaded) {
+                console.warn('일부 이미지 로드에 실패했습니다.');
+            }
+
+            setImagesLoaded(true);
+        } catch (error) {
+            console.error('이미지 프리로딩 실패:', error);
+            // 에러가 발생해도 게임은 계속 진행
+            setImagesLoaded(true);
+        } finally {
+            setIsPreloading(false);
+        }
+    }, [stageId, gameData.pollutions, getStageBackground]);
 
     // 오염물질 처치 함수
     const handlePollutantSlice = useCallback(
@@ -427,6 +492,25 @@ const InGameScreen: React.FC = () => {
                     setScore((prev) => prev + 100);
                     setDefeatedCount((prev) => prev + 1);
 
+                    // 처치한 오염물질 데이터 기록
+                    if (pollutant.pollutionData) {
+                        const polIdx = pollutant.pollutionData.polIdx;
+                        setDefeatedPollutants((prev) => {
+                            const newMap = new Map(prev);
+                            const existing = newMap.get(polIdx) || {
+                                polIdx: polIdx,
+                                defeatedCount: 0,
+                                scoreGained: 0,
+                                maxCombo: 0,
+                            };
+                            existing.defeatedCount += 1;
+                            existing.scoreGained += 100;
+                            existing.maxCombo = Math.max(existing.maxCombo, 1); // 콤보 시스템이 있다면 실제 콤보 값 사용
+                            newMap.set(polIdx, existing);
+                            return newMap;
+                        });
+                    }
+
                     // 🎯 처치된 오염물질은 다른 오염물질과 충돌하지 않도록 설정
                     Matter.Body.set(body, {
                         isSensor: true, // 센서 모드로 변경 (충돌 감지는 하지만 물리적 반응 없음)
@@ -502,14 +586,31 @@ const InGameScreen: React.FC = () => {
         const successYn = isSuccess ? 'Y' : 'N';
 
         try {
+            // 도감 등록 처리 (처치한 오염물질이 있는 경우)
+            if (defeatedPollutants.size > 0) {
+                const pollutantData = Array.from(defeatedPollutants.values());
+                await processGameCompletion(user.email, pollutantData);
+            }
+
+            // 스테이지 클리어 처리
             await completeGame(gameData.stageIdx, user.email, successYn);
         } catch (error) {
+            console.error('게임 종료 처리 실패:', error);
             // API 실패해도 계속 진행
         }
 
         // 전환 화면 표시
         setShowEndTransition(true);
-    }, [gameEnded, user?.email, gameData.stageIdx, defeatedCount, targetDefeatCount, pollutionLevel, activeBodies]);
+    }, [
+        gameEnded,
+        user?.email,
+        gameData.stageIdx,
+        defeatedCount,
+        targetDefeatCount,
+        pollutionLevel,
+        activeBodies,
+        defeatedPollutants,
+    ]);
 
     // 결과 화면으로 이동하는 함수
     const navigateToResult = useCallback(() => {
@@ -542,6 +643,28 @@ const InGameScreen: React.FC = () => {
         try {
             setIsLoading(true);
 
+            // 장착된 아이템 확인 및 소모성 아이템 사용
+            try {
+                const equippedResponse = await getEquippedItems(user.email);
+                if (equippedResponse && (equippedResponse as any).items) {
+                    // 장착된 모든 아이템을 소모 (또는 특정 조건으로 필터링)
+                    const itemsToConsume = (equippedResponse as any).items.filter(
+                        (item: any) => item.item && item.count > 0, // 수량이 있는 아이템만
+                    );
+
+                    // 장착된 아이템 사용
+                    for (const item of itemsToConsume) {
+                        try {
+                            await consumeItem(user.email, item.itemIdx);
+                        } catch (error) {
+                            console.error('아이템 사용 실패:', error);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('장착된 아이템 확인 실패:', error);
+            }
+
             // 게임 시작 API 호출
             const startResponse = await startGame(user.email, parseInt(stageId));
             if (!startResponse.success) {
@@ -561,12 +684,15 @@ const InGameScreen: React.FC = () => {
                 stageIdx: startResponse.stageIdx,
                 pollutions: pollutionsResponse.pollutionsList || [],
             });
+
+            // 이미지 프리로딩
+            await preloadGameImages();
         } catch (error) {
             setIsLoading(false);
         } finally {
             setIsLoading(false);
         }
-    }, [user?.email, stageId]);
+    }, [user?.email, stageId, preloadGameImages]);
 
     // 목표 개수 미리 계산
     useEffect(() => {
@@ -907,14 +1033,9 @@ const InGameScreen: React.FC = () => {
     }, [sliceTrails.length]);
 
     // 로딩 중이거나 사용자 정보가 없으면 로딩 화면 표시
-    if (authLoading || !user || isLoading) {
+    if (authLoading || !user || isLoading || isPreloading || !imagesLoaded) {
         return <LoadingScreen />;
     }
-
-    // 스테이지별 배경 이미지 경로 생성
-    const getStageBackground = (stageId: string) => {
-        return `/assets/img/ingame/stage${stageId}.png`;
-    };
 
     // 나머지 렌더링 로직
     return (
@@ -940,7 +1061,7 @@ const InGameScreen: React.FC = () => {
                     <RightSection>
                         <Score>
                             <img
-                                src='/assets/img/common/thropy.png'
+                                src='/assets/img/common/trophy.png'
                                 alt='점수'
                                 style={{ width: '24px', height: '24px' }}
                             />
@@ -982,9 +1103,8 @@ const InGameScreen: React.FC = () => {
                     onClose={() => setShowPreparation(false)}
                     onStart={() => {
                         startTime.current = Date.now();
-                        // 게임 시작 (데이터는 이미 로딩됨)
                         setShowPreparation(false);
-                        setGameStarted(true); // 실제 게임 시작
+                        setGameStarted(true);
                     }}
                     stageInfo={{
                         name: `스테이지 ${stageId}`,
@@ -1117,7 +1237,6 @@ const InGameScreen: React.FC = () => {
 
                     setSlicePoints((prev) => {
                         const newPoints = [...prev, point.x, point.y];
-
                         // 🎯 슬라이스 감지 최적화: 8개 포인트마다 충돌 검사 (성능 개선)
                         if (newPoints.length % 8 === 0 && activePollutants.length > 0) {
                             setTimeout(() => handlePollutantSlice(), 0); // 비동기로 처리

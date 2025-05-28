@@ -8,6 +8,7 @@ import StageInfoModal from '@/components/modal/StageInfoModal';
 import { startGame } from '@/api/game';
 import { useAuth } from '@/hooks/useAuth';
 import { checkStageClear } from '@/api/stages';
+import LoadingScreen from '@/components/common/LoadingScreen';
 
 // 배경 이미지 import
 import trashIsland from '@/assets/img/stage/trash-island.png';
@@ -210,10 +211,13 @@ const StageSelectScreen: React.FC = () => {
         tap: null,
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [imagesLoaded, setImagesLoaded] = useState(false);
 
     useEffect(() => {
         const fetchStages = async () => {
             try {
+                setIsLoading(true);
                 const stagesResponse = await getMapStages(Number(mapId));
                 const email = localStorage.getItem('email');
                 let clearedStagesList: number[] = [];
@@ -233,12 +237,12 @@ const StageSelectScreen: React.FC = () => {
 
                 const processedStages =
                     stagesResponse.stagelist?.map((stage: StageInfo) => {
-                        const isFirstStageOfMap = stage.stageIdx === Number(mapId) * 3 - 2; // 각 맵의 첫 번째 스테이지 번호 계산
+                        const isFirstStageOfMap = stage.stageIdx === Number(mapId) * 3 - 2;
                         const isUnlocked =
                             isFirstStageOfMap ||
                             clearedStagesList.includes(stage.stageIdx - 1) ||
                             clearedStagesList.includes(stage.stageIdx) ||
-                            (Number(mapId) > 1 && isFirstStageOfMap && prevMapClearedStages.length === 3); // 이전 맵의 모든 스테이지가 클리어되었을 때
+                            (Number(mapId) > 1 && isFirstStageOfMap && prevMapClearedStages.length === 3);
 
                         try {
                             return {
@@ -262,8 +266,52 @@ const StageSelectScreen: React.FC = () => {
                     }) || [];
 
                 setStages(processedStages);
+
+                // 이미지 프리로딩
+                const backgroundImage = getBackgroundImage(mapId || '');
+                const backgroundImageUrl = backgroundImage.replace('url(', '').replace(')', '');
+
+                const imagePromises = [
+                    // 배경 이미지
+                    new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = backgroundImageUrl;
+                    }),
+                    // 아이콘 이미지들
+                    new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = beginIcon;
+                    }),
+                    new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = waveIcon;
+                    }),
+                    new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = fireIcon;
+                    }),
+                    new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = lockerIcon;
+                    }),
+                ];
+
+                await Promise.all(imagePromises);
+                setImagesLoaded(true);
             } catch (error) {
                 console.error('데이터 로딩 실패:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -371,6 +419,10 @@ const StageSelectScreen: React.FC = () => {
                 return '#9E9E9E'; // 회색 (기본)
         }
     };
+
+    if (isLoading || !imagesLoaded) {
+        return <LoadingScreen />;
+    }
 
     return (
         <Container $mapTheme={mapId || ''}>

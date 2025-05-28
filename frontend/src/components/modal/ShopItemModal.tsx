@@ -161,16 +161,26 @@ const ItemTitle = styled.h2`
     text-shadow: 0 2px 4px rgba(73, 80, 87, 0.1);
 `;
 
+const ITEM_DESCRIPTIONS: Record<number, string> = {
+    1: '오염된 구역을 닦아내어 오염도를 소폭 낮춥니다.',
+    2: '강력한 정화 효과로 여러 오염을 한 번에 제거합니다.',
+    3: '오염물질을 안전하게 처리할 수 있습니다.',
+    4: '유해 가스와 미세먼지로부터 캐릭터를 보호합니다.',
+    34: '오염된 지역을 빠르게 정화할 수 있습니다.',
+    8: '넓은 범위의 오염을 한 번에 쓸어낼 수 있습니다.',
+    55: '친환경 미끼로 해로운 생물을 유인해 오염을 줄입니다.',
+    56: '독성 슬러지를 무해하게 중화시킵니다.',
+    57: '땅속 깊은 오염까지 파내어 정화할 수 있습니다.',
+    58: '오염된 토양을 빠르게 회복시킵니다.',
+    59: '넓은 지역에 정화 효과를 퍼뜨립니다.',
+};
+
 const ItemDescription = styled.p`
     color: #6c757d;
-    font-size: 1rem;
+    font-size: 0.9rem;
     margin: 0 0 1.5rem 0;
     text-align: center;
     line-height: 1.5;
-    background: rgba(255, 255, 255, 0.5);
-    padding: 1rem;
-    border-radius: 12px;
-    border: 2px solid rgba(206, 212, 218, 0.3);
 `;
 
 const PriceContainer = styled.div<{ $priceType: 'P' | 'C' }>`
@@ -366,7 +376,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({ item, onClose, onPurchase
 
                 <ItemTitle>{item.itemName}</ItemTitle>
                 <ItemDescription>
-                    {item.priceType === 'P' ? '포인트' : '캐시'}로 구매할 수 있는 아이템입니다.
+                    {ITEM_DESCRIPTIONS[item.itemIdx] ||
+                        (item.priceType === 'P' ? '포인트' : '캐시') + '로 구매할 수 있는 아이템입니다.'}
                 </ItemDescription>
 
                 <PriceContainer $priceType={item.priceType}>

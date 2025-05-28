@@ -528,37 +528,34 @@ const MedalScreen: React.FC = () => {
                                 >
                                     <InsightContent>
                                         {(() => {
-                                            let content = insight.content;
+                                            const content = insight.content;
 
-                                            // 닉네임 강조
-                                            const parts = content.split(user.nickname);
-                                            content = parts.join('<username>' + user.nickname + '</username>');
-
-                                            // HTML 태그를 파싱하여 JSX로 변환
+                                            // 텍스트를 파싱하여 JSX 요소로 변환
                                             const parseContent = (text: string) => {
                                                 const parts = [];
                                                 let currentIndex = 0;
 
-                                                // highlight 태그 찾기
-                                                const highlightRegex = /<highlight>(.*?)<\/highlight>/g;
+                                                // highlight 태그와 닉네임을 동시에 처리
+                                                const regex = /<highlight>(.*?)<\/highlight>/g;
                                                 let match;
 
-                                                while ((match = highlightRegex.exec(text)) !== null) {
-                                                    // 태그 이전 텍스트 추가
+                                                while ((match = regex.exec(text)) !== null) {
+                                                    // 태그 이전 텍스트 추가 (닉네임 처리 포함)
                                                     if (match.index > currentIndex) {
                                                         const beforeText = text.slice(currentIndex, match.index);
-                                                        // username 태그 처리
-                                                        const usernameParts =
-                                                            beforeText.split(/<username>(.*?)<\/username>/);
-                                                        usernameParts.forEach((part, i) => {
-                                                            if (i % 2 === 0) {
-                                                                parts.push(part);
-                                                            } else {
+                                                        const beforeParts = beforeText.split(user.nickname);
+
+                                                        beforeParts.forEach((part, i) => {
+                                                            if (i > 0) {
+                                                                // 닉네임 추가
                                                                 parts.push(
-                                                                    <InsightHighlight key={`user-${parts.length}`}>
-                                                                        {part}
+                                                                    <InsightHighlight key={`nickname-${parts.length}`}>
+                                                                        {user.nickname}
                                                                     </InsightHighlight>,
                                                                 );
+                                                            }
+                                                            if (part) {
+                                                                parts.push(part);
                                                             }
                                                         });
                                                     }
@@ -573,20 +570,22 @@ const MedalScreen: React.FC = () => {
                                                     currentIndex = match.index + match[0].length;
                                                 }
 
-                                                // 남은 텍스트 추가
+                                                // 남은 텍스트 추가 (닉네임 처리 포함)
                                                 if (currentIndex < text.length) {
                                                     const remainingText = text.slice(currentIndex);
-                                                    const usernameParts =
-                                                        remainingText.split(/<username>(.*?)<\/username>/);
-                                                    usernameParts.forEach((part, i) => {
-                                                        if (i % 2 === 0) {
-                                                            parts.push(part);
-                                                        } else {
+                                                    const remainingParts = remainingText.split(user.nickname);
+
+                                                    remainingParts.forEach((part, i) => {
+                                                        if (i > 0) {
+                                                            // 닉네임 추가
                                                             parts.push(
-                                                                <InsightHighlight key={`user-${parts.length}`}>
-                                                                    {part}
+                                                                <InsightHighlight key={`nickname-${parts.length}`}>
+                                                                    {user.nickname}
                                                                 </InsightHighlight>,
                                                             );
+                                                        }
+                                                        if (part) {
+                                                            parts.push(part);
                                                         }
                                                     });
                                                 }

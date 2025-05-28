@@ -240,10 +240,7 @@ const ItemDescription = styled.p`
     color: #a16207;
     text-align: center;
     line-height: 1.5;
-    background: rgba(252, 211, 77, 0.2);
-    padding: 1rem;
-    border-radius: 12px;
-    border: 2px solid rgba(245, 158, 11, 0.3);
+    font-size: 0.9rem;
     margin: 0;
 `;
 

@@ -25,7 +25,7 @@ const Container = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: ${({ theme }) => theme.colors.background.main};
+    background-color: rgb(240, 253, 255);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -44,7 +44,7 @@ const Spinner = styled.div`
 `;
 
 const Text = styled.div`
-    color: ${({ theme }) => theme.colors.text.primary};
+    color: ${({ theme }) => theme.colors.primary.main};
     font-size: 1.2rem;
     text-align: center;
 `;

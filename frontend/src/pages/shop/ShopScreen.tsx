@@ -4,6 +4,7 @@ import Button from '@/components/common/Button';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { useAuth } from '@/hooks/useAuth';
 import { getUserItems } from '@/api/game';
+import { getAllItems } from '@/api/game';
 import { getAllSliceSkins, getAllTapSkins, getUserSliceSkins, getUserTapSkins } from '@/api/skins';
 import ShopItemModal from '@/components/modal/ShopItemModal';
 import ShopSkinModal from '@/components/modal/ShopSkinModal';
@@ -418,21 +419,34 @@ const ShopScreen: React.FC = () => {
         const fetchData = async () => {
             try {
                 if (user?.email) {
-                    const [itemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] = await Promise.all([
-                        getUserItems(user.email),
-                        getAllSliceSkins(user.email),
-                        getAllTapSkins(user.email),
-                        getUserSliceSkins(user.email),
-                        getUserTapSkins(user.email),
-                    ]);
+                    const [allItemsData, userItemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] =
+                        await Promise.all([
+                            getAllItems(), // 전체 아이템 목록
+                            getUserItems(user.email), // 사용자 보유 아이템
+                            getAllSliceSkins(user.email),
+                            getAllTapSkins(user.email),
+                            getUserSliceSkins(user.email),
+                            getUserTapSkins(user.email),
+                        ]);
 
-                    // 아이템 데이터 구조 수정
-                    const processedItems =
-                        (itemsData as any)?.items?.map((userItem: any) => ({
-                            ...userItem.item,
-                            userItemIdx: userItem.userItemIdx,
-                            isUsed: userItem.isUsed,
-                        })) || [];
+                    console.log('갱신된 전체 아이템 데이터:', allItemsData);
+                    console.log('갱신된 사용자 아이템 데이터:', userItemsData);
+                    console.log('갱신된 슬라이스 스킨 데이터:', sliceSkinsData);
+                    console.log('갱신된 탭 스킨 데이터:', tapSkinsData);
+                    console.log('갱신된 보유한 슬라이스 스킨:', userSliceSkins);
+                    console.log('갱신된 보유한 탭 스킨:', userTapSkins);
+
+                    // 사용자가 보유한 아이템 인덱스 목록 생성
+                    const ownedItemIndices = new Set(
+                        ((userItemsData as any)?.items || []).map((userItem: any) => userItem.item.itemIdx),
+                    );
+
+                    // 전체 아이템에서 사용자가 보유하지 않은 아이템만 필터링
+                    const availableItems = ((allItemsData as any)?.items || []).filter(
+                        (item: any) => !ownedItemIndices.has(item.itemIdx),
+                    );
+
+                    console.log('갱신된 구매 가능 아이템 데이터:', availableItems);
 
                     // 보유한 스킨 인덱스 목록 생성
                     const ownedSkinIndices = new Set([
@@ -450,7 +464,9 @@ const ShopScreen: React.FC = () => {
                         .filter((skin: any) => skin && skin.skinIdx) // null 값 제거
                         .filter((skin: any) => !ownedSkinIndices.has(skin.skinIdx));
 
-                    setItems(processedItems);
+                    console.log('갱신된 가공 스킨 데이터:', processedSkins);
+
+                    setItems(availableItems);
                     setSkins(processedSkins);
                 }
             } catch (error) {
@@ -467,29 +483,34 @@ const ShopScreen: React.FC = () => {
         try {
             if (user?.email) {
                 console.log('구매 후 데이터 갱신 시작');
-                const [itemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] = await Promise.all([
-                    getUserItems(user.email),
-                    getAllSliceSkins(user.email),
-                    getAllTapSkins(user.email),
-                    getUserSliceSkins(user.email),
-                    getUserTapSkins(user.email),
-                ]);
+                const [allItemsData, userItemsData, sliceSkinsData, tapSkinsData, userSliceSkins, userTapSkins] =
+                    await Promise.all([
+                        getAllItems(), // 전체 아이템 목록
+                        getUserItems(user.email), // 사용자 보유 아이템
+                        getAllSliceSkins(user.email),
+                        getAllTapSkins(user.email),
+                        getUserSliceSkins(user.email),
+                        getUserTapSkins(user.email),
+                    ]);
 
-                console.log('갱신된 아이템 데이터:', itemsData);
+                console.log('갱신된 전체 아이템 데이터:', allItemsData);
+                console.log('갱신된 사용자 아이템 데이터:', userItemsData);
                 console.log('갱신된 슬라이스 스킨 데이터:', sliceSkinsData);
                 console.log('갱신된 탭 스킨 데이터:', tapSkinsData);
                 console.log('갱신된 보유한 슬라이스 스킨:', userSliceSkins);
                 console.log('갱신된 보유한 탭 스킨:', userTapSkins);
 
-                // 아이템 데이터 구조 수정
-                const processedItems =
-                    (itemsData as any)?.items?.map((userItem: any) => ({
-                        ...userItem.item,
-                        userItemIdx: userItem.userItemIdx,
-                        isUsed: userItem.isUsed,
-                    })) || [];
+                // 사용자가 보유한 아이템 인덱스 목록 생성
+                const ownedItemIndices = new Set(
+                    ((userItemsData as any)?.items || []).map((userItem: any) => userItem.item.itemIdx),
+                );
 
-                console.log('갱신된 가공 아이템 데이터:', processedItems);
+                // 전체 아이템에서 사용자가 보유하지 않은 아이템만 필터링
+                const availableItems = ((allItemsData as any)?.items || []).filter(
+                    (item: any) => !ownedItemIndices.has(item.itemIdx),
+                );
+
+                console.log('갱신된 구매 가능 아이템 데이터:', availableItems);
 
                 // 보유한 스킨 인덱스 목록 생성
                 const ownedSkinIndices = new Set([
@@ -509,7 +530,7 @@ const ShopScreen: React.FC = () => {
 
                 console.log('갱신된 가공 스킨 데이터:', processedSkins);
 
-                setItems(processedItems);
+                setItems(availableItems);
                 setSkins(processedSkins);
             }
         } catch (error) {

@@ -136,6 +136,12 @@ const Footer: React.FC = () => {
             navigate('/main');
             return;
         }
+
+        if (path === '/main') {
+            navigate('/main', { replace: true, state: null });
+            return;
+        }
+
         navigate(path);
     };
 
