@@ -9,6 +9,8 @@ export interface Pollution {
     count: number;
     collectionCount: number;
     collected?: boolean;
+    totalScore?: number;
+    maxCombo?: number;
 }
 
 export interface UserCollection {

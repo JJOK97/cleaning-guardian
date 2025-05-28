@@ -9,6 +9,24 @@ import PollutionDetailModal from './components/PollutionDetailModal';
 import LoadingScreen from '@/components/common/LoadingScreen';
 
 /**
+ * 사용자 수집 통계 정보 (MedalScreen과 동일한 타입)
+ */
+interface UserCollectionStats {
+    statsIdx: number;
+    email: string;
+    polIdx: number;
+    totalDefeated: number;
+    totalScore: number;
+    maxCombo: number;
+    maxScore: number;
+    createdAt: string;
+    updatedAt: string;
+    pollutionName?: string;
+    pollutionImage?: string;
+    pollutionType?: string;
+}
+
+/**
  * 오염물질 수집 도감 화면
  *
  * 게임 로직 개선 관련 기능:
@@ -25,10 +43,44 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 const CollectionScreen: React.FC = () => {
     const { user } = useAuth();
     const [pollutions, setPollutions] = useState<Pollution[]>([]); // DB에서 가져온 전체 오염물질 데이터
+    const [collectionStats, setCollectionStats] = useState<UserCollectionStats[]>([]); // 사용자 수집 통계
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedPollution, setSelectedPollution] = useState<Pollution | null>(null);
+    const [selectedStats, setSelectedStats] = useState<UserCollectionStats | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    /**
+     * 사용자 수집 통계 조회 (MedalScreen과 동일한 API)
+     */
+    const fetchCollectionStats = async (email: string) => {
+        try {
+            const response = await fetch(`/api/v1/collection-stats/users/${email}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCollectionStats(data);
+                return data;
+            }
+        } catch (error) {
+            console.error('수집 통계 조회 실패:', error);
+            return [];
+        }
+    };
+
+    /**
+     * 전체 오염물질 목록 조회
+     */
+    const fetchAllPollutions = async () => {
+        try {
+            const response = await getAllPollutions();
+            if (response.success) {
+                return response.data.pollutions;
+            }
+        } catch (error) {
+            console.error('전체 오염물질 조회 실패:', error);
+        }
+        return [];
+    };
 
     useEffect(() => {
         /**
@@ -43,16 +95,25 @@ const CollectionScreen: React.FC = () => {
             try {
                 setLoading(true);
 
-                // 사용자별 수집 목록 API 호출
-                // 게임 로직 개선: 게임에서 처치한 오염물질들이 여기에 반영됨
-                const collectionsData = await getUserCollections(user.email);
+                // 병렬로 데이터 조회
+                const [statsData, allPollutionsData] = await Promise.all([
+                    fetchCollectionStats(user.email),
+                    fetchAllPollutions(),
+                ]);
 
-                if (collectionsData.success) {
-                    setPollutions(collectionsData.data.pollutions);
-                } else {
-                    console.error('API 응답 실패:', collectionsData);
-                    setError('데이터를 불러오는데 실패했습니다.');
-                }
+                // 수집 통계와 전체 오염물질 데이터를 결합
+                const combinedPollutions = allPollutionsData.map((pollution) => {
+                    const stats = statsData.find((stat: UserCollectionStats) => stat.polIdx === pollution.polIdx);
+                    return {
+                        ...pollution,
+                        collected: !!stats,
+                        collectionCount: stats?.totalDefeated || 0,
+                        totalScore: stats?.totalScore || 0,
+                        maxCombo: stats?.maxCombo || 0,
+                    };
+                });
+
+                setPollutions(combinedPollutions);
             } catch (err) {
                 console.error('데이터 로딩 중 에러:', err);
                 setError('데이터를 불러오는 중 오류가 발생했습니다.');
@@ -69,7 +130,9 @@ const CollectionScreen: React.FC = () => {
      * 게임 로직 개선: 수집된 오염물질의 상세 정보와 처치 통계 표시
      */
     const handleCardClick = (pollution: Pollution) => {
+        const stats = collectionStats.find((stat) => stat.polIdx === pollution.polIdx);
         setSelectedPollution(pollution);
+        setSelectedStats(stats || null);
         setIsModalOpen(true);
     };
 
@@ -105,15 +168,23 @@ const CollectionScreen: React.FC = () => {
                 */}
                 <div className='collection-section'>
                     <h2>수집 완료</h2>
-                    <div className='pollution-grid'>
-                        {collectedPollutions.map((pollution) => (
-                            <PollutionCard
-                                key={pollution.polIdx}
-                                pollution={pollution}
-                                onClick={() => handleCardClick(pollution)}
-                            />
-                        ))}
-                    </div>
+                    {collectedPollutions.length > 0 ? (
+                        <div className='pollution-grid'>
+                            {collectedPollutions.map((pollution) => (
+                                <PollutionCard
+                                    key={pollution.polIdx}
+                                    pollution={pollution}
+                                    onClick={() => handleCardClick(pollution)}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className='empty-state'>
+                            <div className='empty-icon'>🎮</div>
+                            <div className='empty-text'>아직 수집한 오염물질이 없습니다</div>
+                            <div className='empty-subtext'>게임을 플레이하여 오염물질을 처치해보세요!</div>
+                        </div>
+                    )}
                 </div>
 
                 {/* 
@@ -122,15 +193,23 @@ const CollectionScreen: React.FC = () => {
                 */}
                 <div className='collection-section'>
                     <h2>미수집</h2>
-                    <div className='pollution-grid'>
-                        {notCollectedPollutions.map((pollution) => (
-                            <PollutionCard
-                                key={pollution.polIdx}
-                                pollution={pollution}
-                                onClick={() => handleCardClick(pollution)}
-                            />
-                        ))}
-                    </div>
+                    {notCollectedPollutions.length > 0 ? (
+                        <div className='pollution-grid'>
+                            {notCollectedPollutions.map((pollution) => (
+                                <PollutionCard
+                                    key={pollution.polIdx}
+                                    pollution={pollution}
+                                    onClick={() => handleCardClick(pollution)}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className='empty-state'>
+                            <div className='empty-icon'>🏆</div>
+                            <div className='empty-text'>모든 오염물질을 수집했습니다!</div>
+                            <div className='empty-subtext'>축하합니다! 완벽한 환경 수호자입니다!</div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -141,6 +220,7 @@ const CollectionScreen: React.FC = () => {
             {isModalOpen && selectedPollution && (
                 <PollutionDetailModal
                     pollution={selectedPollution}
+                    collectionStats={selectedStats}
                     onClose={() => setIsModalOpen(false)}
                 />
             )}

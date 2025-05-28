@@ -3,17 +3,25 @@ import styled, { keyframes } from 'styled-components';
 import { Pollution } from '@/types/collection';
 
 /**
- * 오염물질 상세 정보 모달 컴포넌트
- *
- * 게임 로직 개선 관련 기능:
- * 1. 상세 오염물질 정보 표시 - DB 기반 실제 오염물질 데이터
- * 2. 수집 통계 표시 - 게임에서의 처치 횟수 등
- *
- * TODO: 게임 로직 개선 후 추가 기능
- * - 게임 내 속성 정보 표시 (점수, 속도, 크기 등)
- * - 처치 히스토리 표시
- * - 관련 스테이지 정보 표시
- * - 획득 가능한 보상 정보 표시
+ * 사용자 수집 통계 정보 (MedalScreen과 동일한 타입)
+ */
+interface UserCollectionStats {
+    statsIdx: number;
+    email: string;
+    polIdx: number;
+    totalDefeated: number;
+    totalScore: number;
+    maxCombo: number;
+    maxScore: number;
+    createdAt: string;
+    updatedAt: string;
+    pollutionName?: string;
+    pollutionImage?: string;
+    pollutionType?: string;
+}
+
+/**
+ * 오염물질 상세 정보 모달 컴포넌트 - 도감 스타일
  */
 
 const fadeIn = keyframes`
@@ -44,8 +52,8 @@ const ModalOverlay = styled.div<{ $isClosing: boolean }>`
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(3px);
+    background: linear-gradient(135deg, rgba(139, 69, 19, 0.8), rgba(210, 105, 30, 0.8));
+    backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -55,128 +63,172 @@ const ModalOverlay = styled.div<{ $isClosing: boolean }>`
 `;
 
 const ModalContent = styled.div<{ $isClosing: boolean }>`
-    background: #fff9e6;
-    border-radius: 24px;
+    background: rgba(255, 248, 220, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
     width: 90%;
     max-width: 400px;
-    height: 60vh;
+    max-height: 75vh; /* 최대 높이 제한 */
+    height: auto; /* 자동 높이 */
+    min-height: 60vh; /* 최소 높이 보장 */
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(139, 69, 19, 0.25), 0 4px 16px rgba(160, 82, 45, 0.15);
+    border: 3px solid rgba(139, 69, 19, 0.3);
     animation: ${({ $isClosing }) => ($isClosing ? fadeOut : fadeIn)} 0.25s ease-out forwards;
+`;
+
+const ModalGradient = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #8b4513, #d2691e, #8b4513);
+    border-radius: 20px 20px 0 0;
 `;
 
 const ImageContainer = styled.div`
     position: relative;
     width: 100%;
-    height: 20vh;
-    background: #7fdbff;
+    height: 180px; /* 고정 높이 */
     flex-shrink: 0;
-    overflow: hidden;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+`;
 
-    &::after {
+const ImageFrame = styled.div`
+    width: 100px;
+    height: 100px;
+    border-radius: 16px;
+    background: rgba(255, 248, 220, 0.9);
+    box-shadow: 0 4px 20px rgba(139, 69, 19, 0.2), inset 0 2px 8px rgba(160, 82, 45, 0.1);
+    border: 3px solid rgba(139, 69, 19, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+
+    &::before {
         content: '';
         position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #48b4e0 25%, #7fdbff 50%, #48b4e0 75%);
-        opacity: 0.5;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #8b4513, #d2691e, #8b4513);
+        border-radius: 18px;
+        z-index: -1;
     }
 `;
 
 const Image = styled.img`
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
     transition: transform 0.3s ease;
 
     &:hover {
-        transform: scale(1.05);
+        transform: scale(1.1);
     }
 `;
 
 const ContentSection = styled.div`
-    padding: 1.2rem 0.8rem;
+    padding: 16px;
     flex: 1;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #fff9e6 0%, rgba(255, 249, 230, 0.95) 100%);
+    background: rgba(255, 248, 220, 0.95);
+    min-height: 0; /* flex 자식이 축소될 수 있도록 */
 `;
 
 const Title = styled.h2`
-    font-size: 1.4rem;
-    color: #2d3748;
-    margin: 0 0 0.6rem 0;
-    font-weight: bold;
+    font-size: 1.2rem;
+    color: #8b4513;
+    margin: 0 0 12px 0;
+    font-weight: 700;
     flex-shrink: 0;
     text-align: center;
-`;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 1px 1px 2px rgba(139, 69, 19, 0.3);
+    line-height: 1.3;
 
-const Summary = styled.p`
-    font-size: 0.75rem;
-    color: #4a5568;
-    line-height: 1.4;
-    margin: 0 0 0.8rem 0;
-    flex-shrink: 0;
-    text-align: center;
-    padding: 0 0.8rem;
-    white-space: pre-line;
+    /* 긴 제목 처리 */
     word-break: keep-all;
     overflow-wrap: break-word;
+    hyphens: auto;
 `;
 
 const DetailBox = styled.div`
-    background: rgba(127, 219, 255, 0.1);
+    background: rgba(139, 69, 19, 0.05);
     border-radius: 16px;
-    padding: 1rem 0.6rem;
+    padding: 12px;
     flex: 1;
     overflow-y: auto;
     line-height: 1.4;
     color: #4a5568;
-    margin: 0 -0.4rem;
+    border: 2px solid rgba(139, 69, 19, 0.1);
+    min-height: 0; /* flex 자식이 축소될 수 있도록 */
 
     &::-webkit-scrollbar {
         width: 6px;
     }
 
     &::-webkit-scrollbar-track {
-        background: rgba(127, 219, 255, 0.1);
+        background: rgba(139, 69, 19, 0.1);
         border-radius: 4px;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: #8bc34a;
+        background: linear-gradient(180deg, #8b4513, #d2691e);
         border-radius: 4px;
 
         &:hover {
-            background: #7cb342;
+            background: linear-gradient(180deg, #a0522d, #cd853f);
         }
     }
 `;
 
 const DetailSection = styled.div`
-    margin-bottom: 1rem;
-    padding: 0.8rem;
-    background: rgba(255, 255, 255, 0.5);
+    margin-bottom: 12px;
+    padding: 12px;
+    background: rgba(255, 248, 220, 0.8);
     border-radius: 12px;
-    border: 1px solid rgba(127, 219, 255, 0.2);
-    margin: 0 0.4rem 0.8rem 0.4rem;
+    border: 2px solid rgba(139, 69, 19, 0.1);
+    position: relative;
 
     &:last-child {
-        margin-bottom: 0.4rem;
+        margin-bottom: 0;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        background: linear-gradient(180deg, #8b4513, #d2691e);
+        border-radius: 0 0 0 12px;
     }
 `;
 
 const DetailTitle = styled.h3`
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: bold;
-    color: #8bc34a;
-    margin: 0 0 0.4rem 0;
+    color: #8b4513;
+    margin: 0 0 8px 0;
+    flex-shrink: 0;
 `;
 
 const DetailText = styled.p`
@@ -186,36 +238,135 @@ const DetailText = styled.p`
     white-space: pre-line;
     word-break: keep-all;
     overflow-wrap: break-word;
+    line-height: 1.5;
+    hyphens: auto;
+
+    /* 긴 텍스트 처리 */
+    &.long-text {
+        max-height: 120px;
+        overflow-y: auto;
+
+        &::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: rgba(139, 69, 19, 0.05);
+            border-radius: 2px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(139, 69, 19, 0.3);
+            border-radius: 2px;
+        }
+    }
 `;
 
 const CloseButton = styled.button`
     width: 100%;
-    padding: 0.8rem;
-    background: #8bc34a;
+    padding: 12px;
+    background: linear-gradient(135deg, #8b4513, #d2691e);
     border: none;
-    border-radius: 0 0 24px 24px;
+    border-radius: 0 0 20px 20px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: white;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    transition: all 0.3s ease;
     flex-shrink: 0;
-    height: 3rem;
 
     &:hover {
-        background: #7cb342;
+        background: linear-gradient(135deg, #a0522d, #cd853f);
+        transform: translateY(-1px);
     }
 
     &:active {
-        transform: translateY(1px);
+        transform: translateY(0);
     }
 `;
 
+const StatItem = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 8px;
+    background: rgba(139, 69, 19, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #8b4513;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+`;
+
+const StatLabel = styled.span`
+    color: #4a5568;
+    font-size: 0.75rem;
+    font-weight: 500;
+    flex: 1;
+    margin-right: 8px;
+
+    /* 긴 라벨 처리 */
+    word-break: keep-all;
+    overflow-wrap: break-word;
+`;
+
+const StatValue = styled.span`
+    color: #8b4513;
+    font-size: 0.8rem;
+    font-weight: bold;
+    flex-shrink: 0;
+    text-align: right;
+`;
+
+const TypeBadge = styled.span<{ $type: string }>`
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: white;
+    background: ${({ $type }) => {
+        switch ($type) {
+            case 'W':
+                return 'linear-gradient(135deg, #3B82F6, #1D4ED8)';
+            case 'L':
+                return 'linear-gradient(135deg, #10B981, #047857)';
+            case 'A':
+                return 'linear-gradient(135deg, #6B7280, #374151)';
+            default:
+                return 'linear-gradient(135deg, #8B4513, #D2691E)';
+        }
+    }};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+
+    /* 긴 텍스트 처리 */
+    word-break: keep-all;
+    white-space: nowrap;
+`;
+
+const getTypeLabel = (type: string) => {
+    switch (type) {
+        case 'W':
+            return '💧 수질';
+        case 'L':
+            return '🌱 토양';
+        case 'A':
+            return '💨 대기';
+        default:
+            return '🌍 환경';
+    }
+};
+
 interface PollutionDetailModalProps {
-    pollution: Pollution; // DB pollutions 테이블 기반 오염물질 정보
+    pollution: Pollution;
+    collectionStats?: UserCollectionStats | null;
     onClose: () => void;
 }
 
-const PollutionDetailModal: React.FC<PollutionDetailModalProps> = ({ pollution, onClose }) => {
+const PollutionDetailModal: React.FC<PollutionDetailModalProps> = ({ pollution, collectionStats, onClose }) => {
     const [isClosing, setIsClosing] = useState(false);
 
     const handleClose = () => {
@@ -224,6 +375,32 @@ const PollutionDetailModal: React.FC<PollutionDetailModalProps> = ({ pollution, 
             setIsClosing(false);
             onClose();
         }, 250);
+    };
+
+    /**
+     * 숫자를 천 단위로 포맷
+     */
+    const formatNumber = (num: number | undefined | null): string => {
+        if (num === undefined || num === null || isNaN(num)) {
+            return '0';
+        }
+        return num.toLocaleString();
+    };
+
+    /**
+     * 텍스트 길이에 따라 클래스 결정
+     */
+    const getTextClass = (text: string) => {
+        return text && text.length > 100 ? 'long-text' : '';
+    };
+
+    /**
+     * 긴 텍스트 요약 (필요시)
+     */
+    const truncateText = (text: string, maxLength: number = 200) => {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
     };
 
     return (
@@ -235,71 +412,94 @@ const PollutionDetailModal: React.FC<PollutionDetailModalProps> = ({ pollution, 
                 onClick={(e) => e.stopPropagation()}
                 $isClosing={isClosing}
             >
-                {/* 
-                    오염물질 이미지 섹션
-                    게임 로직 개선: DB의 polImg1을 사용하여 실제 오염물질 이미지 표시
-                */}
+                <ModalGradient />
+
+                {/* 액자 스타일 이미지 섹션 */}
                 <ImageContainer>
-                    <Image
-                        src={`/assets/img/pollution/${pollution.polImg1}`}
-                        alt={pollution.polName}
-                    />
+                    <ImageFrame>
+                        <Image
+                            src={`/assets/img/pollution/${pollution.polImg1}`}
+                            alt={pollution.polName}
+                            onError={(e) => {
+                                e.currentTarget.src = '/assets/img/pollution/pet.png';
+                            }}
+                        />
+                    </ImageFrame>
                 </ImageContainer>
 
                 <ContentSection>
-                    {/* 
-                        오염물질 기본 정보
-                        게임 로직 개선: DB 기반 실제 오염물질 이름과 설명
-                    */}
-                    <Title>{pollution.polName}</Title>
+                    {/* 오염물질 기본 정보 */}
+                    <Title>
+                        {pollution.polName}
+                        {pollution.type && <TypeBadge $type={pollution.type}>{getTypeLabel(pollution.type)}</TypeBadge>}
+                    </Title>
+
                     <DetailBox>
                         <DetailSection>
-                            <DetailTitle>설명</DetailTitle>
-                            <DetailText>{pollution.polDesc}</DetailText>
+                            <DetailTitle>📝 설명</DetailTitle>
+                            <DetailText className={getTextClass(pollution.polDesc)}>{pollution.polDesc}</DetailText>
                         </DetailSection>
 
-                        {/* 
-                            수집 통계 섹션
-                            게임 로직 개선: 게임에서의 실제 처치 횟수 표시
-                        */}
-                        <DetailSection>
-                            <DetailTitle>수집 횟수</DetailTitle>
-                            <DetailText>{pollution.collectionCount}회</DetailText>
-                            {/* TODO: 게임 로직 개선 후 추가 통계 정보
-                            <DetailText>
-                                총 획득 점수: {pollution.totalScore || 0}점
-                                평균 점수: {pollution.averageScore || 0}점
-                                최고 콤보: {pollution.maxCombo || 0}
-                            </DetailText>
-                            */}
-                        </DetailSection>
+                        {/* 환경 영향 인사이트 */}
+                        {collectionStats && collectionStats.totalDefeated > 0 && (
+                            <DetailSection>
+                                <DetailTitle>🌍 환경 영향</DetailTitle>
+                                <DetailText>
+                                    {pollution.type === 'W' &&
+                                        `이 오염물질을 ${collectionStats.totalDefeated}개 처치하여 약 ${Math.round(
+                                            collectionStats.totalDefeated * 0.5,
+                                        )}L의 깨끗한 물을 되찾았습니다!`}
+                                    {pollution.type === 'L' &&
+                                        `이 오염물질을 ${collectionStats.totalDefeated}개 처치하여 약 ${Math.round(
+                                            collectionStats.totalDefeated * 2,
+                                        )}L의 깨끗한 토양을 되찾았습니다!`}
+                                    {pollution.type === 'A' &&
+                                        `이 오염물질을 ${collectionStats.totalDefeated}개 처치하여 약 ${Math.round(
+                                            collectionStats.totalDefeated * 0.8,
+                                        )}㎥의 깨끗한 공기를 되찾았습니다!`}
+                                </DetailText>
+                            </DetailSection>
+                        )}
 
-                        {/* TODO: 게임 로직 개선 후 추가 섹션들
-                        <DetailSection>
-                            <DetailTitle>게임 속성</DetailTitle>
-                            <DetailText>
-                                기본 점수: {pollution.baseScore}점
-                                이동 속도: {pollution.moveSpeed}
-                                크기 배수: {pollution.sizeMultiplier}x
-                                출현 확률: {pollution.spawnWeight}%
-                            </DetailText>
-                        </DetailSection>
-
-                        <DetailSection>
-                            <DetailTitle>출현 스테이지</DetailTitle>
-                            <DetailText>
-                                {pollution.stages?.map(stage => stage.stageName).join(', ')}
-                            </DetailText>
-                        </DetailSection>
-
-                        <DetailSection>
-                            <DetailTitle>처치 히스토리</DetailTitle>
-                            <DetailText>
-                                최근 처치: {pollution.lastDefeatedAt}
-                                첫 처치: {pollution.firstDefeatedAt}
-                            </DetailText>
-                        </DetailSection>
-                        */}
+                        {/* 수집 통계 섹션 */}
+                        {collectionStats ? (
+                            <DetailSection>
+                                <DetailTitle>🎮 게임 통계</DetailTitle>
+                                <StatItem>
+                                    <StatLabel>총 처치 횟수</StatLabel>
+                                    <StatValue>{formatNumber(collectionStats.totalDefeated)}회</StatValue>
+                                </StatItem>
+                                <StatItem>
+                                    <StatLabel>총 획득 점수</StatLabel>
+                                    <StatValue>{formatNumber(collectionStats.totalScore)}점</StatValue>
+                                </StatItem>
+                                <StatItem>
+                                    <StatLabel>최고 콤보</StatLabel>
+                                    <StatValue>{collectionStats.maxCombo}콤보</StatValue>
+                                </StatItem>
+                                <StatItem>
+                                    <StatLabel>최고 점수</StatLabel>
+                                    <StatValue>{formatNumber(collectionStats.maxScore)}점</StatValue>
+                                </StatItem>
+                                {collectionStats.createdAt && (
+                                    <StatItem>
+                                        <StatLabel>첫 처치일</StatLabel>
+                                        <StatValue>
+                                            {new Date(collectionStats.createdAt).toLocaleDateString('ko-KR')}
+                                        </StatValue>
+                                    </StatItem>
+                                )}
+                            </DetailSection>
+                        ) : (
+                            <DetailSection>
+                                <DetailTitle>🎮 게임 통계</DetailTitle>
+                                <DetailText style={{ textAlign: 'center', color: '#999', fontStyle: 'italic' }}>
+                                    아직 이 오염물질을 처치하지 않았습니다.
+                                    <br />
+                                    게임을 플레이하여 처치해보세요!
+                                </DetailText>
+                            </DetailSection>
+                        )}
                     </DetailBox>
                 </ContentSection>
                 <CloseButton onClick={handleClose}>닫기</CloseButton>

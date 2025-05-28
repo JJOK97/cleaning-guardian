@@ -13,21 +13,48 @@
  */
 
 .collection-screen {
-    height: calc(100vh - 8.8rem); /* 전체 높이에서 header(4.6rem)와 footer(4.2rem) 높이를 뺌 */
-    margin-top: 4.6rem; /* header 높이만큼 상단 여백 */
+    height: 100vh; /* 전체 화면 높이 */
+    margin-top: 0; /* 헤더 여백 제거 */
+    padding-top: 4.6rem; /* 헤더 높이만큼 패딩 */
+    padding-bottom: 5rem; /* 푸터 높이보다 조금 더 여유 */
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    padding: 16px;
+    overflow: hidden; /* 전체 스크롤 방지 */
+    padding-left: 16px;
+    padding-right: 16px;
     box-sizing: border-box;
+    background: linear-gradient(135deg, #8b4513 0%, #d2691e 100%);
+    position: fixed; /* 화면 고정 */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+.collection-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 248, 220, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(160, 82, 45, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .collection-grids {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     flex: 1;
     overflow: hidden;
+    position: relative;
+    z-index: 1;
+    min-height: 0; /* flex 자식 요소가 축소될 수 있도록 */
 }
 
 /* 
@@ -35,49 +62,205 @@
  * 게임 로직 개선: 게임 플레이 결과에 따른 오염물질 분류 표시
  */
 .collection-section {
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    padding: 16px;
+    background: rgba(255, 248, 220, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 10px;
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2), 0 2px 6px rgba(160, 82, 45, 0.1);
+    border: 2px solid rgba(139, 69, 19, 0.3);
+    position: relative;
+    min-height: 0; /* flex 자식 요소가 축소될 수 있도록 */
+}
+
+.collection-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #8b4513, #d2691e, #8b4513);
+    border-radius: 16px 16px 0 0;
 }
 
 .collection-section h2 {
-    margin: 0 0 16px 0;
-    font-size: 1.2rem;
-    color: #333;
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #8b4513;
+    text-align: center;
+    position: relative;
+    padding-bottom: 6px;
+    flex-shrink: 0;
+}
+
+.collection-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #8b4513, #d2691e);
+    border-radius: 1px;
 }
 
 /* 
- * 오염물질 그리드 레이아웃
- * 게임 로직 개선: 수집된 오염물질들을 효율적으로 표시하는 반응형 그리드
+ * 오염물질 그리드 레이아웃 - 가로 스크롤
+ * 게임 로직 개선: 수집된 오염물질들을 가로 스와이프로 표시
  */
 .pollution-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-    gap: 16px;
-    overflow-y: auto;
-    padding-right: 8px;
-    flex: 1;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 2px 8px 2px;
+    height: 80%; /* 섹션 높이의 80% 사용 */
+    align-items: flex-start;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
 }
 
-/* 스크롤바 스타일링 */
 .pollution-grid::-webkit-scrollbar {
-    width: 6px;
+    height: 4px;
 }
 
 .pollution-grid::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
 }
 
 .pollution-grid::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
+    background: linear-gradient(90deg, #8b4513, #d2691e);
+    border-radius: 2px;
+    transition: all 0.3s ease;
 }
 
 .pollution-grid::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: linear-gradient(90deg, #a0522d, #cd853f);
+}
+
+/* 빈 상태 스타일 */
+.collection-section .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80%; /* 섹션 높이의 80% 사용 */
+    color: #718096;
+    text-align: center;
+    padding: 12px 8px;
+}
+
+.collection-section .empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+    opacity: 0.5;
+}
+
+.collection-section .empty-state .empty-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.collection-section .empty-state .empty-subtext {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+    .collection-screen {
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 4.6rem;
+        padding-bottom: 5rem;
+    }
+
+    .collection-grids {
+        gap: 6px;
+    }
+
+    .collection-section {
+        padding: 8px;
+        border-radius: 10px;
+        min-height: 90px;
+    }
+
+    .collection-section h2 {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+    }
+
+    .pollution-grid {
+        gap: 6px;
+        padding: 3px 2px 6px 2px;
+    }
+
+    .collection-section .empty-state {
+        padding: 12px 8px;
+    }
+
+    .collection-section .empty-state .empty-icon {
+        font-size: 2.2rem;
+        margin-bottom: 6px;
+    }
+
+    .collection-section .empty-state .empty-text {
+        font-size: 0.85rem;
+    }
+
+    .collection-section .empty-state .empty-subtext {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .collection-screen {
+        padding-left: 8px;
+        padding-right: 8px;
+        padding-bottom: 5.2rem; /* 작은 화면에서 더 여유 */
+    }
+
+    .collection-grids {
+        gap: 4px;
+    }
+
+    .collection-section {
+        padding: 6px;
+        min-height: 80px;
+    }
+
+    .collection-section h2 {
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+
+    .pollution-grid {
+        gap: 4px;
+        padding: 2px 1px 4px 1px;
+    }
+
+    .collection-section .empty-state {
+        padding: 10px 6px;
+    }
+
+    .collection-section .empty-state .empty-icon {
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+
+    .collection-section .empty-state .empty-text {
+        font-size: 0.8rem;
+    }
+
+    .collection-section .empty-state .empty-subtext {
+        font-size: 0.7rem;
+    }
 }
