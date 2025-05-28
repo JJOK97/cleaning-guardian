@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import styled, { keyframes } from 'styled-components';
 import { Pollution } from '@/types/collection';
 import { getAllPollutions, getUserCollections } from '@/api/collection';
 import PollutionCard from './components/PollutionCard';
@@ -39,6 +40,49 @@ interface UserCollectionStats {
  * - 오염물질별 처치 횟수 통계
  * - 수집 보상 시스템 연동
  */
+
+// MedalScreen에서 사용한 fadeIn 애니메이션을 그대로 활용
+const fadeIn = keyframes`
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+`;
+
+// 컬렉션 전체 화면을 감싸는 애니메이션 래퍼
+const AnimatedContainer = styled.div`
+    animation: ${fadeIn} 0.6s ease-out;
+    width: 100%;
+    height: 100%;
+
+    /* CSS 파일의 스타일보다 우선순위를 높이기 위해 */
+    & > .collection-screen {
+        animation: ${fadeIn} 0.8s ease-out;
+    }
+
+    /* 각 섹션에도 순차적 애니메이션 적용 */
+    & .collection-section {
+        animation: ${fadeIn} 1s ease-out;
+        animation-fill-mode: both;
+
+        &:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        &:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+    }
+
+    /* 헤더에도 애니메이션 적용 */
+    & .collection-header {
+        animation: ${fadeIn} 0.6s ease-out;
+    }
+`;
 
 const CollectionScreen: React.FC = () => {
     const { user } = useAuth();
@@ -150,81 +194,83 @@ const CollectionScreen: React.FC = () => {
     const notCollectedPollutions = pollutions.filter((p) => !p.collected);
 
     return (
-        <div className='collection-screen'>
-            {/* 
-                수집 진행률 헤더
-                게임 로직 개선: 게임 플레이를 통한 실제 수집 진행률 표시
-            */}
-            <CollectionHeader
-                totalCount={pollutions.length}
-                collectedCount={collectedPollutions.length}
-                completionRate={pollutions.length > 0 ? (collectedPollutions.length / pollutions.length) * 100 : 0}
-            />
-
-            <div className='collection-grids'>
+        <AnimatedContainer>
+            <div className='collection-screen'>
                 {/* 
-                    수집 완료 섹션
-                    게임 로직 개선: 게임에서 실제로 처치한 오염물질들만 표시
+                    수집 진행률 헤더
+                    게임 로직 개선: 게임 플레이를 통한 실제 수집 진행률 표시
                 */}
-                <div className='collection-section'>
-                    <h2>수집 완료</h2>
-                    {collectedPollutions.length > 0 ? (
-                        <div className='pollution-grid'>
-                            {collectedPollutions.map((pollution) => (
-                                <PollutionCard
-                                    key={pollution.polIdx}
-                                    pollution={pollution}
-                                    onClick={() => handleCardClick(pollution)}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className='empty-state'>
-                            <div className='empty-icon'>🎮</div>
-                            <div className='empty-text'>아직 수집한 오염물질이 없습니다</div>
-                            <div className='empty-subtext'>게임을 플레이하여 오염물질을 처치해보세요!</div>
-                        </div>
-                    )}
-                </div>
-
-                {/* 
-                    미수집 섹션
-                    게임 로직 개선: 아직 게임에서 처치하지 않은 오염물질들 표시
-                */}
-                <div className='collection-section'>
-                    <h2>미수집</h2>
-                    {notCollectedPollutions.length > 0 ? (
-                        <div className='pollution-grid'>
-                            {notCollectedPollutions.map((pollution) => (
-                                <PollutionCard
-                                    key={pollution.polIdx}
-                                    pollution={pollution}
-                                    onClick={() => handleCardClick(pollution)}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className='empty-state'>
-                            <div className='empty-icon'>🏆</div>
-                            <div className='empty-text'>모든 오염물질을 수집했습니다!</div>
-                            <div className='empty-subtext'>축하합니다! 완벽한 환경 수호자입니다!</div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* 
-                오염물질 상세 정보 모달
-                게임 로직 개선: 처치 횟수, 획득 점수 등 게임 통계 정보 표시
-            */}
-            {isModalOpen && selectedPollution && (
-                <PollutionDetailModal
-                    pollution={selectedPollution}
-                    collectionStats={selectedStats}
-                    onClose={() => setIsModalOpen(false)}
+                <CollectionHeader
+                    totalCount={pollutions.length}
+                    collectedCount={collectedPollutions.length}
+                    completionRate={pollutions.length > 0 ? (collectedPollutions.length / pollutions.length) * 100 : 0}
                 />
-            )}
-        </div>
+
+                <div className='collection-grids'>
+                    {/* 
+                        수집 완료 섹션
+                        게임 로직 개선: 게임에서 실제로 처치한 오염물질들만 표시
+                    */}
+                    <div className='collection-section'>
+                        <h2>수집 완료</h2>
+                        {collectedPollutions.length > 0 ? (
+                            <div className='pollution-grid'>
+                                {collectedPollutions.map((pollution) => (
+                                    <PollutionCard
+                                        key={pollution.polIdx}
+                                        pollution={pollution}
+                                        onClick={() => handleCardClick(pollution)}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className='empty-state'>
+                                <div className='empty-icon'>🎮</div>
+                                <div className='empty-text'>아직 수집한 오염물질이 없습니다</div>
+                                <div className='empty-subtext'>게임을 플레이하여 오염물질을 처치해보세요!</div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 
+                        미수집 섹션
+                        게임 로직 개선: 아직 게임에서 처치하지 않은 오염물질들 표시
+                    */}
+                    <div className='collection-section'>
+                        <h2>미수집</h2>
+                        {notCollectedPollutions.length > 0 ? (
+                            <div className='pollution-grid'>
+                                {notCollectedPollutions.map((pollution) => (
+                                    <PollutionCard
+                                        key={pollution.polIdx}
+                                        pollution={pollution}
+                                        onClick={() => handleCardClick(pollution)}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className='empty-state'>
+                                <div className='empty-icon'>🏆</div>
+                                <div className='empty-text'>모든 오염물질을 수집했습니다!</div>
+                                <div className='empty-subtext'>축하합니다! 완벽한 환경 수호자입니다!</div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* 
+                    오염물질 상세 정보 모달
+                    게임 로직 개선: 처치 횟수, 획득 점수 등 게임 통계 정보 표시
+                */}
+                {isModalOpen && selectedPollution && (
+                    <PollutionDetailModal
+                        pollution={selectedPollution}
+                        collectionStats={selectedStats}
+                        onClose={() => setIsModalOpen(false)}
+                    />
+                )}
+            </div>
+        </AnimatedContainer>
     );
 };
 
